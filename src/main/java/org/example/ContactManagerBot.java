@@ -5,15 +5,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Телеграм-бот менеджера контактов
@@ -25,7 +20,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
      * Конструктор. Инициализируем API-token
      */
     public ContactManagerBot(){
-        this.token = readTokenFromFile();
+        this.token = readTokenFromConfig();
     }
 
     /**
@@ -96,14 +91,15 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     }
 
     /**
-     * Чтение из файла API-токена для бота
+     * Чтение из config.properties API-токена для бота
      */
-    private String readTokenFromFile() {
-        try {
-            Path path = Paths.get("API_KEY.txt");
-            return Files.readAllLines(path).getFirst().trim();
-        } catch (IOException e) {
-            throw new RuntimeException("Не удалось прочитать API_KEY.txt", e);
+    private String readTokenFromConfig() {
+        Properties properties = new Properties();
+        try (InputStream input = Main.class.getClassLoader().getResourceAsStream("config.properties")) {
+            properties.load(input);
+            return properties.getProperty("api.telegram.bot.token");
+        } catch (Exception e) {
+            throw new RuntimeException("Не удалось прочитать config.properties", e);
         }
     }
 }
