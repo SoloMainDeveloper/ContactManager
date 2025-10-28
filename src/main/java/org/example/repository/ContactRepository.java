@@ -67,7 +67,7 @@ public class ContactRepository {
     /**
      * Найти контакты по id пользователя в БД
      */
-    public List<Contact> findByUserId(Long chatId) {
+    public List<Contact> findContactsByChatId(Long chatId) {
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
