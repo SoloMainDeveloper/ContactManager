@@ -113,4 +113,12 @@ public class ContactRepository {
 
         jdbcTemplate.update(sql, params);
     }
+
+    /**
+     * Найти контакт по номеру в БД, соответствующий конкретному пользователю по chatId
+     */
+    public Optional<Contact> findByNumber(String number, long chatId) {
+        //TODO
+        return null;
+    }
 }
