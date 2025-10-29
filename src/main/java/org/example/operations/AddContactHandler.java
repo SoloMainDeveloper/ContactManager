@@ -1,0 +1,63 @@
+package org.example.operations;
+
+import org.example.KeyboardCreator;
+import org.example.service.ContactService;
+import org.example.state.Operation;
+import org.example.state.State;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
+import java.util.List;
+
+public class AddContactHandler implements OperationHandler {
+    @Override
+    public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
+        KeyboardCreator keyboardCreator = new KeyboardCreator();
+        SendMessage response = new SendMessage();
+        switch(messageText){
+            case "Номер":
+                response.setText("Введите номер телефона");
+                state.setLastRequestedParamKey("contactNumber");
+                break;
+            case "Возраст":
+                response.setText("Введите возраст");
+                state.setLastRequestedParamKey("contactAge");
+                break;
+            case "Пол":
+                response.setText("Выберите пол");
+                response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Мужской", "Женский")));
+                state.setLastRequestedParamKey("contactGender");
+                break;
+            case "Сохранить контакт":
+                boolean isSuccessful = service.tryAddContact(chatId, state.getParams());
+                String contactName = state.getParamByKey("contactName");
+                if(isSuccessful)
+                    response.setText("Контакт " + contactName + " успешно добавлен");
+                else
+                    response.setText("Контакт " + contactName + " не был добавлен. Произошла ошибка");
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                break;
+            case "Назад":
+                response.setText("Вы вернулись назад");
+                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                break;
+            default:
+                return handleMessageWithContext(state, messageText);
+        }
+        return response;
+    }
+
+    private SendMessage handleMessageWithContext(State state, String messageText) {
+        SendMessage response = new SendMessage();
+        String lastRequestedParamKey = state.getLastRequestedParamKey();
+        if (lastRequestedParamKey == null) {
+            response.setText("Я не понимаю эту команду.");
+            return response;
+        }
+        state.addParameter(lastRequestedParamKey, messageText);
+        response.setText("Отлично. Выберите какие данные хотите задать контакту");
+        response.setReplyMarkup(new KeyboardCreator().addContactMenu());
+        return response;
+    }
+}
