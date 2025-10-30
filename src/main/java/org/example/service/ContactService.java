@@ -31,7 +31,7 @@ public class ContactService {
         try {
             Contact contact = new Contact(chatId,
                     params.get("contactName"),
-                    params.get("contactNumber"),
+                    params.getOrDefault("contactNumber", ""),
                     Integer.parseInt(params.getOrDefault("contactAge", String.valueOf(-1))),
                     Gender.fromDisplayName(params.get("contactGender")),
                     false

@@ -1,7 +1,6 @@
 package org.example.operations;
 
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.service.ContactService;
 import org.example.state.Operation;
@@ -15,39 +14,41 @@ public class CurrentContactMenuHandler implements OperationHandler {
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
-        String contactName = state.getParamByKey("currentContact");
+        String contactName = state.getParamByKey("currentContactName");
         Contact contact = service.findContactByName(chatId, contactName);
+
         switch (messageText) {
-            case "Информация":
-                response.setText(getContactInfo(contact));
+            case "Меню пользователя вызвано":
+                response.setText("Меню для пользователя " + contactName + " вызвано");
                 response.setReplyMarkup(keyboardCreator.currentContactMenu());
                 break;
+            case "Информация":
+                OperationHandler handler = Operation.GET_CONTACT_INFO.getHandler();
+                return handler.handleMessage(service, state, contactName, chatId);
             case "Изменить":
-                state.changeCurrentOperation(Operation.EDIT_CONTACT);
-                state.addParameter("editContact", contactName);
-
+                state.changeCurrentOperation(Operation.EDIT_CONTACT, false);
                 response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
                 response.setReplyMarkup(keyboardCreator.editContactMenu());
                 break;
             case "Блокировать":
-                state.changeCurrentOperation(Operation.BLOCK_CONTACT);
+                state.changeCurrentOperation(Operation.BLOCK_CONTACT, false);
 
-                String isBlockedInfo = contact.getBlocked() == true ? "заблокирован" : "не заблокирован";
-                String blockActionInfo = contact.getBlocked() == false ? "заблокировать" : "разблокировать";
+                String isBlockedInfo = contact.isBlocked() ? "заблокирован" : "не заблокирован";
+                String blockActionInfo = !contact.isBlocked() ? "заблокировать" : "разблокировать";
                 String responseText = String.format("Текущий контакт %s. Вы хотите %s?", isBlockedInfo, blockActionInfo);
 
                 response.setText(responseText);
                 response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Да", "Нет")));
                 break;
             case "Удалить":
-                state.changeCurrentOperation(Operation.DELETE_CONTACT);
+                state.changeCurrentOperation(Operation.DELETE_CONTACT, false);
                 response.setText("Вы точно хотите удалить текущий контакт?");
                 response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Да", "Нет")));
                 break;
 
             case "Назад":
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:
@@ -55,18 +56,5 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 break;
         }
         return response;
-    }
-
-    private String getContactInfo(Contact contact) {
-        String phoneNumberInfo = contact.getPhoneNumber().isEmpty() ? "не указан" : contact.getPhoneNumber();
-        String genderInfo = "";
-        if (contact.getGender() == Gender.MALE) genderInfo = "мужской";
-        if (contact.getGender() == Gender.FEMALE) genderInfo = "женский";
-        if (contact.getGender() == Gender.NOT_SPECIFIED) genderInfo = "не указан";
-        String ageInfo = contact.getAge() == -1 ? "не указан" : String.valueOf(contact.getAge());
-        String isBlockedInfo = contact.getBlocked() == true ? "Заблокирован" : "Не заблокирован";
-
-        return String.format("Контакт %s.\nНомер: %s.\nПол: %s.\nВозраст: %s.\n%s.",
-                contact.getName(), phoneNumberInfo, genderInfo, ageInfo, isBlockedInfo);
     }
 }

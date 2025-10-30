@@ -20,6 +20,9 @@ public enum Operation {
     DELETE_CONTACT,
     GET_CONTACT_INFO;
 
+    /**
+     * Возвращает обработчик для данного вида операции
+     */
     public OperationHandler getHandler() {
         return switch(this){
             case MAIN_MENU -> new MainMenuHandler();
@@ -31,7 +34,7 @@ public enum Operation {
             case EDIT_CONTACT -> new EditContactHandler();
             case BLOCK_CONTACT -> new BlockContactHandler();
             case DELETE_CONTACT -> new DeleteContactHandler();
-            case GET_CONTACT_INFO -> null;
+            case GET_CONTACT_INFO -> new GetContactInfoHandler();
         };
     }
 }

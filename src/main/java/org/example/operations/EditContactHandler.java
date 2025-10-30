@@ -14,7 +14,7 @@ public class EditContactHandler implements OperationHandler{
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
-        String contactName = state.getParamByKey("editContact");
+        String contactName = state.getParamByKey("currentContactName");
         switch(messageText) {
             case "Имя":
                 response.setText("Введите имя контакта");
@@ -39,17 +39,13 @@ public class EditContactHandler implements OperationHandler{
                     response.setText("Контакт " + contactName + " успешно изменен");
                 else
                     response.setText("Контакт " + contactName + " не был изменен. Произошла ошибка");
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
-
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-                state.addParameter("currentContact", contactName);
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
-
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-                state.addParameter("currentContact", contactName);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:
                 return handleMessageWithContext(state, messageText);

@@ -16,7 +16,7 @@ public class MainMenuHandler implements OperationHandler {
                 response.setReplyMarkup(new ReplyKeyboardCreator().mainMenu());
                 break;
             case "Контакты":
-                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setText("Взаимодействие с контактами. Выберите какое действие хотите совершить");
                 response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 break;

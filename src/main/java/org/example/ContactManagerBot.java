@@ -56,6 +56,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
      */
     @Override
     public void onUpdateReceived(Update update) {
+
         if (update.hasMessage() && update.getMessage().hasText()) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
@@ -70,7 +71,9 @@ public class ContactManagerBot extends TelegramLongPollingBot {
             String callbackData = callbackQuery.getData();
             Message message = (Message) callbackQuery.getMessage();
             Long chatId = message.getChatId();
-            String text = message.getText();
+            if(!states.containsKey(chatId)){
+                states.put(chatId, new State());
+            }
             SendMessage response = messageHandler.handleCallbackData(callbackData, states.get(chatId), message);
             sendMessage(response);
         }

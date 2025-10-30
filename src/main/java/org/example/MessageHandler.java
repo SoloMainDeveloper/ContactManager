@@ -25,17 +25,17 @@ public class MessageHandler {
     }
 
     /**
-     * Обрабатывает нажатие кнопки и возвращает ответ, содержащий текст и/или кнопки
+     * Из callBackData достаёт, какую Operation нужно выставить как текущую, а также контекст для этой операции.
+     * После этого вызывает обработку сообщения в handleMessage()
      */
     public SendMessage handleCallbackData(String callbackData, State state, Message message) {
         SendMessage response = new SendMessage();
-        if (callbackData.startsWith("currentContactMenu_")) {
-            Long chatId = message.getChatId();
-            String contactName = callbackData.substring("currentContactMenu_".length());
-            state.setLastRequestedParamKey("currentContact");
-            OperationHandler handler = state.getOperation().getHandler();
-            response = handler.handleMessage(service, state, contactName, chatId);
-            response.setChatId(String.valueOf(chatId));
+        if (callbackData.startsWith("CURRENT_CONTACT_MENU_")) {
+            state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU, true);
+            String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
+            state.addParameter("currentContactName", contactName);
+            message.setText("Меню пользователя вызвано");
+            return handleMessage(state, message);
         }
         return response;
     }

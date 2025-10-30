@@ -23,7 +23,8 @@ public class GetAllContactsHandler implements OperationHandler {
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
-                response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(names));
+                response.setReplyMarkup(new InlineKeyboardCreator()
+                        .createKeyboard(names, Operation.CURRENT_CONTACT_MENU.toString()));
                 state.setLastRequestedParamKey("currentContact");
                 break;
             case "Добавить фильтр":
@@ -38,7 +39,7 @@ public class GetAllContactsHandler implements OperationHandler {
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:
@@ -58,15 +59,6 @@ public class GetAllContactsHandler implements OperationHandler {
         state.addParameter(lastRequestedParamKey, messageText);
 
         switch(lastRequestedParamKey){
-            case "currentContact": {
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-                state.addParameter(lastRequestedParamKey, messageText);
-
-                String name = state.getParamByKey(lastRequestedParamKey);
-                response.setText("Вы находитесь в меню контакта " + name);
-                response.setReplyMarkup(new ReplyKeyboardCreator().currentContactMenu());
-                break;
-            }
             case "filter": {
                 if(Objects.equals(messageText, "По полу")) {
                     response.setText("Выберите значение фильтра по полу");

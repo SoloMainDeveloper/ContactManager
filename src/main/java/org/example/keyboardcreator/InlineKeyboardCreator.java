@@ -8,13 +8,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class InlineKeyboardCreator {
-    public InlineKeyboardMarkup createKeyboard(List<String> buttonText) {
+    public InlineKeyboardMarkup createKeyboard(List<String> buttonText, String operationName) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         for (String label : buttonText) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(label);
-            button.setCallbackData("currentContactMenu_" + label);
+            button.setCallbackData(operationName + "_" + label);
             rows.add(Collections.singletonList(button));
         }
 
