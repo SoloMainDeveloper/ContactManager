@@ -11,6 +11,9 @@ import java.util.List;
  * Класс, создающий клавиатуры ReplyKeyboardMarkup
  */
 public class ReplyKeyboardCreator {
+    /**
+     * Создаёт ReplyKeyboardMarkup на основе переданного списка строк
+     */
     public ReplyKeyboardMarkup createKeyboard(List<String> buttonsText) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setResizeKeyboard(true);
@@ -30,26 +33,44 @@ public class ReplyKeyboardCreator {
         return keyboardMarkup;
     }
 
+    /**
+     * Возвращает кнопки главного меню
+     */
     public ReplyKeyboardMarkup mainMenu(){
         return createKeyboard(List.of("Контакты"));
     }
 
+    /**
+     * Возвращает кнопки меню контактов
+     */
     public ReplyKeyboardMarkup contactsMenu() {
         return createKeyboard(List.of("Добавить", "Получить все", "Найти", "Назад"));
     }
 
+    /**
+     * Возвращает кнопки меню текущего контакта
+     */
     public ReplyKeyboardMarkup currentContactMenu() {
         return createKeyboard(List.of("Информация", "Изменить", "Блокировать", "Удалить", "Назад"));
     }
 
+    /**
+     * Возвращает кнопки меню добавления контакта
+     */
     public ReplyKeyboardMarkup addContactMenu() {
         return createKeyboard(List.of("Номер", "Возраст", "Пол", "Сохранить контакт", "Назад"));
     }
 
+    /**
+     * Возвращает кнопки меню редактирования контакта
+     */
     public ReplyKeyboardMarkup editContactMenu() {
         return createKeyboard(List.of("Имя", "Номер", "Возраст", "Пол", "Изменить контакт", "Назад"));
     }
 
+    /**
+     * Возвращает кнопки меню получения всех контактов
+     */
     public ReplyKeyboardMarkup getAllContactsMenu() {
         return createKeyboard(List.of("Получить сразу", "Добавить фильтр", "Добавить сортировку", "Назад"));
     }

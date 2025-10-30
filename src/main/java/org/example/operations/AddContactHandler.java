@@ -8,6 +8,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
 
+/**
+ * Обработчик события: Добавление контакта
+ */
 public class AddContactHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
@@ -48,6 +51,9 @@ public class AddContactHandler implements OperationHandler {
         return response;
     }
 
+    /**
+     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом
+     */
     private SendMessage handleMessageWithContext(State state, String messageText) {
         SendMessage response = new SendMessage();
         String lastRequestedParamKey = state.getLastRequestedParamKey();

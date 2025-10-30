@@ -7,6 +7,9 @@ import org.example.state.Operation;
 import org.example.state.State;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+/**
+ * Обработчик события: Блокирование контакта
+ */
 public class BlockContactHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {

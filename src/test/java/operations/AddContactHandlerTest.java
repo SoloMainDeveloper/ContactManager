@@ -9,7 +9,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+/**
+ * Тесты для AddContactHandler
+ */
 public class AddContactHandlerTest {
+    /**
+     * Тест позитивного сценария добавления пользователя, у которого заданы все параметры
+     */
     @Test
     public void addContactTest(){
         OperationHandler handler = new AddContactHandler();

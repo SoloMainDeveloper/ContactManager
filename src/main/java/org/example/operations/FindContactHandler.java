@@ -10,6 +10,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
 
+/**
+ * Обработчик события: Поиск контакта
+ */
 public class FindContactHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
@@ -29,6 +32,10 @@ public class FindContactHandler implements OperationHandler {
         return response;
     }
 
+    /**
+     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом, и затем
+     * использует их при поиске.
+     */
     private SendMessage handleMessageWithContext(ContactService service, State state, String messageText, Long chatId) {
         SendMessage response = new SendMessage();
         String lastRequestedParamKey = state.getLastRequestedParamKey();

@@ -6,9 +6,14 @@ import org.example.entity.Gender;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Маппер данных из БД в сущность Контакта
+ */
 public class ContactMapper {
+    /**
+     * Создаёт контакт на основе ответа от БД
+     */
     public Contact resultSetToContactEntity(ResultSet resultSet) {
-        //resultSet.getLong("chat_id");
         try {
             return new Contact(
                     resultSet.getLong("chat_id"),

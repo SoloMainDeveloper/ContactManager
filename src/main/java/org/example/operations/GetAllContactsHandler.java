@@ -11,6 +11,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Обработчик события: Получение всех контактов
+ */
 public class GetAllContactsHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
@@ -48,6 +51,10 @@ public class GetAllContactsHandler implements OperationHandler {
         return response;
     }
 
+    /**
+     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом, и затем
+     * использует их для поиска.
+     */
     private SendMessage handleMessageWithContext(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
