@@ -14,25 +14,23 @@ public class BlockContactHandler implements OperationHandler {
         SendMessage response = new SendMessage();
         switch(messageText) {
             case "Да":
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-
-                String lastParamKey = state.getLastRequestedParamKey();
-                String contactName = lastParamKey.substring("currentContactMenu_".length());
+                String contactName = state.getParamByKey("currentContactName");
                 Contact contact = service.findContactByName(chatId, contactName);
 
-                contact.setBlocked(!contact.getBlocked());
+                contact.setBlocked(!contact.isBlocked());
                 service.update(contact);
 
-                String blockActionInfo = contact.getBlocked() == false ? "заблокирован" : "разблокирован";
-                String responseText = String.format("Текущий контакт успешно %s", blockActionInfo);
+                String blockActionInfo = contact.isBlocked() ? "заблокирован" : "разблокирован";
+                String responseText = String.format("Контакт " + contactName + " успешно %s", blockActionInfo);
 
                 response.setText(responseText);
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
             case "Нет":
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setText("Действие изменения блокировки отменено");
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду.");

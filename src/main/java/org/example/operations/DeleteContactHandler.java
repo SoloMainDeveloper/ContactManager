@@ -1,6 +1,5 @@
 package org.example.operations;
 
-import org.example.entity.Contact;
 import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.service.ContactService;
 import org.example.state.Operation;
@@ -14,20 +13,16 @@ public class DeleteContactHandler implements OperationHandler {
         SendMessage response = new SendMessage();
         switch(messageText) {
             case "Да":
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-
-                String lastParamKey = state.getLastRequestedParamKey();
-                String contactName = lastParamKey.substring("currentContactMenu_".length());
-
+                String contactName = state.getParamByKey("currentContactName");
                 service.deleteByName(chatId, contactName);
-
-                response.setText("Текущий контакт успешно удален");
+                response.setText("Контакт " + contactName + " успешно удален");
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
             case "Нет":
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setText("Действие удаления текущего контакта отменено");
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
+                response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду.");

@@ -12,11 +12,12 @@ public class State {
     private String lastRequestedParamKey;
 
     /**
-     * Меняет значение текущей операции
+     * Меняет значение текущей операции и очищает предыдущий контекст
      */
-    public void changeCurrentOperation(Operation operation) {
+    public void changeCurrentOperation(Operation operation, boolean needClearContext) {
         this.operation = operation;
-        this.params.clear();
+        if(needClearContext)
+            this.params.clear();
     }
 
     public Operation getOperation() {

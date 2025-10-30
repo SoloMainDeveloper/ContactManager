@@ -39,7 +39,7 @@ public class ContactRepository {
                 .addValue("phoneNumber", contact.getPhoneNumber())
                 .addValue("age", contact.getAge())
                 .addValue("gender", contact.getGender().name())
-                .addValue("isBlocked", contact.getBlocked());
+                .addValue("isBlocked", contact.isBlocked());
 
         jdbcTemplate.update(sql, params);
     }
@@ -112,7 +112,7 @@ public class ContactRepository {
                 .addValue("phoneNumber", contact.getPhoneNumber())
                 .addValue("age", contact.getAge())
                 .addValue("gender", contact.getGender().name())
-                .addValue("isBlocked", contact.getBlocked());
+                .addValue("isBlocked", contact.isBlocked());
 
         jdbcTemplate.update(sql, params);
     }

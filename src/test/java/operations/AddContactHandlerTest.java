@@ -16,7 +16,7 @@ public class AddContactHandlerTest {
         State state = new State();
         ContactService service = new ContactService();
         Long chatId = 123245663L;
-        state.changeCurrentOperation(Operation.ADD_CONTACT);
+        state.changeCurrentOperation(Operation.ADD_CONTACT, true);
         state.setLastRequestedParamKey("contactName");
 
         handler.handleMessage(service, state, "Олег", chatId);
