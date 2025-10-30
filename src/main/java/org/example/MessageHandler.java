@@ -32,7 +32,7 @@ public class MessageHandler {
         if (callbackData.startsWith("currentContactMenu_")) {
             Long chatId = message.getChatId();
             String contactName = callbackData.substring("currentContactMenu_".length());
-            state.setLastRequestedParamKey("currentContactMenu");
+            state.setLastRequestedParamKey("currentContact");
             OperationHandler handler = state.getOperation().getHandler();
             response = handler.handleMessage(service, state, contactName, chatId);
             response.setChatId(String.valueOf(chatId));

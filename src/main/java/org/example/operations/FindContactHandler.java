@@ -48,10 +48,10 @@ public class FindContactHandler implements OperationHandler {
                     response.setText("По имени " + name + " контакт успешно найден.");
                     response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName())));
                 } else {
+                    state.changeCurrentOperation(Operation.CONTACTS_MENU);
                     response.setText("По имени " + name + " контакты не найдены.");
                     response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 }
-                //ReplyKeyboard markup = response.getReplyMarkup();
                 break;
             }
             case "contactNumber": {
@@ -61,17 +61,19 @@ public class FindContactHandler implements OperationHandler {
                     response.setText("По номеру " + number + " контакт успешно найден.");
                     response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName())));
                 } else {
+                    state.changeCurrentOperation(Operation.CONTACTS_MENU);
                     response.setText("По номеру " + number + " контакты не найдены.");
                     response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 }
                 break;
             }
-            case "currentContactMenu": {
-                String name = state.getParamByKey("currentContactMenu");
+            case "currentContact": {
+                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
+                state.addParameter(lastRequestedParamKey, messageText);
+
+                String name = state.getParamByKey(lastRequestedParamKey);
                 response.setText("Вы находитесь в меню контакта " + name);
                 response.setReplyMarkup(new ReplyKeyboardCreator().currentContactMenu());
-                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
-                state.setLastRequestedParamKey("currentContactMenu_" + name);
                 break;
             }
         }

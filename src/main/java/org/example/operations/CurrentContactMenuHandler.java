@@ -15,8 +15,7 @@ public class CurrentContactMenuHandler implements OperationHandler {
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
-        String lastParamKey = state.getLastRequestedParamKey();
-        String contactName = lastParamKey.substring("currentContactMenu_".length());
+        String contactName = state.getParamByKey("currentContact");
         Contact contact = service.findContactByName(chatId, contactName);
         switch (messageText) {
             case "Информация":
@@ -25,6 +24,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 break;
             case "Изменить":
                 state.changeCurrentOperation(Operation.EDIT_CONTACT);
+                state.addParameter("editContact", contactName);
+
                 response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
                 response.setReplyMarkup(keyboardCreator.editContactMenu());
                 break;

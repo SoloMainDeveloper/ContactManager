@@ -7,7 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ContactMapper {
-    public Contact resultSetToContactEntity(ResultSet resultSet) throws SQLException {
+    public Contact resultSetToContactEntity(ResultSet resultSet) {
+        //resultSet.getLong("chat_id");
         try {
             return new Contact(
                     resultSet.getLong("chat_id"),

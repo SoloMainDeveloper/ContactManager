@@ -21,7 +21,7 @@ public class BlockContactHandler implements OperationHandler {
                 Contact contact = service.findContactByName(chatId, contactName);
 
                 contact.setBlocked(!contact.getBlocked());
-                service.update(contact);
+                service.updateBlockField(contact);
 
                 String blockActionInfo = contact.getBlocked() == false ? "заблокирован" : "разблокирован";
                 String responseText = String.format("Текущий контакт успешно %s", blockActionInfo);
