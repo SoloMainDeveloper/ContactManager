@@ -12,6 +12,8 @@ public enum Operation {
     ADD_CONTACT,
     FIND_CONTACT,
     GET_ALL_CONTACTS,
+
+    CURRENT_CONTACT_MENU,
     EDIT_CONTACT,
     BLOCK_CONTACT,
     DELETE_CONTACT,
@@ -24,9 +26,10 @@ public enum Operation {
             case ADD_CONTACT -> new AddContactHandler();
             case FIND_CONTACT -> new FindContactHandler();
             case GET_ALL_CONTACTS -> null;
+            case CURRENT_CONTACT_MENU -> new CurrentContactMenuHandler();
             case EDIT_CONTACT -> null;
-            case BLOCK_CONTACT -> null;
-            case DELETE_CONTACT -> null;
+            case BLOCK_CONTACT -> new BlockContactHandler();
+            case DELETE_CONTACT -> new DeleteContactHandler();
             case GET_CONTACT_INFO -> null;
         };
     }

@@ -1,5 +1,6 @@
-package org.example;
+package org.example.keyboardcreator;
 
+import org.example.entity.Contact;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Класс, создающий клавиатуры ReplyKeyboardMarkup
  */
-public class KeyboardCreator {
+public class ReplyKeyboardCreator {
     public ReplyKeyboardMarkup createKeyboard(List<String> buttonsText) {
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setResizeKeyboard(true);
@@ -33,11 +34,19 @@ public class KeyboardCreator {
         return createKeyboard(List.of("Контакты"));
     }
 
-    public ReplyKeyboardMarkup contactsMenu(){
+    public ReplyKeyboardMarkup contactsMenu() {
         return createKeyboard(List.of("Добавить", "Получить все", "Найти", "Назад"));
     }
 
-    public ReplyKeyboardMarkup addContactMenu(){
+    public ReplyKeyboardMarkup currentContactMenu() {
+        return createKeyboard(List.of("Информация", "Изменить", "Блокировать", "Удалить", "Назад"));
+    }
+
+    public ReplyKeyboardMarkup addContactMenu() {
         return createKeyboard(List.of("Номер", "Возраст", "Пол", "Сохранить контакт", "Назад"));
+    }
+
+    public ReplyKeyboardMarkup editContactMenu() {
+        return createKeyboard(List.of("Имя", "Номер", "Возраст", "Пол", "Сохранить контакт", "Назад"));
     }
 }

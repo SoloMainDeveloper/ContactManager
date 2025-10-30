@@ -1,10 +1,16 @@
 package org.example.operations;
 
-import org.example.KeyboardCreator;
+import org.example.keyboardcreator.InlineKeyboardCreator;
+import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.entity.Contact;
 import org.example.service.ContactService;
+import org.example.state.Operation;
 import org.example.state.State;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+
+import java.util.List;
 
 public class FindContactHandler implements OperationHandler {
     @Override
@@ -35,29 +41,41 @@ public class FindContactHandler implements OperationHandler {
         state.addParameter(lastRequestedParamKey, messageText);
 
         switch(lastRequestedParamKey){
-            case "contactName":{
+            case "contactName": {
                 String name = state.getParamByKey("contactName");
                 Contact contact = service.findContactByName(chatId, name);
-                if(contact != null){
+                if(contact != null) {
                     response.setText("По имени " + name + " контакт успешно найден.");
+                    response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName())));
                 } else {
                     response.setText("По имени " + name + " контакты не найдены.");
+                    response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
+                }
+                //ReplyKeyboard markup = response.getReplyMarkup();
+                break;
+            }
+            case "contactNumber": {
+                String number = state.getParamByKey("contactNumber");
+                Contact contact = service.findContactByNumber(chatId, number);
+                if(contact != null) {
+                    response.setText("По номеру " + number + " контакт успешно найден.");
+                    response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName())));
+                } else {
+                    response.setText("По номеру " + number + " контакты не найдены.");
+                    response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 }
                 break;
             }
-            case "contactNumber":{
-                String number = state.getParamByKey("contactNumber");
-                Contact contact = service.findContactByNumber(chatId, number);
-                if(contact != null){
-                    response.setText("По номеру " + number + " контакт успешно найден.");
-                } else {
-                    response.setText("По номеру " + number + " контакты не найдены.");
-                }
+            case "currentContactMenu": {
+                String name = state.getParamByKey("currentContactMenu");
+                response.setText("Вы находитесь в меню контакта " + name);
+                response.setReplyMarkup(new ReplyKeyboardCreator().currentContactMenu());
+                state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU);
+                state.setLastRequestedParamKey("currentContactMenu_" + name);
                 break;
             }
         }
 
-        response.setReplyMarkup(new KeyboardCreator().contactsMenu());
         return response;
     }
 }

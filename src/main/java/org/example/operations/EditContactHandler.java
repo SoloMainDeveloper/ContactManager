@@ -8,12 +8,15 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
 
-public class AddContactHandler implements OperationHandler {
+public class EditContactHandler implements OperationHandler{
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         switch(messageText){
+            case "Имя":
+                response.setText("Введите имя контакта");
+                state.setLastRequestedParamKey("contactName");
             case "Номер":
                 response.setText("Введите номер телефона");
                 state.setLastRequestedParamKey("contactNumber");

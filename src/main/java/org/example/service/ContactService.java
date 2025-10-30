@@ -23,40 +23,50 @@ public class ContactService {
         repository = new ContactRepository(dataSource);
     }
 
-    public boolean tryAddContact(long chatId, HashMap<String, String> params) {
+    /**
+     * Попытаться добавить контакт, при успешном выполнении возвращается true
+     */
+    public boolean tryAddContact(Long chatId, HashMap<String, String> params) {
         try {
             Contact contact = new Contact(chatId,
                     params.get("contactName"),
                     params.get("contactNumber"),
-                    Integer.parseInt(params.get("contactAge")),
-                    Gender.fromDisplayName(params.get("contactGender")));
+                    Integer.parseInt(params.getOrDefault("contactAge", String.valueOf(-1))),
+                    Gender.fromDisplayName(params.get("contactGender")),
+                    false);
             repository.add(contact);
             return true;
         } catch (Exception exception){
-
             return false;
         }
     }
 
     /**
-     * Поиск контакта по имени
+     * Найти контакт по имени
      * @return контакт в случае успеха, в случае неудачи - null.
      */
-    public Contact findContactByName(long chatId, String name) {
-        Optional<Contact> contact = repository.findByName(name, chatId);
+    public Contact findContactByName(Long chatId, String name) {
+        Optional<Contact> contact = repository.findContactByName(name, chatId);
         return contact.orElse(null);
     }
 
     /**
-     * Поиск контакта по номеру
+     * Найти контакт по номеру
      * @return контакт в случае успеха, в случае неудачи - null.
      */
-    public Contact findContactByNumber(long chatId, String number) {
-        Optional<Contact> contact = repository.findByNumber(number, chatId);
+    public Contact findContactByNumber(Long chatId, String number) {
+        Optional<Contact> contact = repository.findContactByNumber(number, chatId);
         return contact.orElse(null);
     }
 
-    public void deleteByName(long chatId, String name) {
+    public void update(Contact contact) {
+        repository.update(contact);
+    }
+
+    /**
+     * Удалить контакт по имени
+     */
+    public void deleteByName(Long chatId, String name) {
         repository.deleteByName(name, chatId);
     }
 }
