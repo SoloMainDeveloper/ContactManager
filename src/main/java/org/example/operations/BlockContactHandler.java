@@ -19,14 +19,17 @@ public class BlockContactHandler implements OperationHandler {
             case "Да":
                 String contactName = state.getParamByKey("currentContactName");
                 Contact contact = service.findContactByName(chatId, contactName);
+                if(contact == null){
+                    response.setText("Контакта с именем " + contactName + " не существует. Блокировка не применена");
+                } else {
+                    contact.setBlocked(!contact.isBlocked());
+                    service.updateBlockField(contact);
 
-                contact.setBlocked(!contact.isBlocked());
-                service.updateBlockField(contact);
+                    String blockActionInfo = contact.isBlocked() ? "заблокирован" : "разблокирован";
+                    String responseText = String.format("Контакт " + contactName + " успешно %s", blockActionInfo);
 
-                String blockActionInfo = contact.isBlocked() ? "заблокирован" : "разблокирован";
-                String responseText = String.format("Контакт " + contactName + " успешно %s", blockActionInfo);
-
-                response.setText(responseText);
+                    response.setText(responseText);
+                }
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
                 state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
