@@ -1,13 +1,10 @@
 package org.example.operations;
 
-import org.example.KeyboardCreator;
+import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.service.ContactService;
 import org.example.state.Operation;
 import org.example.state.State;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-
-import java.util.List;
 
 public class MainMenuHandler implements OperationHandler {
     @Override
@@ -16,12 +13,12 @@ public class MainMenuHandler implements OperationHandler {
         switch (messageText) {
             case "/start":
                 response.setText("Привет! Я бот для управления контактами.");
-                response.setReplyMarkup(new KeyboardCreator().mainMenu());
+                response.setReplyMarkup(new ReplyKeyboardCreator().mainMenu());
                 break;
             case "Контакты":
                 state.changeCurrentOperation(Operation.CONTACTS_MENU);
                 response.setText("Взаимодействие с контактами. Выберите какое действие хотите совершить");
-                response.setReplyMarkup(new KeyboardCreator().contactsMenu());
+                response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду");

@@ -1,5 +1,7 @@
 package org.example.entity;
 
+import java.sql.ResultSet;
+
 /**
  * Контакт
  */
@@ -27,7 +29,12 @@ public class Contact {
     /**
      * Пол контакта
      */
-    private Gender gender = Gender.NOT_SPECIFIED;
+    private Gender gender;
+
+    /**
+     * Заблокирован/не заблокирован контакт
+     */
+    private Boolean isBlocked;
 
     /**
      * Конструктор по умолчанию
@@ -37,12 +44,17 @@ public class Contact {
     /**
      * Конструктор с заполнением всех полей контакта
      */
-    public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender) {
+    public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender, Boolean isBlocked) {
         this.chatId = chatId;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.age = age;
         this.gender = gender;
+        this.isBlocked = isBlocked;
+    }
+
+    public Contact(ResultSet resultSet) {
+
     }
 
     /**
@@ -113,5 +125,13 @@ public class Contact {
      */
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public Boolean getBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        isBlocked = blocked;
     }
 }

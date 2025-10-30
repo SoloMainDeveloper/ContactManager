@@ -1,17 +1,17 @@
 package org.example.operations;
 
-import org.example.KeyboardCreator;
+import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.service.ContactService;
 import org.example.state.Operation;
 import org.example.state.State;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.List;
 
 public class ContactsMenuHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
+        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         switch (messageText) {
             case "Добавить":
@@ -26,11 +26,12 @@ public class ContactsMenuHandler implements OperationHandler {
             case "Найти":
                 state.changeCurrentOperation(Operation.FIND_CONTACT);
                 response.setText("Выберите по какому признаку будет произведен поиск");
-                response.setReplyMarkup(new KeyboardCreator().createKeyboard(List.of("Поиск по имени", "Поиск по номеру")));
+                response.setReplyMarkup(new ReplyKeyboardCreator().createKeyboard(List.of("Поиск по имени", "Поиск по номеру")));
                 break;
             case "Назад":
+                response.setText("Вы вернулись назад");
                 state.changeCurrentOperation(Operation.MAIN_MENU);
-                //TODO
+                response.setReplyMarkup(keyboardCreator.mainMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду");

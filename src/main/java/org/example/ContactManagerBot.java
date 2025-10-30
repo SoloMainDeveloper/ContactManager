@@ -3,6 +3,7 @@ package org.example;
 import org.example.state.State;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -62,6 +63,15 @@ public class ContactManagerBot extends TelegramLongPollingBot {
                 states.put(chatId, new State());
             }
             SendMessage response = messageHandler.handleMessage(states.get(chatId), message);
+            sendMessage(response);
+        }
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String callbackData = callbackQuery.getData();
+            Message message = (Message) callbackQuery.getMessage();
+            Long chatId = message.getChatId();
+            String text = message.getText();
+            SendMessage response = messageHandler.handleCallbackData(callbackData, states.get(chatId), message);
             sendMessage(response);
         }
     }
