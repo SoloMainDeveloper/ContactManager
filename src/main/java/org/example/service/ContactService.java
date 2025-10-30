@@ -69,6 +69,9 @@ public class ContactService {
         return repository.findContactsByChatId(chatId, "", "");
     }
 
+    /**
+     * Возвращает все контакты, имеющееся у данного пользователя с применением фильтрации и сортировки
+     */
     public List<Contact> findContactsByChatIdWithFilterAndSorter(Long chatId, HashMap<String, String> params) {
         String filter = "";
         String sorter = "";

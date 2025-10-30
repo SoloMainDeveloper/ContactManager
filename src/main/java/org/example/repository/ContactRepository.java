@@ -89,7 +89,7 @@ public class ContactRepository {
     }
 
     /**
-     * Найти контакты по id пользователя
+     * Найти контакты по id пользователя с фильтрацией и сортировкой при необходимости
      */
     public List<Contact> findContactsByChatId(Long chatId, String filter, String sorter) {
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId" + filter + sorter;
