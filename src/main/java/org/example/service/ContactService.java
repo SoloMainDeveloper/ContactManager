@@ -8,6 +8,7 @@ import org.example.DataBase;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -65,17 +66,28 @@ public class ContactService {
      * Возвращает все контакты, имеющееся у данного пользователя
      */
     public List<Contact> findContactsByChatId(Long chatId) {
-        return repository.findContactsByChatId(chatId);
+        return repository.findContactsByChatId(chatId, "", "");
     }
 
-    public List<Contact> findContactsByChatIdAndGender(Long chatId, HashMap<String, String> genderParams) {
-        String gender = genderParams.get("filterByGender");
-        return repository.findContactsByChatIdAndGender(chatId, Gender.fromDisplayName(gender));
-    }
-
-    public List<Contact> findContactsByChatIdAndAge(Long chatId, HashMap<String, String> genderParams) {
-        String ageCondition = genderParams.get("filterByAge");
-        return repository.findContactsByChatIdAndAge(chatId, ageCondition);
+    public List<Contact> findContactsByChatIdWithFilterAndSorter(Long chatId, HashMap<String, String> params) {
+        String filter = "";
+        String sorter = "";
+        if(params.containsKey("filterByGender")) {
+            String gender = Gender.fromDisplayName(params.get("filterByGender")).name();
+            filter = " and gender = '" + gender + "'";
+        }
+        if(params.containsKey("filterByAge")) {
+            String ageCondition = params.get("filterByAge");
+            filter = " and age " + ageCondition;
+        }
+        if(params.containsKey("sorter")) {
+            String sorterValue = params.get("sorter");
+            if(Objects.equals(sorterValue, "В порядке возрастания возраста")) sorter = " ORDER BY age ASC";
+            if(Objects.equals(sorterValue, "В порядке убывания возраста")) sorter = " ORDER BY age DESC";
+            if(Objects.equals(sorterValue, "В алфавитном порядке имени")) sorter = " ORDER BY name ASC";
+            if(Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) sorter = " ORDER BY name DESC";
+        }
+        return repository.findContactsByChatId(chatId, filter, sorter);
     }
 
     /**
