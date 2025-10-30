@@ -35,11 +35,11 @@ public class AddContactHandler implements OperationHandler {
                 else
                     response.setText("Контакт " + contactName + " не был добавлен. Произошла ошибка");
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
-                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU);
+                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
                 break;
             default:

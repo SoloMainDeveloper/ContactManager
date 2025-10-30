@@ -127,7 +127,7 @@ public class Contact {
         this.gender = gender;
     }
 
-    public Boolean getBlocked() {
+    public Boolean isBlocked() {
         return isBlocked;
     }
 

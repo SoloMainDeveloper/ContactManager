@@ -70,7 +70,6 @@ public class ContactManagerBot extends TelegramLongPollingBot {
             String callbackData = callbackQuery.getData();
             Message message = (Message) callbackQuery.getMessage();
             Long chatId = message.getChatId();
-            String text = message.getText();
             SendMessage response = messageHandler.handleCallbackData(callbackData, states.get(chatId), message);
             sendMessage(response);
         }
