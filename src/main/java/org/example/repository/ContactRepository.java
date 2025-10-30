@@ -89,7 +89,7 @@ public class ContactRepository {
     }
 
     /**
-     * Найти контакты по id пользователя в БД
+     * Найти контакты по id пользователя
      */
     public List<Contact> findContactsByChatId(Long chatId) {
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId";
@@ -97,6 +97,35 @@ public class ContactRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId);
 
+        return getResponseFromFindContactsQuery(sql, params);
+    }
+
+    /**
+     * Найти контакты по id пользователя c использованием сортировки по полу
+     */
+    public List<Contact> findContactsByChatIdAndGender(Long chatId, Gender gender) {
+        String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId and gender = :gender";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("chatId", chatId)
+                .addValue("gender", gender.name());
+
+        return getResponseFromFindContactsQuery(sql, params);
+    }
+
+    /**
+     * Найти контакты по id пользователя c использованием сортировки по возрасту
+     */
+    public List<Contact> findContactsByChatIdAndAge(Long chatId, String ageCondition) {
+        String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId and age" + ageCondition;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("chatId", chatId);
+
+        return getResponseFromFindContactsQuery(sql, params);
+    }
+
+    public List<Contact> getResponseFromFindContactsQuery(String sql, MapSqlParameterSource params) {
         try {
             return jdbcTemplate.query(sql, params, (resultSet, rowNum) -> {
                 ContactMapper mapper = new ContactMapper();
@@ -105,9 +134,7 @@ public class ContactRepository {
         } catch (EmptyResultDataAccessException exception) {
             return null;
         }
-
     }
-
 
     public void updateBlockField(Contact contact) {
         String sql = "UPDATE public.contacts SET " +

@@ -51,6 +51,6 @@ public class ReplyKeyboardCreator {
     }
 
     public ReplyKeyboardMarkup getAllContactsMenu() {
-        return createKeyboard(List.of("Получить сразу", "Добавить фильтр", "Добавить сортировку", "Назад"));
+        return createKeyboard(List.of("Получить сразу", "Добавить фильтр/сортировку", "Назад"));
     }
 }

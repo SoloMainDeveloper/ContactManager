@@ -65,6 +65,16 @@ public class ContactService {
         return repository.findContactsByChatId(chatId);
     }
 
+    public List<Contact> findContactsByChatIdAndGender(Long chatId, HashMap<String, String> genderParams) {
+        String gender = genderParams.get("filterByGender");
+        return repository.findContactsByChatIdAndGender(chatId, Gender.fromDisplayName(gender));
+    }
+
+    public List<Contact> findContactsByChatIdAndAge(Long chatId, HashMap<String, String> genderParams) {
+        String ageCondition = genderParams.get("filterByAge");
+        return repository.findContactsByChatIdAndAge(chatId, ageCondition);
+    }
+
     /**
      * Обновляет поле блокировки пользователя
      */
