@@ -21,12 +21,13 @@ public class ContactsMenuHandler implements OperationHandler {
                 break;
             case "Получить все":
                 state.changeCurrentOperation(Operation.GET_ALL_CONTACTS, true);
-                //TODO
+                response.setText("Желаете получить все контакты сразу или добавить фильтрацию/сортировку?");
+                response.setReplyMarkup(keyboardCreator.getAllContactsMenu());
                 break;
             case "Найти":
                 state.changeCurrentOperation(Operation.FIND_CONTACT, true);
                 response.setText("Выберите по какому признаку будет произведен поиск");
-                response.setReplyMarkup(new ReplyKeyboardCreator().createKeyboard(List.of("Поиск по имени", "Поиск по номеру")));
+                response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Поиск по имени", "Поиск по номеру")));
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");

@@ -47,6 +47,7 @@ public class FindContactHandler implements OperationHandler {
                     response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName()),
                             Operation.CURRENT_CONTACT_MENU.toString()));
                 } else {
+                    state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                     response.setText("По имени " + name + " контакты не найдены.");
                     response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 }
@@ -60,6 +61,7 @@ public class FindContactHandler implements OperationHandler {
                     response.setReplyMarkup(new InlineKeyboardCreator().createKeyboard(List.of(contact.getName()),
                             Operation.CURRENT_CONTACT_MENU.toString()));
                 } else {
+                    state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                     response.setText("По номеру " + number + " контакты не найдены.");
                     response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
                 }

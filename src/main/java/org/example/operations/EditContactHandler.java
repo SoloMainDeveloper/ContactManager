@@ -1,5 +1,6 @@
 package org.example.operations;
 
+import org.example.entity.Contact;
 import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.service.ContactService;
 import org.example.state.Operation;
@@ -13,7 +14,8 @@ public class EditContactHandler implements OperationHandler{
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
-        switch(messageText){
+        String contactName = state.getParamByKey("currentContactName");
+        switch(messageText) {
             case "Имя":
                 response.setText("Введите имя контакта");
                 state.setLastRequestedParamKey("contactName");
@@ -30,13 +32,13 @@ public class EditContactHandler implements OperationHandler{
                 response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Мужской", "Женский")));
                 state.setLastRequestedParamKey("contactGender");
                 break;
-            case "Сохранить контакт":
-                boolean isSuccessful = service.tryAddContact(chatId, state.getParams());
-                String contactName = state.getParamByKey("contactName");
+            case "Изменить контакт":
+                Contact oldContact = service.findContactByName(chatId, contactName);
+                Boolean isSuccessful = service.tryUpdateContact(state.getParams(), oldContact);
                 if(isSuccessful)
-                    response.setText("Контакт " + contactName + " успешно добавлен");
+                    response.setText("Контакт " + contactName + " успешно изменен");
                 else
-                    response.setText("Контакт " + contactName + " не был добавлен. Произошла ошибка");
+                    response.setText("Контакт " + contactName + " не был изменен. Произошла ошибка");
                 response.setReplyMarkup(keyboardCreator.contactsMenu());
                 state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 break;
@@ -59,8 +61,8 @@ public class EditContactHandler implements OperationHandler{
             return response;
         }
         state.addParameter(lastRequestedParamKey, messageText);
-        response.setText("Отлично. Выберите какие данные хотите задать контакту");
-        response.setReplyMarkup(new ReplyKeyboardCreator().addContactMenu());
+        response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
+        response.setReplyMarkup(new ReplyKeyboardCreator().editContactMenu());
         return response;
     }
 }

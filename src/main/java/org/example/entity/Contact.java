@@ -42,6 +42,17 @@ public class Contact {
     public Contact() {}
 
     /**
+     * Конструктор для заполнения всех полей, кроме блокировки
+     */
+    public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender) {
+        this.chatId = chatId;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.age = age;
+        this.gender = gender;
+    }
+
+    /**
      * Конструктор с заполнением всех полей контакта
      */
     public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender, Boolean isBlocked) {

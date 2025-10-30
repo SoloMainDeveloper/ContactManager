@@ -47,6 +47,10 @@ public class ReplyKeyboardCreator {
     }
 
     public ReplyKeyboardMarkup editContactMenu() {
-        return createKeyboard(List.of("Имя", "Номер", "Возраст", "Пол", "Сохранить контакт", "Назад"));
+        return createKeyboard(List.of("Имя", "Номер", "Возраст", "Пол", "Изменить контакт", "Назад"));
+    }
+
+    public ReplyKeyboardMarkup getAllContactsMenu() {
+        return createKeyboard(List.of("Получить сразу", "Добавить фильтр", "Добавить сортировку", "Назад"));
     }
 }

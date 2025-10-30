@@ -1,6 +1,7 @@
 package org.example.state;
 
 import org.example.operations.*;
+import org.example.operations.GetAllContactsHandler;
 
 /**
  * Функциональная операция пользователя над ботом
@@ -28,7 +29,7 @@ public enum Operation {
             case CONTACTS_MENU -> new ContactsMenuHandler();
             case ADD_CONTACT -> new AddContactHandler();
             case FIND_CONTACT -> new FindContactHandler();
-            case GET_ALL_CONTACTS -> null;
+            case GET_ALL_CONTACTS -> new GetAllContactsHandler();
             case CURRENT_CONTACT_MENU -> new CurrentContactMenuHandler();
             case EDIT_CONTACT -> new EditContactHandler();
             case BLOCK_CONTACT -> new BlockContactHandler();

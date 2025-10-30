@@ -3,6 +3,7 @@ package org.example.repository;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.mapper.ContactMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -54,11 +55,16 @@ public class ContactRepository {
                 .addValue("chatId", chatId)
                 .addValue("name", name);
 
-        Contact contact = jdbcTemplate.queryForObject(sql, params, (resultSet, rowNum) -> {
-            ContactMapper mapper = new ContactMapper();
-            return mapper.resultSetToContactEntity(resultSet);
-        });
-        return Optional.ofNullable(contact);
+        try {
+            Contact contact = jdbcTemplate.queryForObject(sql, params, (resultSet, rowNum) -> {
+                ContactMapper mapper = new ContactMapper();
+                return mapper.resultSetToContactEntity(resultSet);
+            });
+            return Optional.ofNullable(contact);
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+
     }
 
     /**
@@ -71,11 +77,15 @@ public class ContactRepository {
                 .addValue("chatId", chatId)
                 .addValue("phoneNumber", number);
 
-        Contact contact = jdbcTemplate.queryForObject(sql, params, (resultSet, rowNum) -> {
-            ContactMapper mapper = new ContactMapper();
-            return mapper.resultSetToContactEntity(resultSet);
-        });
-        return Optional.ofNullable(contact);
+        try {
+            Contact contact = jdbcTemplate.queryForObject(sql, params, (resultSet, rowNum) -> {
+                ContactMapper mapper = new ContactMapper();
+                return mapper.resultSetToContactEntity(resultSet);
+            });
+            return Optional.ofNullable(contact);
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -87,16 +97,28 @@ public class ContactRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId);
 
-        return jdbcTemplate.query(sql, params, (set, rowNum) -> {
-            Contact contact = new Contact();
-            contact.setChatId(set.getLong("chat_id"));
-            contact.setName(set.getString("name"));
-            contact.setPhoneNumber(set.getString("phone_number"));
-            contact.setAge(set.getInt("age"));
-            contact.setGender(Gender.valueOf(set.getString("gender")));
-            contact.setBlocked(set.getBoolean("is_blocked"));
-            return contact;
-        });
+        try {
+            return jdbcTemplate.query(sql, params, (resultSet, rowNum) -> {
+                ContactMapper mapper = new ContactMapper();
+                return mapper.resultSetToContactEntity(resultSet);
+            });
+        } catch (EmptyResultDataAccessException exception) {
+            return null;
+        }
+
+    }
+
+
+    public void updateBlockField(Contact contact) {
+        String sql = "UPDATE public.contacts SET " +
+                "is_blocked = :isBlocked WHERE chat_id = :chatId and name = :name";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("chatId", contact.getChatId())
+                .addValue("name", contact.getName())
+                .addValue("isBlocked", contact.isBlocked());
+
+        jdbcTemplate.update(sql, params);
     }
 
     /**
@@ -104,15 +126,14 @@ public class ContactRepository {
      */
     public void update(Contact contact) {
         String sql = "UPDATE public.contacts SET name = :name, phone_number = :phoneNumber, " +
-                "age = :age, gender = :gender, is_blocked = :isBlocked WHERE chat_id = :chatId and name = :name";
+                "age = :age, gender = :gender WHERE chat_id = :chatId and name = :name";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", contact.getChatId())
                 .addValue("name", contact.getName())
                 .addValue("phoneNumber", contact.getPhoneNumber())
                 .addValue("age", contact.getAge())
-                .addValue("gender", contact.getGender().name())
-                .addValue("isBlocked", contact.isBlocked());
+                .addValue("gender", contact.getGender().name());
 
         jdbcTemplate.update(sql, params);
     }
