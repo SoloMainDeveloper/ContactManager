@@ -136,6 +136,12 @@ public class ContactRepository {
         }
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Обновляет поле, отвечающее за блокировку
+     */
+>>>>>>> origin/task-1
     public void updateBlockField(Contact contact) {
         String sql = "UPDATE public.contacts SET " +
                 "is_blocked = :isBlocked WHERE chat_id = :chatId and name = :name";

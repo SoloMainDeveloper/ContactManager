@@ -61,6 +61,9 @@ public class ContactService {
         return contact.orElse(null);
     }
 
+    /**
+     * Возвращает все контакты, имеющееся у данного пользователя
+     */
     public List<Contact> findContactsByChatId(Long chatId) {
         return repository.findContactsByChatId(chatId);
     }
