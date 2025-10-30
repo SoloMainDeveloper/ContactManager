@@ -9,6 +9,9 @@ import org.example.state.State;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
+/**
+ * Обработчик события: Получение информации о контакте
+ */
 public class GetContactInfoHandler implements OperationHandler {
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
@@ -20,6 +23,9 @@ public class GetContactInfoHandler implements OperationHandler {
         return response;
     }
 
+    /**
+     * Возвращает информацию о пользователе в виде строки.
+     */
     private String getContactInfo(Contact contact) {
         String phoneNumberInfo = contact.getPhoneNumber().isEmpty() ? "не указан" : contact.getPhoneNumber();
         String genderInfo = "";

@@ -108,7 +108,9 @@ public class ContactRepository {
 
     }
 
-
+    /**
+     * Обновляет поле, отвечающее за блокировку
+     */
     public void updateBlockField(Contact contact) {
         String sql = "UPDATE public.contacts SET " +
                 "is_blocked = :isBlocked WHERE chat_id = :chatId and name = :name";

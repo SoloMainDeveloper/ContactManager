@@ -8,8 +8,14 @@ public enum Gender {
     MALE("Мужской"),
     FEMALE("Женский");
 
+    /**
+     * Строковое значение Gender
+     */
     private final String displayName;
 
+    /**
+     * Конструктор
+     */
     Gender(String displayName) {
         this.displayName = displayName;
     }
@@ -18,6 +24,9 @@ public enum Gender {
         return displayName;
     }
 
+    /**
+     * Создаёт Gender на по displayName
+     */
     public static Gender fromDisplayName(String displayName) {
         for (Gender gender : values()) {
             if (gender.displayName.equals(displayName)) {

@@ -7,7 +7,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Класс, создающий клавиатуры InlineKeyboardMarkup
+ */
 public class InlineKeyboardCreator {
+    /**
+     * Создаёт InlineKeyboardMarkup на основе переданного списка текста buttonText. Также
+     * добавляет в callBackData название операции operationName.
+     */
     public InlineKeyboardMarkup createKeyboard(List<String> buttonText, String operationName) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
