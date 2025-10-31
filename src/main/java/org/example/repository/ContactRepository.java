@@ -89,10 +89,10 @@ public class ContactRepository {
     }
 
     /**
-     * Найти контакты по id пользователя в БД
+     * Найти контакты по id пользователя с фильтрацией и сортировкой при необходимости
      */
-    public List<Contact> findContactsByChatId(Long chatId) {
-        String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId";
+    public List<Contact> findContactsByChatId(Long chatId, String filter, String sorter) {
+        String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId" + filter + sorter;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId);
@@ -105,7 +105,6 @@ public class ContactRepository {
         } catch (EmptyResultDataAccessException exception) {
             return null;
         }
-
     }
 
     /**
