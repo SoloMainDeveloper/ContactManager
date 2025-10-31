@@ -12,12 +12,17 @@ import java.util.List;
 /**
  * Обработчик события: Редактирование контакта
  */
-public class EditContactHandler implements OperationHandler{
+public class EditContactHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         String contactName = state.getParamByKey("currentContactName");
+
         switch(messageText) {
             case "Имя":
                 response.setText("Введите имя контакта");
@@ -68,7 +73,7 @@ public class EditContactHandler implements OperationHandler{
         }
         state.addParameter(lastRequestedParamKey, messageText);
         response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-        response.setReplyMarkup(new ReplyKeyboardCreator().editContactMenu());
+        response.setReplyMarkup(keyboardCreator.editContactMenu());
         return response;
     }
 }

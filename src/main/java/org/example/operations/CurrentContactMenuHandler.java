@@ -13,9 +13,13 @@ import java.util.List;
  * Обработчик события: действия пользователя в меню текущего контакта
  */
 public class CurrentContactMenuHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         String contactName = state.getParamByKey("currentContactName");
         Contact contact = service.findContactByName(chatId, contactName);

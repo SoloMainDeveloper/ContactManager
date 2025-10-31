@@ -10,9 +10,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
  * Обработчик события: Удаление контакта
  */
 public class DeleteContactHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         switch(messageText) {
             case "Да":

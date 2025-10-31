@@ -64,10 +64,6 @@ public class Contact {
         this.isBlocked = isBlocked;
     }
 
-    public Contact(ResultSet resultSet) {
-
-    }
-
     /**
      * Возвращает уникальный идентификатор пользователя
      */

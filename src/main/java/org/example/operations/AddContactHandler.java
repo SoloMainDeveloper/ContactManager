@@ -12,9 +12,13 @@ import java.util.List;
  * Обработчик события: Добавление контакта
  */
 public class AddContactHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         switch(messageText){
             case "Номер":
@@ -63,7 +67,7 @@ public class AddContactHandler implements OperationHandler {
         }
         state.addParameter(lastRequestedParamKey, messageText);
         response.setText("Отлично. Выберите какие данные хотите задать контакту");
-        response.setReplyMarkup(new ReplyKeyboardCreator().addContactMenu());
+        response.setReplyMarkup(keyboardCreator.addContactMenu());
         return response;
     }
 }

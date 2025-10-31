@@ -12,9 +12,13 @@ import java.util.List;
  * Обработчик события: действия пользователя в меню контактов
  */
 public class ContactsMenuHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
         SendMessage response = new SendMessage();
         switch (messageText) {
             case "Добавить":
@@ -30,7 +34,7 @@ public class ContactsMenuHandler implements OperationHandler {
             case "Найти":
                 state.changeCurrentOperation(Operation.FIND_CONTACT, true);
                 response.setText("Выберите по какому признаку будет произведен поиск");
-                response.setReplyMarkup(keyboardCreator.createKeyboard(List.of("Поиск по имени", "Поиск по номеру")));
+                response.setReplyMarkup(keyboardCreator.findContactMenu());
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");
