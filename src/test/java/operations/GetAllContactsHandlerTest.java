@@ -61,7 +61,7 @@ public class GetAllContactsHandlerTest {
         service.tryAddContact(chatId, contactMap3);
 
         state.changeCurrentOperation(Operation.GET_ALL_CONTACTS, true);
-        SendMessage response = handler.handleMessage(service, state, "Получить сразу", chatId);
+        SendMessage response = handler.handleMessage(service, state, "Получить", chatId);
 
         Assert.assertEquals("Все контакты", response.getText());
     }
