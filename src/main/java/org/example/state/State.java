@@ -2,6 +2,7 @@ package org.example.state;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Состояние диалога пользователя с ботом
@@ -14,7 +15,7 @@ public class State {
     /**
      * Контекст операции
      */
-    private final HashMap<String, String> params = new LinkedHashMap<>();
+    private final Map<String, String> params = new LinkedHashMap<>();
     /**
      * Последний запрошенный ботом у пользователя параметр на ввод
      */
@@ -60,7 +61,7 @@ public class State {
     /**
      * Возвращает контекст операции
      */
-    public HashMap<String, String> getParams() {
+    public Map<String, String> getParams() {
         return params;
     }
 

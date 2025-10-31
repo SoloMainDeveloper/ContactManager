@@ -13,12 +13,17 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
  * Обработчик события: Получение информации о контакте
  */
 public class GetContactInfoHandler implements OperationHandler {
+    /**
+     * Создает меню из кнопок для быстрого ввода команд
+     */
+    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+
     @Override
     public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
         SendMessage response = new SendMessage();
         Contact contact = service.findContactByName(chatId, messageText);
         response.setText(getContactInfo(contact));
-        response.setReplyMarkup(new ReplyKeyboardCreator().contactsMenu());
+        response.setReplyMarkup(keyboardCreator.contactsMenu());
         state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
         return response;
     }

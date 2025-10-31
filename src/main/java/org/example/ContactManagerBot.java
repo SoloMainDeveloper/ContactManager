@@ -34,26 +34,16 @@ public class ContactManagerBot extends TelegramLongPollingBot {
         this.token = readTokenFromConfig();
     }
 
-    /**
-     * Возвращает название телеграм-бота
-     */
     @Override
     public String getBotUsername() {
         return "YourContactManagerBot";
     }
 
-    /**
-     * Возвращает API-token для телеграм-бота
-     */
     @Override
     public String getBotToken() {
         return token;
     }
 
-    /**
-     * Ловит сообщения пользователей и пишет им ответ в чате телеграм-бота.
-     * Если у пользователя не было состояния диалога - state, создаёт его.
-     */
     @Override
     public void onUpdateReceived(Update update) {
 

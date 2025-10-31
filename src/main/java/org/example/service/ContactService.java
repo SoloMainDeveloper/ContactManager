@@ -6,10 +6,7 @@ import org.example.repository.ContactRepository;
 import org.example.DataBase;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Сервис для работы с контактами
@@ -28,7 +25,7 @@ public class ContactService {
     /**
      * Попытаться добавить контакт, при успешном выполнении возвращается true
      */
-    public boolean tryAddContact(Long chatId, HashMap<String, String> params) {
+    public boolean tryAddContact(Long chatId, Map<String, String> params) {
         try {
             Contact contact = new Contact(chatId,
                     params.get("contactName"),
@@ -72,7 +69,7 @@ public class ContactService {
     /**
      * Возвращает все контакты, имеющееся у данного пользователя с применением фильтрации и сортировки
      */
-    public List<Contact> findContactsByChatIdWithFilterAndSorter(Long chatId, HashMap<String, String> params) {
+    public List<Contact> findContactsByChatIdWithFilterAndSorter(Long chatId, Map<String, String> params) {
         String filter = "";
         String sorter = "";
         if(params.containsKey("filterByGender")) {
@@ -103,7 +100,7 @@ public class ContactService {
     /**
      * Попытаться обновить все поля пользователя, кроме блокировки
      */
-    public Boolean tryUpdateContact(HashMap<String, String> params, Contact oldContact) {
+    public Boolean tryUpdateContact(Map<String, String> params, Contact oldContact) {
         try {
             if(params.containsKey("contactName")) oldContact.setName(params.get("contactName"));
             if(params.containsKey("contactNumber")) oldContact.setPhoneNumber(params.get("contactNumber"));
