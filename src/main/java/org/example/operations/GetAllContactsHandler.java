@@ -1,12 +1,13 @@
 package org.example.operations;
 
+import org.example.response.BotResponse;
 import org.example.entity.Contact;
-import org.example.keyboardcreator.InlineKeyboardCreator;
-import org.example.keyboardcreator.ReplyKeyboardCreator;
+import org.example.response.InlineKeyboardText;
+import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.state.Operation;
 import org.example.state.State;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,49 +15,60 @@ import java.util.Objects;
 /**
  * Обработчик события: Получение всех контактов
  */
+@Component
 public class GetAllContactsHandler implements OperationHandler {
     /**
      * Создает меню из кнопок для быстрого ввода команд
      */
-    private final ReplyKeyboardCreator replyKeyboardCreator = new ReplyKeyboardCreator();
+    private final ReplyKeyboardConstants replyKeyboardCreator = new ReplyKeyboardConstants();
 
     /**
-     * Создает кнопки в ответе текста сообщения
+     * Сервис контактов
      */
-    private final InlineKeyboardCreator inlineKeyboardCreator = new InlineKeyboardCreator();
+    private final ContactService service;
 
+    /**
+     * Конструктор
+     */
+    public GetAllContactsHandler(ContactService service) {
+        this.service = service;
+    }
 
     @Override
-    public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    public Operation getSupportedOperation() {
+        return Operation.GET_ALL_CONTACTS;
+    }
+
+    @Override
+    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+        BotResponse response = new BotResponse();
 
         switch(messageText){
-            case "Получить":
+            case "Получить" -> {
                 response.setText("Все контакты");
                 List<Contact> contacts = service.findContactsByChatId(chatId);
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
-                response.setReplyMarkup(inlineKeyboardCreator
-                        .createKeyboard(names, Operation.CURRENT_CONTACT_MENU.toString()));
-                break;
-            case "Добавить фильтр":
+                response.setInlineKeyboardText(new InlineKeyboardText(
+                        names, Operation.CURRENT_CONTACT_MENU.toString()));
+            }
+            case "Добавить фильтр" -> {
                 response.setText("Выберите фильтр");
                 response.setReplyMarkup(replyKeyboardCreator.addFilterMenu());
                 state.setLastRequestedParamKey("filter");
-                break;
-            case "Добавить сортировку":
+            }
+            case "Добавить сортировку" -> {
                 response.setText("Выберите в каком порядке выполнить сортировку");
                 response.setReplyMarkup(replyKeyboardCreator.addSorterMenu());
                 state.setLastRequestedParamKey("sorter");
-                break;
-            case "Назад":
+            }
+            case "Назад" -> {
                 response.setText("Вы вернулись назад");
                 state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
                 response.setReplyMarkup(replyKeyboardCreator.contactsMenu());
-                break;
-            default:
-                return handleMessageWithContext(service, state, messageText, chatId);
+            }
+            default -> response = handleMessageWithContext(state, messageText, chatId);
         }
         return response;
     }
@@ -65,12 +77,11 @@ public class GetAllContactsHandler implements OperationHandler {
      * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом, и затем
      * использует их для поиска.
      */
-    private SendMessage handleMessageWithContext(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleMessageWithContext(State state, String messageText,
+                                            Long chatId) {
         String lastRequestedParamKey = state.getLastRequestedParamKey();
         if (lastRequestedParamKey == null) {
-            response.setText("Я не понимаю эту команду.");
-            return response;
+            return new BotResponse("Я не понимаю эту команду.");
         }
         state.addParameter(lastRequestedParamKey, messageText);
 
@@ -79,17 +90,17 @@ public class GetAllContactsHandler implements OperationHandler {
             case "filterByGender" -> handleFilterByGenderCommand(state, messageText);
             case "filterByAge" -> handleFilterByAgeCommand(state, messageText);
             case "filterByAgeCondition" -> handleFilterByAgeConditionCommand(state, messageText);
-            case "needSort" -> handleNeedSortCommand(service, state, messageText, chatId);
-            case "sorter" -> handleSorterCommand(service, state, messageText, chatId);
-            default -> response;
+            case "needSort" -> handleNeedSortCommand(state, messageText, chatId);
+            case "sorter" -> handleSorterCommand(state, messageText, chatId);
+            default -> new BotResponse("Я не понимаю эту команду.");
         };
     }
 
     /**
      * Обработать команду фильтрации
      */
-    private SendMessage handleFilterCommand(State state, String messageText) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleFilterCommand(State state, String messageText) {
+        BotResponse response = new BotResponse();
 
         switch (messageText) {
             case "По полу" -> {
@@ -117,16 +128,16 @@ public class GetAllContactsHandler implements OperationHandler {
     /**
      * Обработать команду фильтрации по полу
      */
-    private SendMessage handleFilterByGenderCommand(State state, String messageText) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleFilterByGenderCommand(State state, String messageText) {
+        BotResponse response = new BotResponse();
 
         if(Objects.equals(messageText, "Мужской") ||
                 Objects.equals(messageText, "Женский") ||
                 Objects.equals(messageText, "Не выбрано")) {
-            response.setText("Отлично. Выбран следующий фильтр по полу: "
+            response.setText("Отлично. Выбран следующий фильтр по полу:"
                     + messageText + ".\nНе желаете ли выбрать сортировку?");
             state.addParameter("filterByGender", messageText);
-            response.setReplyMarkup(replyKeyboardCreator.createKeyboard(List.of("Да", "Нет", "Назад к выбору")));
+            response.setReplyMarkup(List.of("Да", "Нет", "Назад к выбору"));
             state.setLastRequestedParamKey("needSort");
         } else if(Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");
@@ -142,8 +153,8 @@ public class GetAllContactsHandler implements OperationHandler {
     /**
      * Обработать команду фильтрации по возрасту
      */
-    private SendMessage handleFilterByAgeCommand(State state, String messageText) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleFilterByAgeCommand(State state, String messageText) {
+        BotResponse response = new BotResponse();
         try {
             if(Objects.equals(messageText, "Назад к выбору")) {
                 response.setText("Вы вернулись назад к выбору");
@@ -152,8 +163,8 @@ public class GetAllContactsHandler implements OperationHandler {
             } else {
                 Number age = Integer.parseInt(messageText);
                 response.setText("Отлично. Теперь выберите условие фильтрации");
-                response.setReplyMarkup(replyKeyboardCreator.createKeyboard(
-                        List.of("> " + age, "< " + age, "= " + age, "Назад к выбору")));
+                response.setReplyMarkup(List.of(
+                        "> " + age, "< " + age, "= " + age, "Назад к выбору"));
                 state.addParameter("ageValue", messageText);
                 state.setLastRequestedParamKey("filterByAgeCondition");
             }
@@ -167,17 +178,17 @@ public class GetAllContactsHandler implements OperationHandler {
     /**
      * Обработать текст сообщения с заполненным условием фильтрации по возрасту
      */
-    private SendMessage handleFilterByAgeConditionCommand(State state, String messageText) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleFilterByAgeConditionCommand(State state, String messageText) {
+        BotResponse response = new BotResponse();
         String age = state.getParamByKey("ageValue");
 
         if(Objects.equals(messageText, "> " + age) ||
                 Objects.equals(messageText, "< " + age) ||
                 Objects.equals(messageText, "= " + age)) {
-            response.setText("Отлично. Выбран следующий фильтр по возрасту: "
+            response.setText("Отлично. Выбран следующий фильтр по возрасту:"
                     + messageText + ".\nНе желаете ли выбрать сортировку?");
             state.addParameter("filterByAge", messageText);
-            response.setReplyMarkup(replyKeyboardCreator.createKeyboard(List.of("Да", "Нет", "Назад к выбору")));
+            response.setReplyMarkup(List.of("Да", "Нет", "Назад к выбору"));
             state.setLastRequestedParamKey("needSort");
         } else if(Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");
@@ -193,16 +204,17 @@ public class GetAllContactsHandler implements OperationHandler {
     /**
      * Обработать команду необходимости сортировки после применения фильтрации
      */
-    private SendMessage handleNeedSortCommand(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleNeedSortCommand(State state, String messageText, Long chatId) {
+        BotResponse response = new BotResponse();
 
         if(Objects.equals(messageText, "Да")) {
-            response.setText("Выберите в каком порядке выполнить сортировку");
             response.setReplyMarkup(replyKeyboardCreator.addSorterMenu());
             state.setLastRequestedParamKey("sorter");
+            return new BotResponse("Выберите в каком порядке выполнить сортировку");
         }
         if(Objects.equals(messageText, "Нет")) {
-            List<Contact> contacts = service.findContactsByChatIdWithFilterAndSorter(chatId, state.getParams());
+            List<Contact> contacts = service.findContactsByChatIdWithFilterAndSorter(
+                    chatId, state.getParams());
             if(contacts.isEmpty()) {
                 response.setText("Контакты не найдены с такой фильтрацией");
                 response.setReplyMarkup(replyKeyboardCreator.getAllContactsMenu());
@@ -211,8 +223,8 @@ public class GetAllContactsHandler implements OperationHandler {
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
-                response.setReplyMarkup(inlineKeyboardCreator
-                        .createKeyboard(names, Operation.CURRENT_CONTACT_MENU.toString()));
+                response.setInlineKeyboardText(new InlineKeyboardText(
+                        names, Operation.CURRENT_CONTACT_MENU.toString()));
             }
         } else if(Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");
@@ -228,8 +240,8 @@ public class GetAllContactsHandler implements OperationHandler {
     /**
      * Обработать команду сортировки
      */
-    private SendMessage handleSorterCommand(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    private BotResponse handleSorterCommand(State state, String messageText, Long chatId) {
+        BotResponse response = new BotResponse();
 
         if(Objects.equals(messageText, "В порядке убывания возраста") ||
                 Objects.equals(messageText, "В порядке возрастания возраста") ||
@@ -246,8 +258,8 @@ public class GetAllContactsHandler implements OperationHandler {
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
-                response.setReplyMarkup(inlineKeyboardCreator
-                        .createKeyboard(names, Operation.CURRENT_CONTACT_MENU.toString()));
+                response.setInlineKeyboardText(new InlineKeyboardText(
+                        names, Operation.CURRENT_CONTACT_MENU.toString()));
             }
         } else if(Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");

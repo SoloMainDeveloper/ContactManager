@@ -1,53 +1,42 @@
 package org.example;
 
-
+import org.example.config.DataBaseConfig;
 import org.postgresql.ds.PGSimpleDataSource;
-
-import java.io.InputStream;
-import java.util.Properties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 /**
  * База данных для работы с PostgreSQL
  */
+@Component
 public class DataBase {
     /**
-     * Набор свойств, состоящий из пар ключ-значение
+     * Конфигурация для подключения к базе данных
      */
-    private final Properties properties;
+    private final DataBaseConfig config;
 
     /**
-     * Конструктор по умолчанию, заполняет свойства БД из config.properties
+     * Конструктор
+     * @param config содержит данные для подключения
      */
-    public DataBase() {
-        properties = readPropertiesFromConfig();
+    public DataBase(DataBaseConfig config){
+        this.config = config;
     }
 
     /**
      * Создает и настраивает источник данных для подключения к БД
      */
+    @Bean
     public PGSimpleDataSource buildDataSource() {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(properties.getProperty("datasource.url"));
-        dataSource.setUser(properties.getProperty("datasource.username"));
-        dataSource.setPassword(properties.getProperty("datasource.password"));
+        dataSource.setUrl(config.getDataSourceUrl());
+        dataSource.setUser(config.getDataSourceUsername());
+        dataSource.setPassword(config.getDataSourcePassword());
 
         dataSource.setSsl(true);
         dataSource.setSslMode("verify-full");
         dataSource.setSslRootCert("root.crt");
 
         return dataSource;
-    }
-
-    /**
-     * Читает свойства из config.properties для подключения к БД
-     */
-    private Properties readPropertiesFromConfig() {
-        Properties properties = new Properties();
-        try (InputStream input = Main.class.getClassLoader().getResourceAsStream("config.properties")) {
-            properties.load(input);
-            return properties;
-        } catch (Exception e) {
-            throw new RuntimeException("Не удалось прочитать config.properties", e);
-        }
     }
 }

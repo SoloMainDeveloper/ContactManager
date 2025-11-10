@@ -1,11 +1,11 @@
 package org.example.repository;
 
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.mapper.ContactMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.Optional;
 /**
  * Хранилище контактов
  */
+@Repository
 public class ContactRepository {
     /**
      * Объект по управлению обработки событий и соединений с БД
@@ -103,7 +104,7 @@ public class ContactRepository {
                 return mapper.resultSetToContactEntity(resultSet);
             });
         } catch (EmptyResultDataAccessException exception) {
-            return null;
+            return List.of();
         }
     }
 

@@ -20,6 +20,9 @@ public enum Gender {
         this.displayName = displayName;
     }
 
+    /**
+     * Возвращает отображаемое имя для пола
+     */
     public String getDisplayName() {
         return displayName;
     }

@@ -1,6 +1,5 @@
 package org.example.keyboardcreator;
 
-import org.example.entity.Contact;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -31,76 +30,5 @@ public class ReplyKeyboardCreator {
 
         keyboardMarkup.setKeyboard(keyboard);
         return keyboardMarkup;
-    }
-
-    /**
-     * Возвращает кнопки главного меню
-     */
-    public ReplyKeyboardMarkup mainMenu(){
-        return createKeyboard(List.of("Контакты"));
-    }
-
-    /**
-     * Возвращает кнопки меню контактов
-     */
-    public ReplyKeyboardMarkup contactsMenu() {
-        return createKeyboard(List.of("Добавить", "Получить все", "Найти", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню текущего контакта
-     */
-    public ReplyKeyboardMarkup currentContactMenu() {
-        return createKeyboard(List.of("Информация", "Изменить", "Блокировать", "Удалить", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню добавления контакта
-     */
-    public ReplyKeyboardMarkup addContactMenu() {
-        return createKeyboard(List.of("Номер", "Возраст", "Пол", "Сохранить контакт", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню поиска
-     */
-    public ReplyKeyboardMarkup findContactMenu() {
-        return createKeyboard(List.of("Поиск по имени", "Поиск по номеру", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню редактирования контакта
-     */
-    public ReplyKeyboardMarkup editContactMenu() {
-        return createKeyboard(List.of("Имя", "Номер", "Возраст", "Пол", "Изменить контакт", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню получения всех контактов
-     */
-    public ReplyKeyboardMarkup getAllContactsMenu() {
-        return createKeyboard(List.of("Получить", "Добавить фильтр", "Добавить сортировку", "Назад"));
-    }
-
-    /**
-     * Возвращает кнопки меню фильтрации
-     */
-    public ReplyKeyboardMarkup addFilterMenu() {
-        return createKeyboard(List.of("По полу", "По возрасту", "Назад к выбору"));
-    }
-
-    /**
-     * Возвращает кнопки меню фильтрации по полу
-     */
-    public ReplyKeyboardMarkup addFilterByGenderMenu() {
-        return createKeyboard(List.of("Мужской", "Женский", "Не выбрано", "Назад к выбору"));
-    }
-
-    /**
-     * Возвращает кнопки меню сортировки
-     */
-    public ReplyKeyboardMarkup addSorterMenu() {
-        return createKeyboard(List.of("В порядке убывания возраста", "В порядке возрастания возраста",
-                "В алфавитном порядке имени", "В обратном алфавитному порядку имени", "Назад к выбору"));
     }
 }

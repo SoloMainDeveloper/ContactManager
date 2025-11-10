@@ -1,5 +1,6 @@
 package org.example.keyboardcreator;
 
+import org.example.response.InlineKeyboardText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -15,13 +16,13 @@ public class InlineKeyboardCreator {
      * Создаёт InlineKeyboardMarkup на основе переданного списка текста buttonText. Также
      * добавляет в callBackData название операции operationName.
      */
-    public InlineKeyboardMarkup createKeyboard(List<String> buttonText, String operationName) {
+    public InlineKeyboardMarkup createKeyboard(InlineKeyboardText inlineKeyboardText) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
-        for (String label : buttonText) {
+        for (String label : inlineKeyboardText.inlineText()) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(label);
-            button.setCallbackData(operationName + "_" + label);
+            button.setCallbackData(inlineKeyboardText.operationName() + "_" + label);
             rows.add(Collections.singletonList(button));
         }
 

@@ -1,25 +1,29 @@
 package org.example.operations;
 
-import org.example.keyboardcreator.ReplyKeyboardCreator;
-import org.example.service.ContactService;
+import org.example.response.BotResponse;
+import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.state.Operation;
 import org.example.state.State;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
-import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * Обработчик события: действия пользователя в меню контактов
  */
+@Component
 public class ContactsMenuHandler implements OperationHandler {
     /**
      * Создает меню из кнопок для быстрого ввода команд
      */
-    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
 
     @Override
-    public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    public Operation getSupportedOperation() {
+        return Operation.CONTACTS_MENU;
+    }
+
+    @Override
+    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+        BotResponse response = new BotResponse();
         switch (messageText) {
             case "Добавить":
                 state.changeCurrentOperation(Operation.ADD_CONTACT, true);
@@ -27,8 +31,10 @@ public class ContactsMenuHandler implements OperationHandler {
                 state.setLastRequestedParamKey("contactName");
                 break;
             case "Получить все":
-                state.changeCurrentOperation(Operation.GET_ALL_CONTACTS, true);
-                response.setText("Желаете получить все контакты сразу или добавить фильтрацию/сортировку?");
+                state.changeCurrentOperation(
+                        Operation.GET_ALL_CONTACTS, true);
+                response.setText("Желаете получить все контакты сразу или добавить" +
+                        " фильтрацию/сортировку?");
                 response.setReplyMarkup(keyboardCreator.getAllContactsMenu());
                 break;
             case "Найти":

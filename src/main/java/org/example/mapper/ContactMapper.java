@@ -4,7 +4,6 @@ import org.example.entity.Contact;
 import org.example.entity.Gender;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Маппер данных из БД в сущность Контакта
