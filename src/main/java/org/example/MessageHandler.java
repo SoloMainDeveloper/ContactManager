@@ -1,42 +1,62 @@
 package org.example;
 
-import org.example.operations.OperationHandler;
+import org.example.entity.User;
+import org.example.operations.*;
+import org.example.response.BotResponse;
 import org.example.state.Operation;
 import org.example.state.State;
-import org.example.service.ContactService;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Обработчик сообщений от пользователей
  */
+@Component
 public class MessageHandler {
-    private final ContactService service = new ContactService();
+    /**
+     * Обработчики всех существующих операций в логике бота
+     */
+    private final Map<Operation, OperationHandler> handlers;
+
+    public MessageHandler(List<OperationHandler> operationHandlers){
+        this.handlers = operationHandlers.stream()
+                .collect(Collectors.toMap(
+                        OperationHandler::getSupportedOperation,
+                        Function.identity()
+                ));
+    }
 
     /**
      * Получив сообщение, возвращает ответ, содержащий текст и/или кнопки
      */
-    public SendMessage handleMessage(State state, Message message){
-        Long chatId = message.getChatId();
-        OperationHandler handler = state.getOperation().getHandler();
-        SendMessage response = handler.handleMessage(service, state, message.getText(), chatId);
-        response.setChatId(String.valueOf(chatId));
-        return response;
+    public BotResponse handleMessage(User user, String messageText) {
+        State state = user.getState();
+        OperationHandler handler = handlers.get(state.getOperation());
+        if (handler == null) {
+            return new BotResponse("Неизвестная операция");
+        }
+        return handler.handleMessage(state, messageText, user.getChatId());
     }
 
     /**
-     * Из callBackData достаёт, какую Operation нужно выставить как текущую, а также контекст для этой операции.
-     * После этого вызывает обработку сообщения в handleMessage()
+     * Из callBackData достаёт, какую Operation нужно выставить как текущую, а также
+     * контекст для этой операции. После этого вызывает обработку сообщения в
+     * handleMessage()
+     * @param callbackData текст, скрытно хранящийся в inline-кнопке, необходимый для
+     * обработки действий при нажатии на эту кнопку
      */
-    public SendMessage handleCallbackData(String callbackData, State state, Message message) {
-        SendMessage response = new SendMessage();
+    public BotResponse handleInlineButtonActivated(User user, String callbackData) {
         if (callbackData.startsWith("CURRENT_CONTACT_MENU_")) {
+            State state = user.getState();
             state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU, true);
             String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
             state.addParameter("currentContactName", contactName);
-            message.setText("Меню пользователя вызвано");
-            return handleMessage(state, message);
+            return handleMessage(user, "Меню пользователя вызвано");
         }
-        return response;
+        return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }
 }

@@ -3,23 +3,25 @@ package org.example.service;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.repository.ContactRepository;
-import org.example.DataBase;
+import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.util.*;
 
 /**
  * Сервис для работы с контактами
  */
+@Service
 public class ContactService {
+    /**
+     * Репозиторий для контактов
+     */
     private final ContactRepository repository;
 
     /**
      * Конструктор. Инициализируем repository, создавая подключение к БД
      */
-    public ContactService(){
-        DataSource dataSource = new DataBase().buildDataSource();
-        repository = new ContactRepository(dataSource);
+    public ContactService(ContactRepository repository){
+        this.repository = repository;
     }
 
     /**
@@ -30,13 +32,16 @@ public class ContactService {
             Contact contact = new Contact(chatId,
                     params.get("contactName"),
                     params.getOrDefault("contactNumber", ""),
-                    Integer.parseInt(params.getOrDefault("contactAge", String.valueOf(-1))),
+                    Integer.parseInt(params.getOrDefault("contactAge",
+                            String.valueOf(-1))),
                     Gender.fromDisplayName(params.get("contactGender")),
                     false
             );
             repository.add(contact);
             return true;
-        } catch (Exception exception){
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Произошла ошибка при попытке добавить контакт: " + e);
             return false;
         }
     }
@@ -45,18 +50,16 @@ public class ContactService {
      * Найти контакт по имени
      * @return контакт в случае успеха, в случае неудачи - null.
      */
-    public Contact findContactByName(Long chatId, String name) {
-        Optional<Contact> contact = repository.findContactByName(name, chatId);
-        return contact.orElse(null);
+    public Optional<Contact> findContactByName(Long chatId, String name) {
+        return repository.findContactByName(name, chatId);
     }
 
     /**
      * Найти контакт по номеру
      * @return контакт в случае успеха, в случае неудачи - null.
      */
-    public Contact findContactByNumber(Long chatId, String number) {
-        Optional<Contact> contact = repository.findContactByNumber(number, chatId);
-        return contact.orElse(null);
+    public Optional<Contact> findContactByNumber(Long chatId, String number) {
+        return repository.findContactByNumber(number, chatId);
     }
 
     /**
@@ -69,7 +72,8 @@ public class ContactService {
     /**
      * Возвращает все контакты, имеющееся у данного пользователя с применением фильтрации и сортировки
      */
-    public List<Contact> findContactsByChatIdWithFilterAndSorter(Long chatId, Map<String, String> params) {
+    public List<Contact> findContactsByChatIdWithFilterAndSorter(
+            Long chatId, Map<String, String> params) {
         String filter = "";
         String sorter = "";
         if(params.containsKey("filterByGender")) {
@@ -82,10 +86,18 @@ public class ContactService {
         }
         if(params.containsKey("sorter")) {
             String sorterValue = params.get("sorter");
-            if(Objects.equals(sorterValue, "В порядке возрастания возраста")) sorter = " ORDER BY age ASC";
-            if(Objects.equals(sorterValue, "В порядке убывания возраста")) sorter = " ORDER BY age DESC";
-            if(Objects.equals(sorterValue, "В алфавитном порядке имени")) sorter = " ORDER BY name ASC";
-            if(Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) sorter = " ORDER BY name DESC";
+            if(Objects.equals(sorterValue, "В порядке возрастания возраста")) {
+                sorter = " ORDER BY age ASC";
+            }
+            if(Objects.equals(sorterValue, "В порядке убывания возраста")) {
+                sorter = " ORDER BY age DESC";
+            }
+            if(Objects.equals(sorterValue, "В алфавитном порядке имени")) {
+                sorter = " ORDER BY name ASC";
+            }
+            if(Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) {
+                sorter = " ORDER BY name DESC";
+            }
         }
         return repository.findContactsByChatId(chatId, filter, sorter);
     }
@@ -100,16 +112,26 @@ public class ContactService {
     /**
      * Попытаться обновить все поля пользователя, кроме блокировки
      */
-    public Boolean tryUpdateContact(Map<String, String> params, Contact oldContact) {
+    public Boolean tryUpdateContact(Long chatId, String name, Map<String, String> params) {
         try {
-            if(params.containsKey("contactName")) oldContact.setName(params.get("contactName"));
-            if(params.containsKey("contactNumber")) oldContact.setPhoneNumber(params.get("contactNumber"));
-            if(params.containsKey("contactAge")) oldContact.setAge(Integer.parseInt(params.get("contactAge")));
-            if(params.containsKey("contactGender")) oldContact.setGender(Gender.fromDisplayName(params.get("contactGender")));
-
+            Contact oldContact = findContactByName(chatId, name).orElseThrow();
+            if(params.containsKey("contactName")) {
+                oldContact.setName(params.get("contactName"));
+            }
+            if(params.containsKey("contactNumber")) {
+                oldContact.setPhoneNumber(params.get("contactNumber"));
+            }
+            if(params.containsKey("contactAge")) {
+                oldContact.setAge(Integer.parseInt(params.get("contactAge")));
+            }
+            if(params.containsKey("contactGender")) {
+                oldContact.setGender(Gender.fromDisplayName(params.get("contactGender")));
+            }
             repository.update(oldContact);
             return true;
-        } catch (Exception exception){
+        } catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Произошла ошибка при попытке изменить контакт: " + e);
             return false;
         }
     }

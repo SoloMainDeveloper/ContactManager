@@ -13,16 +13,21 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <telegrambots.version>6.9.7.1</telegrambots.version>
-        <spring-boot-starter-data-jdbc.version>3.5.7</spring-boot-starter-data-jdbc.version>
+        <spring-boot>3.5.7</spring-boot>
         <postgresql.version>42.7.8</postgresql.version>
-        <junit.version>4.13.2</junit.version>
         <commons-lang3.version>3.19.0</commons-lang3.version>
+        <junit-jupiter-api.version>6.0.1</junit-jupiter-api.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -34,11 +39,17 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -51,8 +62,21 @@
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring-boot}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-jdbc</artifactId>
-                <version>${spring-boot-starter-data-jdbc.version}</version>
+                <version>${spring-boot}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -60,10 +84,11 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit-jupiter-api.version}</version>
                 <scope>test</scope>
             </dependency>
 

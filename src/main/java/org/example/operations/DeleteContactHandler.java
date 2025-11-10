@@ -1,23 +1,42 @@
 package org.example.operations;
 
-import org.example.keyboardcreator.ReplyKeyboardCreator;
+import org.example.response.BotResponse;
+import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.state.Operation;
 import org.example.state.State;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.springframework.stereotype.Component;
 
 /**
  * Обработчик события: Удаление контакта
  */
+@Component
 public class DeleteContactHandler implements OperationHandler {
     /**
      * Создает меню из кнопок для быстрого ввода команд
      */
-    private final ReplyKeyboardCreator keyboardCreator = new ReplyKeyboardCreator();
+    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
+
+    /**
+     * Сервис контактов
+     */
+    private final ContactService service;
+
+    /**
+     * Конструктор
+     */
+    public DeleteContactHandler(ContactService service) {
+        this.service = service;
+    }
 
     @Override
-    public SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId) {
-        SendMessage response = new SendMessage();
+    public Operation getSupportedOperation() {
+        return Operation.DELETE_CONTACT;
+    }
+
+    @Override
+    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+        BotResponse response = new BotResponse();
         switch(messageText) {
             case "Да":
                 String contactName = state.getParamByKey("currentContactName");

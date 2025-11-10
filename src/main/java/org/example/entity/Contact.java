@@ -1,7 +1,5 @@
 package org.example.entity;
 
-import java.sql.ResultSet;
-
 /**
  * Контакт
  */
@@ -55,7 +53,8 @@ public class Contact {
     /**
      * Конструктор с заполнением всех полей контакта
      */
-    public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender, Boolean isBlocked) {
+    public Contact(Long chatId, String name, String phoneNumber, int age,
+                   Gender gender, Boolean isBlocked) {
         this.chatId = chatId;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -134,10 +133,16 @@ public class Contact {
         this.gender = gender;
     }
 
+    /**
+     * Возвращает состояние блокировки true/false
+     */
     public Boolean isBlocked() {
         return isBlocked;
     }
 
+    /**
+     * Устанавливает значение блокировки
+     */
     public void setBlocked(Boolean blocked) {
         isBlocked = blocked;
     }

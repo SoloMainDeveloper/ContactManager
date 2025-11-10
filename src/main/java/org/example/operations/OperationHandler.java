@@ -1,15 +1,20 @@
 package org.example.operations;
 
-import org.example.service.ContactService;
+import org.example.response.BotResponse;
+import org.example.state.Operation;
 import org.example.state.State;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 /**
  * Обработчик операций
  */
 public interface OperationHandler {
     /**
+     * Возвращает тип поддерживаемой операции
+     */
+    Operation getSupportedOperation();
+
+    /**
      * Обрабатывает сообщение от пользователя в рамках текущего состояния и возвращает ответ
      */
-    SendMessage handleMessage(ContactService service, State state, String messageText, Long chatId);
+    BotResponse handleMessage(State state, String messageText, Long chatId);
 }
