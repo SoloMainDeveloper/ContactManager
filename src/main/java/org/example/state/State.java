@@ -21,15 +21,6 @@ public class State {
     private String lastRequestedParamKey;
 
     /**
-     * Меняет значение текущей операции и очищает предыдущий контекст
-     */
-    public void changeCurrentOperation(Operation operation, boolean needClearContext) {
-        this.operation = operation;
-        if(needClearContext)
-            this.params.clear();
-    }
-
-    /**
      * Возвращает текущую операцию
      */
     public Operation getOperation() {
@@ -37,37 +28,40 @@ public class State {
     }
 
     /**
-     * Возвращает последний запрошенный ботом параметр
+     * Устанавливает текущую операцию
      */
-    public String getLastRequestedParamKey() {
-        return lastRequestedParamKey;
+    public void setOperation(Operation operation, boolean needClearContext) {
+        this.operation = operation;
+        if(needClearContext){
+            params.clear();
+        }
     }
 
     /**
-     * Устанавливает ключ последнего запрошенного параметра
-     */
-    public void setLastRequestedParamKey(String lastRequestedParamKey) {
-        this.lastRequestedParamKey = lastRequestedParamKey;
-    }
-
-    /**
-     * Добавление параметра в контекст
-     */
-    public void addParameter(String key, String value){
-        params.put(key, value);
-    }
-
-    /**
-     * Возвращает контекст операции
+     * Возвращает параметры текущей функции
      */
     public Map<String, String> getParams() {
         return params;
     }
 
     /**
-     * Возвращает значение параметра контекста по его ключу
+     * Добавляет параметр в контекст операции
      */
-    public String getParamByKey(String contactName) {
-        return params.get(contactName);
+    public void addParameter(String key, String value){
+        params.put(key, value);
+    }
+
+    /**
+     * Возвращает имя последнего запрошенного от пользователя параметра
+     */
+    public String getLastRequestedParamKey() {
+        return lastRequestedParamKey;
+    }
+
+    /**
+     * Устанавливает имя последнего запрошенного от пользователя параметра
+     */
+    public void setLastRequestedParamKey(String lastRequestedParamKey) {
+        this.lastRequestedParamKey = lastRequestedParamKey;
     }
 }

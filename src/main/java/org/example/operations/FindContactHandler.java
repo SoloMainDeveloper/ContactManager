@@ -6,8 +6,8 @@ import org.example.keyboardcreator.InlineKeyboardCreator;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.entity.Contact;
 import org.example.service.ContactService;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,13 +31,19 @@ public class FindContactHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private final ContactService service;
+    private final ContactService contactService;
+
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
 
     /**
      * Конструктор
      */
-    public FindContactHandler(ContactService service) {
-        this.service = service;
+    public FindContactHandler(ContactService contactService, StateService stateService) {
+        this.contactService = contactService;
+        this.stateService = stateService;
     }
 
     @Override
@@ -46,24 +52,24 @@ public class FindContactHandler implements OperationHandler {
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch(messageText){
             case "Поиск по имени" -> {
                 response.setText("Введите имя");
-                state.setLastRequestedParamKey("contactName");
+                stateService.setLastRequestedParamKey(chatId, "contactName");
             }
             case "Поиск по номеру" -> {
                 response.setText("Введите номер");
-                state.setLastRequestedParamKey("contactNumber");
+                stateService.setLastRequestedParamKey(chatId, "contactNumber");
             }
             case "Назад" -> {
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
-                response.setReplyMarkup(replyKeyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(replyKeyboardCreator.contactsMenu());
             }
             default -> {
-                return handleMessageWithContext(state, messageText, chatId);
+                return handleMessageWithContext(chatId, messageText);
             }
         }
         return response;
@@ -73,17 +79,16 @@ public class FindContactHandler implements OperationHandler {
      * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом, и затем
      * использует их при поиске.
      */
-    private BotResponse handleMessageWithContext(State state, String messageText,
-                                            Long chatId) {
-        String lastRequestedParamKey = state.getLastRequestedParamKey();
+    private BotResponse handleMessageWithContext(Long chatId, String messageText) {
+        String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
             return new BotResponse("Я не понимаю эту команду.");
         }
-        state.addParameter(lastRequestedParamKey, messageText);
+        stateService.addParameter(chatId, lastRequestedParamKey, messageText);
 
         return switch (lastRequestedParamKey) {
-            case "contactName" -> handleFindContactByName(state, chatId);
-            case "contactNumber" -> handleFindContactByPhoneNumber(state, chatId);
+            case "contactName" -> handleFindContactByName(chatId);
+            case "contactNumber" -> handleFindContactByPhoneNumber(chatId);
             default -> new BotResponse("Я не понимаю эту команду.");
         };
     }
@@ -91,10 +96,10 @@ public class FindContactHandler implements OperationHandler {
     /**
      * Обрабатывает команду нахождения контакта по имени
      */
-    private BotResponse handleFindContactByName(State state, Long chatId) {
+    private BotResponse handleFindContactByName(Long chatId) {
         BotResponse response = new BotResponse();
-        String name = state.getParamByKey("contactName");
-        Optional<Contact> contact = service.findContactByName(chatId, name);
+        String name = stateService.getParamByKey(chatId, "contactName");
+        Optional<Contact> contact = contactService.findContactByName(chatId, name);
 
         if(contact.isPresent()) {
             response.setText("По имени " + name + " контакт успешно найден.");
@@ -102,9 +107,9 @@ public class FindContactHandler implements OperationHandler {
                     List.of(contact.get().getName()),
                     Operation.CURRENT_CONTACT_MENU.toString()));
         } else {
-            state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             response.setText("По имени " + name + " контакты не найдены.");
-            response.setReplyMarkup(replyKeyboardCreator.contactsMenu());
+            response.setKeyboardText(replyKeyboardCreator.contactsMenu());
         }
         return response;
     }
@@ -112,10 +117,10 @@ public class FindContactHandler implements OperationHandler {
     /**
      * Обрабатывает команду нахождения контакта номеру телефона
      */
-    private BotResponse handleFindContactByPhoneNumber(State state, Long chatId) {
+    private BotResponse handleFindContactByPhoneNumber(Long chatId) {
         BotResponse response = new BotResponse();
-        String number = state.getParamByKey("contactNumber");
-        Optional<Contact> contact = service.findContactByNumber(chatId, number);
+        String number = stateService.getParamByKey(chatId, "contactNumber");
+        Optional<Contact> contact = contactService.findContactByNumber(chatId, number);
 
         if(contact.isPresent()) {
             response.setText("По номеру " + number + " контакт успешно найден.");
@@ -123,9 +128,9 @@ public class FindContactHandler implements OperationHandler {
                     List.of(contact.get().getName()),
                     Operation.CURRENT_CONTACT_MENU.toString()));
         } else {
-            state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             response.setText("По номеру " + number + " контакты не найдены.");
-            response.setReplyMarkup(replyKeyboardCreator.contactsMenu());
+            response.setKeyboardText(replyKeyboardCreator.contactsMenu());
         }
         return response;
     }

@@ -4,8 +4,8 @@ import org.example.response.BotResponse;
 import org.example.entity.Contact;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -28,27 +28,35 @@ public class BlockContactHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private final ContactService service;
+    private final ContactService contactService;
+
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
 
     /**
      * Конструктор
      */
-    public BlockContactHandler(ContactService service) {
-        this.service = service;
+    public BlockContactHandler(ContactService contactService, StateService stateService) {
+        this.contactService = contactService;
+        this.stateService = stateService;
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch(messageText) {
             case "Да" -> {
-                String contactName = state.getParamByKey("currentContactName");
-                Optional<Contact> contactOptional = service
+                String contactName = stateService.getParamByKey(
+                        chatId,
+                        "currentContactName");
+                Optional<Contact> contactOptional = contactService
                         .findContactByName(chatId, contactName);
                 if (contactOptional.isPresent()) {
                     Contact contact = contactOptional.get();
                     contact.setBlocked(!contact.isBlocked());
-                    service.updateBlockField(contact);
+                    contactService.updateBlockField(contact);
 
                     String blockActionInfo = contact.isBlocked()
                             ? "заблокирован"
@@ -61,13 +69,15 @@ public class BlockContactHandler implements OperationHandler {
                     response.setText("Контакта с именем " + contactName
                             + " не существует. Блокировка не применена");
                 }
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU,
+                        true);
             }
             case "Нет" -> {
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU,
+                        true);
                 response.setText("Действие изменения блокировки отменено");
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                response.setKeyboardText(keyboardCreator.contactsMenu());
             }
             default -> response.setText("Я не понимаю эту команду.");
         }

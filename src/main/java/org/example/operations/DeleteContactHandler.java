@@ -3,8 +3,8 @@ package org.example.operations;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,13 +20,19 @@ public class DeleteContactHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private final ContactService service;
+    private final ContactService contactService;
+
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
 
     /**
      * Конструктор
      */
-    public DeleteContactHandler(ContactService service) {
-        this.service = service;
+    public DeleteContactHandler(ContactService contactService, StateService stateService) {
+        this.contactService = contactService;
+        this.stateService = stateService;
     }
 
     @Override
@@ -35,20 +41,23 @@ public class DeleteContactHandler implements OperationHandler {
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch(messageText) {
             case "Да":
-                String contactName = state.getParamByKey("currentContactName");
-                service.deleteByName(chatId, contactName);
+                String contactName = stateService.getParamByKey(chatId,
+                        "currentContactName");
+                contactService.deleteByName(chatId, contactName);
                 response.setText("Контакт " + contactName + " успешно удален");
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(
+                        chatId, Operation.CONTACTS_MENU, true);
                 break;
             case "Нет":
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(
+                        chatId, Operation.CONTACTS_MENU, true);
                 response.setText("Действие удаления текущего контакта отменено");
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                response.setKeyboardText(keyboardCreator.contactsMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду.");

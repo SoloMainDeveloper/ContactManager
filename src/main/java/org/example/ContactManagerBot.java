@@ -1,10 +1,8 @@
 package org.example;
 
 import org.example.config.BotConfig;
-import org.example.entity.User;
 import org.example.keyboardcreator.InlineKeyboardCreator;
 import org.example.keyboardcreator.ReplyKeyboardCreator;
-import org.example.repository.UserRepository;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +30,12 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     @Autowired
     private MessageHandler messageHandler;
 
-    @Autowired
-    private final UserRepository userRepository;
-
     /**
      * Конструктор. Инициализируем API-token
      */
     public ContactManagerBot(BotConfig config, MessageHandler messageHandler){
         super(config.getBotToken());
         this.botUsername = config.getBotUsername();
-        this.userRepository = new UserRepository();
     }
 
     @Override
@@ -53,20 +47,18 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             Message message = update.getMessage();
-            User user = userRepository.getUserById(message.getChatId());
-            BotResponse response = messageHandler.handleMessage(user, message.getText());
+            BotResponse response = messageHandler.handleMessage(message.getChatId(), message.getText());
             SendMessage sendMessage = adaptBotResponseToTelegram(response);
-            sendMessage(user, sendMessage);
+            sendMessage(message.getChatId(), sendMessage);
         }
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String callbackData = callbackQuery.getData();
             Message message = (Message) callbackQuery.getMessage();
-            User user = userRepository.getUserById(message.getChatId());
             BotResponse response = messageHandler.handleInlineButtonActivated(
-                    user, callbackData);
+                    message.getChatId(), callbackData);
             SendMessage sendMessage = adaptBotResponseToTelegram(response);
-            sendMessage(user, sendMessage);
+            sendMessage(message.getChatId(), sendMessage);
         }
     }
 
@@ -91,9 +83,9 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     /**
      * Отправляет сообщение пользователю
      */
-    private void sendMessage(User user, SendMessage response) {
+    private void sendMessage(Long chatId, SendMessage response) {
         try {
-            response.setChatId(user.getChatId());
+            response.setChatId(chatId);
             execute(response);
         } catch (TelegramApiException e) {
             e.printStackTrace();

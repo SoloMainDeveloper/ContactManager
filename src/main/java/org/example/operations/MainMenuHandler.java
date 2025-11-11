@@ -2,8 +2,8 @@ package org.example.operations;
 
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,24 +16,37 @@ public class MainMenuHandler implements OperationHandler {
      */
     private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
 
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
+
+    /**
+     * Конструктор
+     */
+    public MainMenuHandler(StateService stateService){
+        this.stateService = stateService;
+    }
+
     @Override
     public Operation getSupportedOperation() {
         return Operation.MAIN_MENU;
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "/start" -> {
                 response.setText("Привет! Я бот для управления контактами.");
-                response.setReplyMarkup(keyboardCreator.mainMenu());
+                response.setKeyboardText(keyboardCreator.mainMenu());
             }
             case "Контакты" -> {
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(
+                        chatId, Operation.CONTACTS_MENU, true);
                 response.setText("Взаимодействие с контактами. Выберите какое"
                         + " действие хотите совершить");
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                response.setKeyboardText(keyboardCreator.contactsMenu());
             }
             default -> response.setText("Я не понимаю эту команду");
         }
