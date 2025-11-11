@@ -67,7 +67,7 @@ public class AddContactHandler implements OperationHandler {
                     response.setText("Контакт " + contactName + " успешно добавлен");
                 } else {
                     response.setText("Контакт " + contactName
-                            + " не был добавлен. Произошла ошибка");
+                            + " не был добавлен, так как он уже существует");
                 }
                 response.setKeyboardText(keyboardCreator.contactsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);

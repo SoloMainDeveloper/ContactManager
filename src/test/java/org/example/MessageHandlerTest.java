@@ -133,7 +133,7 @@ class MessageHandlerTest {
         BotResponse response = handler.handleMessage(
                 chatId, "Сохранить контакт");
         Assertions.assertEquals(
-                "Контакт Олег не был добавлен. Произошла ошибка",
+                "Контакт Олег не был добавлен, так как он уже существует",
                 response.getText());
 
         Contact contact = contactService
