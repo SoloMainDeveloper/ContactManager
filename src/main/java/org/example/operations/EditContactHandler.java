@@ -3,8 +3,8 @@ package org.example.operations;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,13 +22,19 @@ public class EditContactHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private final ContactService service;
+    private final ContactService contactService;
+
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
 
     /**
      * Конструктор
      */
-    public EditContactHandler(ContactService service) {
-        this.service = service;
+    public EditContactHandler(ContactService contactService, StateService stateService) {
+        this.contactService = contactService;
+        this.stateService = stateService;
     }
 
     @Override
@@ -37,47 +43,47 @@ public class EditContactHandler implements OperationHandler {
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = state.getParamByKey("currentContactName");
+        String contactName = stateService.getParamByKey(chatId, "currentContactName");
 
         switch(messageText) {
             case "Имя" -> {
                 response.setText("Введите имя контакта");
-                state.setLastRequestedParamKey("contactName");
+                stateService.setLastRequestedParamKey(chatId, "contactName");
             }
             case "Номер" -> {
                 response.setText("Введите номер телефона");
-                state.setLastRequestedParamKey("contactNumber");
+                stateService.setLastRequestedParamKey(chatId, "contactNumber");
             }
             case "Возраст" -> {
                 response.setText("Введите возраст");
-                state.setLastRequestedParamKey("contactAge");
+                stateService.setLastRequestedParamKey(chatId, "contactAge");
             }
             case "Пол" -> {
                 response.setText("Выберите пол");
-                response.setReplyMarkup(List.of("Мужской", "Женский"));
-                state.setLastRequestedParamKey("contactGender");
+                response.setKeyboardText(List.of("Мужской", "Женский"));
+                stateService.setLastRequestedParamKey(chatId, "contactGender");
             }
             case "Изменить контакт" -> {
-                Boolean isSuccessful = service.tryUpdateContact(
-                        chatId, contactName, state.getParams());
+                Boolean isSuccessful = contactService.tryUpdateContact(
+                        chatId, contactName, stateService.getParams(chatId));
                 if(isSuccessful) {
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } else {
                     response.setText("Контакт " + contactName
                             + " не был изменен, так как не был найден");
                 }
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             }
             case "Назад" -> {
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
             }
             default -> {
-                return handleMessageWithContext(state, messageText);
+                return handleMessageWithContext(chatId, messageText);
             }
         }
         return response;
@@ -87,16 +93,16 @@ public class EditContactHandler implements OperationHandler {
      * Обрабатывает сообщение от пользователя. Заполняет контекст входными
      * данными, которые были запрошены ботом
      */
-    private BotResponse handleMessageWithContext(State state, String messageText) {
+    private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String lastRequestedParamKey = state.getLastRequestedParamKey();
+        String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
             response.setText("Я не понимаю эту команду.");
             return response;
         }
-        state.addParameter(lastRequestedParamKey, messageText);
+        stateService.addParameter(chatId, lastRequestedParamKey, messageText);
         response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-        response.setReplyMarkup(keyboardCreator.editContactMenu());
+        response.setKeyboardText(keyboardCreator.editContactMenu());
         return response;
     }
 }

@@ -1,10 +1,9 @@
 package org.example;
 
-import org.example.entity.User;
 import org.example.operations.*;
 import org.example.response.BotResponse;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,24 +21,27 @@ public class MessageHandler {
      */
     private final Map<Operation, OperationHandler> handlers;
 
-    public MessageHandler(List<OperationHandler> operationHandlers){
+    private final StateService stateService;
+
+    public MessageHandler(List<OperationHandler> operationHandlers,
+                          StateService stateService){
         this.handlers = operationHandlers.stream()
                 .collect(Collectors.toMap(
                         OperationHandler::getSupportedOperation,
                         Function.identity()
                 ));
+        this.stateService = stateService;
     }
 
     /**
      * Получив сообщение, возвращает ответ, содержащий текст и/или кнопки
      */
-    public BotResponse handleMessage(User user, String messageText) {
-        State state = user.getState();
-        OperationHandler handler = handlers.get(state.getOperation());
+    public BotResponse handleMessage(Long chatId, String messageText) {
+        OperationHandler handler = handlers.get(stateService.getOperation(chatId));
         if (handler == null) {
             return new BotResponse("Неизвестная операция");
         }
-        return handler.handleMessage(state, messageText, user.getChatId());
+        return handler.handleMessage(chatId, messageText);
     }
 
     /**
@@ -49,13 +51,14 @@ public class MessageHandler {
      * @param callbackData текст, скрытно хранящийся в inline-кнопке, необходимый для
      * обработки действий при нажатии на эту кнопку
      */
-    public BotResponse handleInlineButtonActivated(User user, String callbackData) {
+    public BotResponse handleInlineButtonActivated(Long chatId, String callbackData) {
         if (callbackData.startsWith("CURRENT_CONTACT_MENU_")) {
-            State state = user.getState();
-            state.changeCurrentOperation(Operation.CURRENT_CONTACT_MENU, true);
+            stateService.changeCurrentOperation(chatId,
+                    Operation.CURRENT_CONTACT_MENU,
+                    true);
             String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
-            state.addParameter("currentContactName", contactName);
-            return handleMessage(user, "Меню пользователя вызвано");
+            stateService.addParameter(chatId, "currentContactName", contactName);
+            return handleMessage(chatId, "Меню пользователя вызвано");
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }

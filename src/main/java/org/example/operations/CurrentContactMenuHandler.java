@@ -5,8 +5,8 @@ import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,13 +24,19 @@ public class CurrentContactMenuHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private final ContactService service;
+    private final ContactService contactService;
+
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
 
     /**
      * Конструктор
      */
-    public CurrentContactMenuHandler(ContactService service) {
-        this.service = service;
+    public CurrentContactMenuHandler(ContactService contactService, StateService stateService) {
+        this.contactService = contactService;
+        this.stateService = stateService;
     }
 
     @Override
@@ -39,10 +45,10 @@ public class CurrentContactMenuHandler implements OperationHandler {
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = state.getParamByKey("currentContactName");
-        Contact contact = service.findContactByName(chatId, contactName).orElse(null);
+        String contactName = stateService.getParamByKey(chatId, "currentContactName");
+        Contact contact = contactService.findContactByName(chatId, contactName).orElse(null);
         if(contact == null){
             response.setText("Контакт " + contactName + " не был найден");
             return response;
@@ -50,20 +56,23 @@ public class CurrentContactMenuHandler implements OperationHandler {
         switch (messageText) {
             case "Меню пользователя вызвано" -> {
                 response.setText("Меню для пользователя " + contactName + " вызвано");
-                response.setReplyMarkup(keyboardCreator.currentContactMenu());
+                response.setKeyboardText(keyboardCreator.currentContactMenu());
             }
             case "Информация" -> {
                 response.setText(getContactInfo(contact));
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(
+                        chatId, Operation.CONTACTS_MENU, true);
             }
             case "Изменить" -> {
-                state.changeCurrentOperation(Operation.EDIT_CONTACT, false);
+                stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT,
+                        false);
                 response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-                response.setReplyMarkup(keyboardCreator.editContactMenu());
+                response.setKeyboardText(keyboardCreator.editContactMenu());
             }
             case "Блокировать" -> {
-                state.changeCurrentOperation(Operation.BLOCK_CONTACT, false);
+                stateService.changeCurrentOperation(
+                        chatId, Operation.BLOCK_CONTACT, false);
 
                 String isBlockedInfo = contact.isBlocked()
                         ? "заблокирован"
@@ -75,17 +84,19 @@ public class CurrentContactMenuHandler implements OperationHandler {
                         isBlockedInfo, blockActionInfo);
 
                 response.setText(responseText);
-                response.setReplyMarkup(List.of("Да", "Нет"));
+                response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Удалить" -> {
-                state.changeCurrentOperation(Operation.DELETE_CONTACT, false);
+                stateService.changeCurrentOperation(
+                        chatId, Operation.DELETE_CONTACT, false);
                 response.setText("Вы точно хотите удалить текущий контакт?");
-                response.setReplyMarkup(List.of("Да", "Нет"));
+                response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Назад" -> {
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.CONTACTS_MENU, true);
-                response.setReplyMarkup(keyboardCreator.contactsMenu());
+                stateService.changeCurrentOperation(
+                        chatId, Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(keyboardCreator.contactsMenu());
             }
             default -> response.setText("Я не понимаю эту команду");
         }

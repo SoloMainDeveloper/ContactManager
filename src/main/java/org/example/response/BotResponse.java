@@ -58,7 +58,7 @@ public class BotResponse {
     /**
      * Устанавливает текст для кнопок клавиатуры
      */
-    public void setReplyMarkup(List<String> keyboardText) {
+    public void setKeyboardText(List<String> keyboardText) {
         this.keyboardText = keyboardText;
     }
 

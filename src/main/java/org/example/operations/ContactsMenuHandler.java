@@ -2,8 +2,8 @@ package org.example.operations;
 
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.state.State;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,36 +16,48 @@ public class ContactsMenuHandler implements OperationHandler {
      */
     private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
 
+    /**
+     * Сервис состояний
+     */
+    private final StateService stateService;
+
+    /**
+     * Конструктор
+     */
+    public ContactsMenuHandler(StateService stateService){
+        this.stateService = stateService;
+    }
+
     @Override
     public Operation getSupportedOperation() {
         return Operation.CONTACTS_MENU;
     }
 
     @Override
-    public BotResponse handleMessage(State state, String messageText, Long chatId) {
+    public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Добавить":
-                state.changeCurrentOperation(Operation.ADD_CONTACT, true);
+                stateService.changeCurrentOperation(chatId, Operation.ADD_CONTACT, true);
                 response.setText("Напишите имя добавляемого контакта");
-                state.setLastRequestedParamKey("contactName");
+                stateService.setLastRequestedParamKey(chatId,"contactName");
                 break;
             case "Получить все":
-                state.changeCurrentOperation(
+                stateService.changeCurrentOperation(chatId,
                         Operation.GET_ALL_CONTACTS, true);
                 response.setText("Желаете получить все контакты сразу или добавить" +
                         " фильтрацию/сортировку?");
-                response.setReplyMarkup(keyboardCreator.getAllContactsMenu());
+                response.setKeyboardText(keyboardCreator.getAllContactsMenu());
                 break;
             case "Найти":
-                state.changeCurrentOperation(Operation.FIND_CONTACT, true);
+                stateService.changeCurrentOperation(chatId,Operation.FIND_CONTACT, true);
                 response.setText("Выберите по какому признаку будет произведен поиск");
-                response.setReplyMarkup(keyboardCreator.findContactMenu());
+                response.setKeyboardText(keyboardCreator.findContactMenu());
                 break;
             case "Назад":
                 response.setText("Вы вернулись назад");
-                state.changeCurrentOperation(Operation.MAIN_MENU, true);
-                response.setReplyMarkup(keyboardCreator.mainMenu());
+                stateService.changeCurrentOperation(chatId,Operation.MAIN_MENU, true);
+                response.setKeyboardText(keyboardCreator.mainMenu());
                 break;
             default:
                 response.setText("Я не понимаю эту команду");

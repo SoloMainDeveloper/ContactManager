@@ -9,13 +9,13 @@ import java.util.*;
 /**
  * Хранилище контактов. Необходимо для тестов
  */
-public class FakeRepository extends ContactRepository {
+public class FakeContactRepository extends ContactRepository {
     private final Map<Long, Map<String, Contact>> contacts;
 
     /**
      * Конструктор
      */
-    public FakeRepository() {
+    public FakeContactRepository() {
         super(new PGSimpleDataSource());
         contacts = new LinkedHashMap<>();
     }
