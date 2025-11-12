@@ -48,7 +48,7 @@ public class DeleteGroupHandler implements OperationHandler {
             case "Да" -> {
                 String contactName = stateService.getParamByKey(chatId,
                         "currentGroupName");
-                //TODO groupService.deleteByName(chatId, contactName);
+                groupService.deleteGroupByName(chatId, contactName);
                 response.setText("Группа " + contactName + " успешно удалена");
                 response.setKeyboardText(keyboardCreator.groupsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);

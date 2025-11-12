@@ -15,6 +15,7 @@ public class ContactMapper {
     public Contact resultSetToContactEntity(ResultSet resultSet) {
         try {
             return new Contact(
+                    resultSet.getLong("id"),
                     resultSet.getLong("chat_id"),
                     resultSet.getString("name"),
                     resultSet.getString("phone_number"),

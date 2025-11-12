@@ -47,16 +47,14 @@ public class ContactService {
     }
 
     /**
-     * Найти контакт по имени
-     * @return контакт в случае успеха, в случае неудачи - null.
+     * Найти контакт по имени у данного пользователя
      */
     public Optional<Contact> findContactByName(Long chatId, String name) {
         return repository.findContactByName(name, chatId);
     }
 
     /**
-     * Найти контакт по номеру
-     * @return контакт в случае успеха, в случае неудачи - null.
+     * Найти контакт по номеру у данного пользователя
      */
     public Optional<Contact> findContactByNumber(Long chatId, String number) {
         return repository.findContactByNumber(number, chatId);

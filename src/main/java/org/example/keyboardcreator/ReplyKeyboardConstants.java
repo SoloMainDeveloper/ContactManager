@@ -105,4 +105,12 @@ public class ReplyKeyboardConstants {
     public List<String> currentGroupMenu() {
         return List.of("Вывести все контакты группы", "Изменить", "Удалить", "Назад");
     }
+
+    /**
+     * Возвращает кнопки меню редактирования группы
+     */
+    public List<String> editGroupMenu() {
+        return List.of("Изменить имя группы", "Удалить контакт из группы",
+                "Добавить контакт в группу", "Сохранить группу");
+    }
 }

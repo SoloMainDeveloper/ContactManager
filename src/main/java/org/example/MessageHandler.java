@@ -62,7 +62,7 @@ public class MessageHandler {
         } else if (callbackData.startsWith("CURRENT_GROUP_MENU_")) {
             stateService.changeCurrentOperation(
                     chatId, Operation.CURRENT_GROUP_MENU, true);
-            String groupName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
+            String groupName = callbackData.substring("CURRENT_GROUP_MENU_".length());
             stateService.addParameter(chatId, "currentGroupName", groupName);
             return handleMessage(chatId, "Меню группы вызвано");
         }

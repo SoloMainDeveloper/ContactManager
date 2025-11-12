@@ -1,6 +1,5 @@
 package org.example.operations.group;
 
-import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
@@ -49,8 +48,7 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         String groupName = stateService.getParamByKey(chatId, "currentGroupName");
-        Group group = new Group();
-        //TODO groupService.findGroupByName(chatId, groupName).orElse(null);
+        Group group = groupService.findGroupByName(chatId, groupName).orElse(null);
         if(group == null) {
             response.setText("Группа " + groupName + " не была найдена");
             return response;
@@ -61,12 +59,13 @@ public class CurrentGroupMenuHandler implements OperationHandler {
                 response.setKeyboardText(keyboardCreator.currentGroupMenu());
             }
             case "Вывести все контакты группы" -> {
-                //TODO
+                //TODO реализовать вывод Inline-кнопок контактов
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
             }
             case "Изменить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP, false);
-                //TODO
+                response.setText("Отлично. Выберите какие операции хотите выполнить");
+                response.setKeyboardText(keyboardCreator.editGroupMenu());
             }
             case "Удалить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP, false);

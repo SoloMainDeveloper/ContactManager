@@ -1,12 +1,18 @@
 package org.example.operations.group;
 
+import org.example.entity.Contact;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
+import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.GroupConverter;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Обработчик события: Добавление группы
@@ -24,6 +30,11 @@ public class AddGroupHandler implements OperationHandler {
     private final GroupService groupService;
 
     /**
+     * Сервис контактов
+     */
+    private final ContactService contactService;
+
+    /**
      * Сервис состояний
      */
     private final StateService stateService;
@@ -31,8 +42,10 @@ public class AddGroupHandler implements OperationHandler {
     /**
      * Конструктор
      */
-    public AddGroupHandler(GroupService groupService, StateService stateService) {
+    public AddGroupHandler(GroupService groupService, ContactService contactService,
+                           StateService stateService) {
         this.groupService = groupService;
+        this.contactService = contactService;
         this.stateService = stateService;
     }
 
@@ -46,17 +59,19 @@ public class AddGroupHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText){
             case "Добавить контакт" -> {
-                //TODO
+                response.setText("Введите имя контакта для добавления в группу");
+                stateService.setLastRequestedParamKey(chatId, "contactToAdd");
             }
             case "Сохранить группу" -> {
                 String groupName = "Друзья";
-                boolean isSuccessful = true; //groupService.tryAddGroup(chatId, params);
+                boolean isSuccessful = groupService.tryAdd(chatId,
+                        stateService.getParams(chatId));
                 if(isSuccessful){
                     response.setText("Группа " + groupName + " успешна сохранена");
                     response.setKeyboardText(keyboardCreator.addGroupMenu());
                 } else {
-                    response.setText("Группа не была сохранена");
-                    //TODO почему не была сохранена
+                    response.setText("Группа не была сохранена, так как уже существует"
+                            + " группа с этим именем");
                 }
                 response.setKeyboardText(keyboardCreator.groupsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
@@ -73,17 +88,49 @@ public class AddGroupHandler implements OperationHandler {
         return  response;
     }
 
-    private BotResponse handleMessageWithContext(Long chatId, String messageText){
-        //TODO
+
+    /**
+     * Обработать сообщение с учётом контекста операции
+     */
+    private BotResponse handleMessageWithContext(Long chatId, String messageText) {
+         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
+         return switch(lastRequestedParamKey) {
+            case "groupName" -> handleGroupNameMessage(chatId, messageText);
+            case "contactToAdd" -> handleContactToAddMessage(chatId, messageText);
+            default -> new BotResponse("Я не понимаю эту команду.");
+        };
+    }
+
+    /**
+     * Обработать сообщение, содержащее имя добавляемой группы
+     */
+    private BotResponse handleGroupNameMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
-        if (lastRequestedParamKey == null) {
-            response.setText("Я не понимаю эту команду.");
-            return response;
-        }
-        stateService.addParameter(chatId, lastRequestedParamKey, messageText);
-        response.setText("Отлично. Выберите какие контакты хотите добавить в группу");
+        stateService.addParameter(chatId, "groupName", messageText);
+        response.setText("Отлично. Выберите дальнейшие действия");
         response.setKeyboardText(keyboardCreator.addGroupMenu());
+        return response;
+    }
+
+    /**
+     * Обработать сообщение, содержащее имя контакта, добавляемого в группу
+     */
+    private BotResponse handleContactToAddMessage(Long chatId, String contactName) {
+        BotResponse response = new BotResponse();
+        Optional<Contact> contact = contactService
+                .findContactByName(chatId, contactName);
+        if(contact.isPresent()) {
+            GroupConverter converter = new GroupConverter();
+            Set<Long> contactIds = converter.stringToContactIds(
+                    stateService.getParamByKey(chatId, "contactIds"));
+            contactIds.add(contact.get().getId());
+            stateService.addParameter(chatId, "contactIds",
+                    converter.contactIdsToString(contactIds));
+            response.setText("Контакт " + contactName + " успешно добавлен в " +
+                    "группу. Желаете добавить ещё контактов в группу?");
+        } else {
+            response.setText("Контакт " + contactName + " не был найден.");
+        }
         return response;
     }
 }
