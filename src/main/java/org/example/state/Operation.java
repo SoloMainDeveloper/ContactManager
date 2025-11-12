@@ -15,4 +15,13 @@ public enum Operation {
     EDIT_CONTACT,
     BLOCK_CONTACT,
     DELETE_CONTACT,
+
+    GROUPS_MENU,
+    ADD_GROUP,
+    FIND_GROUP,
+    GET_ALL_GROUPS,
+
+    CURRENT_GROUP_MENU,
+    EDIT_GROUP,
+    DELETE_GROUP
 }

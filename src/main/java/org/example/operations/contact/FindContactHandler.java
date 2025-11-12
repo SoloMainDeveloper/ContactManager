@@ -1,5 +1,6 @@
-package org.example.operations;
+package org.example.operations.contact;
 
+import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
 import org.example.keyboardcreator.InlineKeyboardCreator;

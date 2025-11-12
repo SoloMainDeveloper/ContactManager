@@ -48,6 +48,12 @@ public class MainMenuHandler implements OperationHandler {
                         + " действие хотите совершить");
                 response.setKeyboardText(keyboardCreator.contactsMenu());
             }
+            case "Группы" -> {
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                response.setText("Взаимодействие с группами. Выберите какое"
+                        + " действие хотите совершить");
+                response.setKeyboardText(keyboardCreator.groupsMenu());
+            }
             default -> response.setText("Я не понимаю эту команду");
         }
         return response;

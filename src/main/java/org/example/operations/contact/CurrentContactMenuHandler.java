@@ -1,5 +1,6 @@
-package org.example.operations;
+package org.example.operations.contact;
 
+import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
