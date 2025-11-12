@@ -1,4 +1,4 @@
-package org.example.mapper;
+package org.example.utils;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;

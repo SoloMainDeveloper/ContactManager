@@ -1,7 +1,7 @@
 package org.example.repository;
 
 import org.example.entity.Contact;
-import org.example.mapper.ContactMapper;
+import org.example.utils.ContactMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
