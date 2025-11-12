@@ -91,14 +91,14 @@ public class GroupRepository {
     /**
      * Обновить название группы в БД
      */
-    public void update(Group group, Long chatId) {
+    public void update(Group group) {
         String sql = "UPDATE public.groups " +
                 "SET name = :name and contact_ids = :contactIds " +
                 "WHERE chat_id = :chatId and name = :name";
 
         GroupConverter converter = new GroupConverter();
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
+                .addValue("chatId", group.getChatId())
                 .addValue("name", group.getName())
                 .addValue("contactIds", converter
                         .contactIdsToString(group.getContactIds()));

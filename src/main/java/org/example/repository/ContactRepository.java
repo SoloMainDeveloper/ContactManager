@@ -65,7 +65,6 @@ public class ContactRepository {
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
-
     }
 
     /**

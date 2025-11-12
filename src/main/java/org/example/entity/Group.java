@@ -72,9 +72,16 @@ public class Group {
     }
 
     /**
-     * Установить id-шники контактов группы
+     * Добавить id-шник контакта в группу
      */
-    public void setContactIds(Set<Long> contactIds) {
-        this.contactIds = contactIds;
+    public void addContactId(Long contactId) {
+        contactIds.add(contactId);
+    }
+
+    /**
+     * Удалить id-шник контакта из группы
+     */
+    public void removeContactId(Long contactId) {
+        contactIds.remove(contactId);
     }
 }

@@ -5,6 +5,11 @@ package org.example.entity;
  */
 public class Contact {
     /**
+     * Идентификатор контакта. Генерируется в базе данных
+     */
+    private Long id;
+
+    /**
      * id чата общения пользователя с ботом
      */
     private Long chatId;
@@ -40,17 +45,6 @@ public class Contact {
     public Contact() {}
 
     /**
-     * Конструктор для заполнения всех полей, кроме блокировки
-     */
-    public Contact(Long chatId, String name, String phoneNumber, int age, Gender gender) {
-        this.chatId = chatId;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.age = age;
-        this.gender = gender;
-    }
-
-    /**
      * Конструктор с заполнением всех полей контакта
      */
     public Contact(Long chatId, String name, String phoneNumber, int age,
@@ -61,6 +55,28 @@ public class Contact {
         this.age = age;
         this.gender = gender;
         this.isBlocked = isBlocked;
+        this.id = null;
+    }
+
+    /**
+     * Конструктор для уже существующего контакта
+     */
+    public Contact(Long id, Long chatId, String name, String phoneNumber,
+                   int age, Gender gender, Boolean isBlocked) {
+        this.chatId = chatId;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.age = age;
+        this.gender = gender;
+        this.isBlocked = isBlocked;
+        this.id = id;
+    }
+
+    /**
+     * Возвращает id
+     */
+    public Long getId() {
+        return id;
     }
 
     /**
