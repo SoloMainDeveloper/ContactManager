@@ -86,7 +86,7 @@ public class StateService {
     /**
      * Возвращает значение параметра контекста по его ключу
      */
-    public String getParamByKey(Long chatId, String contactName) {
-        return getOrCreateState(chatId).getParams().get(contactName);
+    public String getParamByKey(Long chatId, String key) {
+        return getOrCreateState(chatId).getParams().get(key);
     }
 }

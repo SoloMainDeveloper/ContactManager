@@ -74,7 +74,8 @@ public class ReplyKeyboardConstants {
      */
     public List<String> addSorterMenu() {
         return List.of("В порядке убывания возраста", "В порядке возрастания возраста",
-                "В алфавитном порядке имени", "В обратном алфавитному порядку имени", "Назад к выбору");
+                "В алфавитном порядке имени", "В обратном алфавитному порядку имени",
+                "Назад к выбору");
     }
 
     /**
@@ -82,5 +83,26 @@ public class ReplyKeyboardConstants {
      */
     public List<String> groupsMenu() {
         return List.of("Добавить", "Получить все", "Найти", "Назад");
+    }
+
+    /**
+     * Возвращает кнопки меню получения всех групп
+     */
+    public List<String> getAllGroupsMenu() {
+        return List.of("Получить", "Сортировать", "Назад");
+    }
+
+    /**
+     * Возвращает кнопки меню для создания группы
+     */
+    public List<String> addGroupMenu() {
+        return List.of("Добавить контакт", "Сохранить группу", "Назад");
+    }
+
+    /**
+     * Возвращает кнопки меню текущего группы
+     */
+    public List<String> currentGroupMenu() {
+        return List.of("Вывести все контакты группы", "Изменить", "Удалить", "Назад");
     }
 }

@@ -59,6 +59,12 @@ public class MessageHandler {
             String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
             stateService.addParameter(chatId, "currentContactName", contactName);
             return handleMessage(chatId, "Меню пользователя вызвано");
+        } else if (callbackData.startsWith("CURRENT_GROUP_MENU_")) {
+            stateService.changeCurrentOperation(
+                    chatId, Operation.CURRENT_GROUP_MENU, true);
+            String groupName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
+            stateService.addParameter(chatId, "currentGroupName", groupName);
+            return handleMessage(chatId, "Меню группы вызвано");
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }
