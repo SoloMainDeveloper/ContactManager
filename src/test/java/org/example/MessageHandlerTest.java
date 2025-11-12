@@ -3,6 +3,7 @@ package org.example;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.*;
+import org.example.operations.contact.*;
 import org.example.repository.StateRepository;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
