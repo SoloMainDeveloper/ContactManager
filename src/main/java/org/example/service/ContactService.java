@@ -47,6 +47,13 @@ public class ContactService {
     }
 
     /**
+     * Найти контакт по идентификатору у данного пользователя
+     */
+    public Optional<Contact> findContactById(Long chatId, Long contactId) {
+        return repository.findContactById(contactId, chatId);
+    }
+
+    /**
      * Найти контакт по имени у данного пользователя
      */
     public Optional<Contact> findContactByName(Long chatId, String name) {

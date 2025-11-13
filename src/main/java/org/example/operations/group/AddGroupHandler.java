@@ -63,8 +63,8 @@ public class AddGroupHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "contactToAdd");
             }
             case "Сохранить группу" -> {
-                String groupName = "Друзья";
-                boolean isSuccessful = groupService.tryAdd(chatId,
+                String groupName = stateService.getParamByKey(chatId, "groupName");
+                Boolean isSuccessful = groupService.tryAddGroup(chatId,
                         stateService.getParams(chatId));
                 if(isSuccessful){
                     response.setText("Группа " + groupName + " успешна сохранена");
@@ -117,17 +117,22 @@ public class AddGroupHandler implements OperationHandler {
      */
     private BotResponse handleContactToAddMessage(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
-        Optional<Contact> contact = contactService
-                .findContactByName(chatId, contactName);
+        Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
+        GroupConverter converter = new GroupConverter();
+        String dfs = stateService.getParamByKey(chatId, "contactIds");
+        Set<Long> contactIds = converter.stringToContactIds(
+                stateService.getParamByKey(chatId, "contactIds"));
         if(contact.isPresent()) {
-            GroupConverter converter = new GroupConverter();
-            Set<Long> contactIds = converter.stringToContactIds(
-                    stateService.getParamByKey(chatId, "contactIds"));
-            contactIds.add(contact.get().getId());
-            stateService.addParameter(chatId, "contactIds",
-                    converter.contactIdsToString(contactIds));
-            response.setText("Контакт " + contactName + " успешно добавлен в " +
-                    "группу. Желаете добавить ещё контактов в группу?");
+            Long contactId = contact.get().getId();
+            if(contactIds.contains(contactId)) {
+                response.setText("Контакт с таким именем уже добавлен");
+            } else {
+                contactIds.add(contactId);
+                stateService.addParameter(chatId, "contactIds",
+                        converter.contactIdsToString(contactIds));
+                response.setText("Контакт " + contactName + " успешно добавлен в " +
+                        "группу. Желаете добавить ещё контактов в группу?");
+            }
         } else {
             response.setText("Контакт " + contactName + " не был найден.");
         }

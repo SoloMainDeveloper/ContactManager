@@ -47,6 +47,29 @@ public class ContactRepository {
     }
 
     /**
+     * Найти контакт по идентификатору в БД,
+     * соответствующий конкретному пользователю по chatId
+     */
+    public Optional<Contact> findContactById(Long contactId, Long chatId) {
+        String sql = "SELECT * FROM public.contacts WHERE id = :id and chat_id = :chatId";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", contactId)
+                .addValue("chatId", chatId);
+
+        try {
+            Contact contact = jdbcTemplate.queryForObject(sql, params,
+                    (resultSet, rowNum) -> {
+                ContactMapper mapper = new ContactMapper();
+                return mapper.resultSetToContactEntity(resultSet);
+            });
+            return Optional.ofNullable(contact);
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Найти контакт по имени в БД, соответствующий конкретному пользователю по chatId
      */
     public Optional<Contact> findContactByName(String name, Long chatId) {
