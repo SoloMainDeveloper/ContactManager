@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Тестируем обработчик сообщений
+ * Тестируем обработчики сообщений, взаимодействующие с контактами
  */
-class MessageHandlerTest {
+class ContactMessageHandlerTest {
     /**
      * Фейковый контакт-репозиторий для тестов
      */

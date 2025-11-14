@@ -67,7 +67,7 @@ public class GetAllContactsHandler implements OperationHandler {
             }
             case "Добавить сортировку" -> {
                 response.setText("Выберите в каком порядке выполнить сортировку");
-                response.setKeyboardText(replyKeyboardCreator.addSorterMenu());
+                response.setKeyboardText(replyKeyboardCreator.addSorterContactMenu());
                 stateService.setLastRequestedParamKey(chatId, "sorter");
             }
             case "Назад" -> {
@@ -219,7 +219,7 @@ public class GetAllContactsHandler implements OperationHandler {
 
         switch (messageText) {
             case "Да" -> {
-                response.setKeyboardText(replyKeyboardCreator.addSorterMenu());
+                response.setKeyboardText(replyKeyboardCreator.addSorterContactMenu());
                 stateService.setLastRequestedParamKey(chatId, "sorter");
                 response.setText("Выберите в каком порядке выполнить сортировку");
             }

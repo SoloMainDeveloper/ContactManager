@@ -4,11 +4,14 @@ import org.example.entity.Group;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
+import org.example.response.InlineKeyboardText;
+import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +30,11 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     private final GroupService groupService;
 
     /**
+     * Сервис контактов
+     */
+    private  final ContactService contactService;
+
+    /**
      * Сервис состояний
      */
     private final StateService stateService;
@@ -34,8 +42,11 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     /**
      * Конструктор
      */
-    public CurrentGroupMenuHandler(GroupService groupService, StateService stateService) {
+    public CurrentGroupMenuHandler(GroupService groupService,
+                                   ContactService contactService,
+                                   StateService stateService) {
         this.groupService = groupService;
+        this.contactService = contactService;
         this.stateService = stateService;
     }
 
@@ -59,8 +70,7 @@ public class CurrentGroupMenuHandler implements OperationHandler {
                 response.setKeyboardText(keyboardCreator.currentGroupMenu());
             }
             case "Вывести все контакты группы" -> {
-                //TODO реализовать вывод Inline-кнопок контактов
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                response = handleGetAllContactsFromGroup(chatId, group);
             }
             case "Изменить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP, false);
@@ -78,6 +88,29 @@ public class CurrentGroupMenuHandler implements OperationHandler {
                 response.setKeyboardText(keyboardCreator.contactsMenu());
             }
             default -> response.setText("Я не понимаю эту команду");
+        }
+        return response;
+    }
+
+    /**
+     * Обработать сообщение по выводу всех контактов группы
+     */
+    private BotResponse handleGetAllContactsFromGroup(Long chatId, Group group) {
+        BotResponse response = new BotResponse();
+
+        List<String> contactNames = new ArrayList<>();
+        for(Long contactId : group.getContactIds()) {
+            contactService.findContactById(chatId, contactId)
+                    .ifPresent(contact ->
+                            contactNames.add(contact.getName())
+                    );
+        }
+        if(contactNames.isEmpty()) {
+            response.setText("В группе " + group.getName() + " пока нет контактов");
+        } else {
+            response.setText("Все контакты группы " + group.getName() + ":");
+            response.setInlineKeyboardText(new InlineKeyboardText(contactNames,
+                    Operation.CURRENT_CONTACT_MENU.name()));
         }
         return response;
     }

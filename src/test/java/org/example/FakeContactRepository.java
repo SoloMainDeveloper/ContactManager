@@ -12,7 +12,15 @@ import java.util.stream.Collectors;
  * Хранилище контактов. Необходимо для тестов
  */
 public class FakeContactRepository extends ContactRepository {
+    /**
+     * Объект хранения контактов вместо БД
+     */
     private final Map<Long, Map<String, Contact>> contacts;
+
+    /**
+     * Счетчик - мнимая генерация id контакта
+     */
+    private Long counter;
 
     /**
      * Конструктор
@@ -20,6 +28,7 @@ public class FakeContactRepository extends ContactRepository {
     public FakeContactRepository() {
         super(new PGSimpleDataSource());
         contacts = new LinkedHashMap<>();
+        counter = 0L;
     }
 
     /**
@@ -41,24 +50,37 @@ public class FakeContactRepository extends ContactRepository {
         if(contacts.get(chatId).containsKey(contact.getName())){
             throw new RuntimeException();
         }
-        contacts.get(chatId).put(contact.getName(), contact);
+        Contact contactWithId = new Contact(counter, contact.getChatId(),
+                contact.getName(), contact.getPhoneNumber(), contact.getAge(),
+                contact.getGender(), contact.isBlocked());
+        contacts.get(chatId).put(contact.getName(), contactWithId);
+        counter++;
+    }
+
+    @Override
+    public Optional<Contact> findContactById(Long contactId, Long chatId) {
+        Map<String, Contact> currentContacts = contacts.get(chatId);
+        return currentContacts.values().stream()
+                .filter(contact ->
+                        contact.getId() != null && contact.getId().equals(contactId))
+                .findFirst();
     }
 
     @Override
     public Optional<Contact> findContactByName(String name, Long chatId) {
-        Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
-        return currentChatIdContacts == null ||
-                currentChatIdContacts.isEmpty() ||
-                currentChatIdContacts.get(name) == null
+        Map<String, Contact> currentContacts = contacts.get(chatId);
+        return currentContacts == null ||
+                currentContacts.isEmpty() ||
+                currentContacts.get(name) == null
             ? Optional.empty()
-            : Optional.of(currentChatIdContacts.get(name));
+            : Optional.of(currentContacts.get(name));
     }
 
     @Override
     public Optional<Contact> findContactByNumber(String number, Long chatId) {
-        Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
-        if(currentChatIdContacts != null) {
-            for (Contact current : currentChatIdContacts.values()) {
+        Map<String, Contact> currentContacts = contacts.get(chatId);
+        if(currentContacts != null) {
+            for (Contact current : currentContacts.values()) {
                 if (Objects.equals(current.getPhoneNumber(), number)) {
                     return Optional.of(current);
                 }

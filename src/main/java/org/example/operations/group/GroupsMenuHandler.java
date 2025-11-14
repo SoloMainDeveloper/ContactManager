@@ -3,7 +3,6 @@ package org.example.operations.group;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
-import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
@@ -46,7 +45,7 @@ public class GroupsMenuHandler implements OperationHandler {
             }
             case "Получить все" -> {
                 stateService.changeCurrentOperation(
-                        chatId, Operation.GET_ALL_CONTACTS, true);
+                        chatId, Operation.GET_ALL_GROUPS, true);
                 response.setText("Желаете получить все группы сразу или"
                         + " добавить сортировку?");
                 response.setKeyboardText(keyboardCreator.getAllGroupsMenu());

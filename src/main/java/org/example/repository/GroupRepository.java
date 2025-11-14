@@ -72,8 +72,8 @@ public class GroupRepository {
     /**
      * Найти все группы по id пользователя
      */
-    public List<Group> findGroupsByChatId(Long chatId) {
-        String sql = "SELECT * FROM public.groups WHERE chat_id = :chatId";
+    public List<Group> findGroupsByChatId(Long chatId, String sorter) {
+        String sql = "SELECT * FROM public.groups WHERE chat_id = :chatId" + sorter;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId);
@@ -89,17 +89,18 @@ public class GroupRepository {
     }
 
     /**
-     * Обновить название группы в БД
+     * Обновить группу в БД
      */
-    public void update(Group group) {
+    public void update(String oldName, Group group) {
         String sql = "UPDATE public.groups " +
-                "SET name = :name and contact_ids = :contactIds " +
-                "WHERE chat_id = :chatId and name = :name";
+                "SET name = :newName, contact_ids = :contactIds " +
+                "WHERE chat_id = :chatId and name = :oldName";
 
         GroupConverter converter = new GroupConverter();
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", group.getChatId())
-                .addValue("name", group.getName())
+                .addValue("oldName", oldName)
+                .addValue("newName", group.getName())
                 .addValue("contactIds", converter
                         .contactIdsToString(group.getContactIds()));
 

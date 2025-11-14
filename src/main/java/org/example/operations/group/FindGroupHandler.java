@@ -19,11 +19,6 @@ import java.util.Optional;
 @Component
 public class FindGroupHandler implements OperationHandler {
     /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
-    /**
      * Сервис групп
      */
     private final GroupService groupService;
@@ -49,13 +44,7 @@ public class FindGroupHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String groupName) {
         BotResponse response = new BotResponse();
-        String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
-        if (!lastRequestedParamKey.equals("groupName")) {
-            return new BotResponse("Я не понимаю эту команду.");
-        }
         Optional<Group> group = groupService.findGroupByName(chatId, groupName);
-        stateService.addParameter(chatId, lastRequestedParamKey, groupName);
-
         if(group.isPresent()) {
             response.setText("Группа " + groupName + " успешно найдена");
             response.setInlineKeyboardText(new InlineKeyboardText(List.of(groupName),
@@ -63,7 +52,7 @@ public class FindGroupHandler implements OperationHandler {
         } else {
             response.setText("По имени " + groupName + " группа не найдена");
         }
-
+        stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
         return response;
     }
 }
