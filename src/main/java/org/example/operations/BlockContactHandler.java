@@ -55,8 +55,7 @@ public class BlockContactHandler implements OperationHandler {
                         .findContactByName(chatId, contactName);
                 if (contactOptional.isPresent()) {
                     Contact contact = contactOptional.get();
-                    contact.setBlocked(!contact.isBlocked());
-                    contactService.updateBlockField(contact);
+                    contactService.toggleContactBlocked(contact);
 
                     String blockActionInfo = contact.isBlocked()
                             ? "заблокирован"

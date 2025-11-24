@@ -1,5 +1,6 @@
 package org.example.operations;
 
+import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
@@ -60,14 +61,13 @@ public class AddContactHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "contactGender");
             }
             case "Сохранить контакт" -> {
-                boolean isSuccessful = contactService.tryAddContact(chatId,
-                        stateService.getParams(chatId));
                 String contactName = stateService.getParamByKey(chatId, "contactName");
-                if (isSuccessful) {
+                try {
+                    contactService.tryAddContact(chatId, stateService.getParams(chatId));
                     response.setText("Контакт " + contactName + " успешно добавлен");
-                } else {
-                    response.setText("Контакт " + contactName
-                            + " не был добавлен, так как он уже существует");
+                } catch (ContactAlreadyExistsException e) {
+                    e.printStackTrace();
+                    response.setText("Произошла ошибка при добавлении: " + e.getMessage());
                 }
                 response.setKeyboardText(keyboardCreator.contactsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);

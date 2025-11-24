@@ -1,5 +1,6 @@
 package org.example.operations;
 
+import org.example.exceptions.ContactDoesNotExistException;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
@@ -66,13 +67,13 @@ public class EditContactHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "contactGender");
             }
             case "Изменить контакт" -> {
-                Boolean isSuccessful = contactService.tryUpdateContact(
-                        chatId, contactName, stateService.getParams(chatId));
-                if(isSuccessful) {
+                try {
+                    contactService.tryUpdateContact(
+                            chatId, contactName, stateService.getParams(chatId));
                     response.setText("Контакт " + contactName + " успешно изменен");
-                } else {
-                    response.setText("Контакт " + contactName
-                            + " не был изменен, так как не был найден");
+                } catch (ContactDoesNotExistException e) {
+                    e.printStackTrace();
+                    response.setText("Произошла ошибка при изменении: " + e.getMessage());
                 }
                 response.setKeyboardText(keyboardCreator.contactsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);

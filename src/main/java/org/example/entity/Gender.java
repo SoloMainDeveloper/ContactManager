@@ -29,6 +29,7 @@ public enum Gender {
 
     /**
      * Создаёт Gender на по displayName
+     * <p>Вячеслав Юрьевич, тут static Вы нам разрешили</p>
      */
     public static Gender fromDisplayName(String displayName) {
         for (Gender gender : values()) {
