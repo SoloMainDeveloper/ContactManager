@@ -65,7 +65,7 @@ public class ContactRepository implements IContactRepository {
     }
 
     @Override
-    public List<Contact> findContactByNumber(String number, Long chatId) {
+    public List<Contact> findContactsByNumber(String number, Long chatId) {
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId and phone_number = :phoneNumber";
 
         MapSqlParameterSource params = new MapSqlParameterSource()

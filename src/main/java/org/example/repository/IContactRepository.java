@@ -20,9 +20,9 @@ public interface IContactRepository {
     Optional<Contact> findContactByName(String name, Long chatId);
 
     /**
-     * Найти контакт по номеру, соответствующий конкретному пользователю по chatId
+     * Найти контакты по номеру, соответствующие конкретному пользователю по chatId
      */
-    List<Contact> findContactByNumber(String number, Long chatId);
+    List<Contact> findContactsByNumber(String number, Long chatId);
 
     /**
      * Найти контакты по id пользователя с фильтрацией и сортировкой при необходимости

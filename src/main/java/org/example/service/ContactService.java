@@ -61,7 +61,7 @@ public class ContactService {
      * @return контакты в случае успеха, в ином случае пустой List.of().
      */
     public List<Contact> findContactByNumber(Long chatId, String number) {
-        return repository.findContactByNumber(number, chatId);
+        return repository.findContactsByNumber(number, chatId);
     }
 
     /**

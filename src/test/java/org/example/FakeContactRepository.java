@@ -40,7 +40,7 @@ public class FakeContactRepository implements IContactRepository {
     }
 
     @Override
-    public List<Contact> findContactByNumber(String number, Long chatId) {
+    public List<Contact> findContactsByNumber(String number, Long chatId) {
         Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
         List<Contact> contacts = new ArrayList<>();
         if(currentChatIdContacts != null) {
