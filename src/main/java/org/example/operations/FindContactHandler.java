@@ -120,17 +120,19 @@ public class FindContactHandler implements OperationHandler {
     private BotResponse handleFindContactByPhoneNumber(Long chatId) {
         BotResponse response = new BotResponse();
         String number = stateService.getParamByKey(chatId, "contactNumber");
-        Optional<Contact> contact = contactService.findContactByNumber(chatId, number);
+        List<Contact> contacts = contactService.findContactByNumber(chatId, number);
 
-        if(contact.isPresent()) {
-            response.setText("По номеру " + number + " контакт успешно найден.");
-            response.setInlineKeyboardText(new InlineKeyboardText(
-                    List.of(contact.get().getName()),
-                    Operation.CURRENT_CONTACT_MENU.toString()));
-        } else {
+        if(contacts.isEmpty()) {
             stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             response.setText("По номеру " + number + " контакты не найдены.");
             response.setKeyboardText(replyKeyboardCreator.contactsMenu());
+        } else {
+            response.setText("По номеру " + number + " контакт успешно найден.");
+            List<String> names = contacts.stream()
+                    .map(Contact::getName)
+                    .toList();
+            response.setInlineKeyboardText(new InlineKeyboardText(
+                    names, Operation.CURRENT_CONTACT_MENU.toString()));
         }
         return response;
     }

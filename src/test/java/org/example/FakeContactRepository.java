@@ -2,8 +2,7 @@ package org.example;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
-import org.example.repository.ContactRepository;
-import org.postgresql.ds.PGSimpleDataSource;
+import org.example.repository.IContactRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,25 +10,14 @@ import java.util.stream.Collectors;
 /**
  * Хранилище контактов. Необходимо для тестов
  */
-public class FakeContactRepository extends ContactRepository {
+public class FakeContactRepository implements IContactRepository {
     private final Map<Long, Map<String, Contact>> contacts;
 
     /**
      * Конструктор
      */
     public FakeContactRepository() {
-        super(new PGSimpleDataSource());
         contacts = new LinkedHashMap<>();
-    }
-
-    /**
-     * Возвращает количество контактов у пользователя с данным chatId
-     */
-    public int getCurrentContactsSize(Long chatId){
-        if(contacts.containsKey(chatId)){
-            return contacts.get(chatId).size();
-        }
-        return 0;
     }
 
     @Override
@@ -37,9 +25,6 @@ public class FakeContactRepository extends ContactRepository {
         Long chatId = contact.getChatId();
         if(!contacts.containsKey(chatId)){
             contacts.put(chatId, new LinkedHashMap<>());
-        }
-        if(contacts.get(chatId).containsKey(contact.getName())){
-            throw new RuntimeException();
         }
         contacts.get(chatId).put(contact.getName(), contact);
     }
@@ -55,16 +40,17 @@ public class FakeContactRepository extends ContactRepository {
     }
 
     @Override
-    public Optional<Contact> findContactByNumber(String number, Long chatId) {
+    public List<Contact> findContactByNumber(String number, Long chatId) {
         Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
+        List<Contact> contacts = new ArrayList<>();
         if(currentChatIdContacts != null) {
             for (Contact current : currentChatIdContacts.values()) {
                 if (Objects.equals(current.getPhoneNumber(), number)) {
-                    return Optional.of(current);
+                    contacts.add(current);
                 }
             }
         }
-        return Optional.empty();
+        return contacts;
     }
 
     @Override
@@ -163,11 +149,6 @@ public class FakeContactRepository extends ContactRepository {
             sortedContacts.sort(Comparator.comparing(Contact::getName).reversed());
         }
         return sortedContacts;
-    }
-
-    @Override
-    public void updateBlockField(Contact contact) {
-        update(contact);
     }
 
     @Override
