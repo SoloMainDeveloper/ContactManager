@@ -68,4 +68,17 @@ public class MessageHandler {
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }
+
+    public BotResponse handleMessageWithDocument(
+            Long chatId, String fileName, String content) {
+        String lastRequestedParam = stateService.getLastRequestedParamKey(chatId);
+        if(lastRequestedParam == null) {
+            return new BotResponse("Документ не был запрошен");
+        }
+        if (lastRequestedParam.equals("importData")) {
+            stateService.addParameter(chatId, "fileName", fileName);
+            return handleMessage(chatId, content);
+        }
+        return new BotResponse("Документ не был обработан");
+    }
 }

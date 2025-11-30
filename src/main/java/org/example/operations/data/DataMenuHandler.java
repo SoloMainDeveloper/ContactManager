@@ -3,11 +3,13 @@ package org.example.operations.data;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
+import org.example.service.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,11 +28,17 @@ public class DataMenuHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Сервис экспорта
+     */
+    private final ExportService exportService;
+
+    /**
      * Конструктор
      */
     @Autowired
-    public DataMenuHandler(StateService stateService){
+    public DataMenuHandler(StateService stateService, ExportService exportService){
         this.stateService = stateService;
+        this.exportService = exportService;
     }
 
     @Override
@@ -52,8 +60,13 @@ public class DataMenuHandler implements OperationHandler {
                 stateService.changeCurrentOperation(
                         chatId, Operation.EXPORT_CONTACTS, true);
                 response.setText("Выберите желаемый формат экспорта контактов");
-                response.setKeyboardText(List.of()); //как нибудь придумать чтобы прям
-                // из ExportService.getSupportableFormats()
+                List<String> keyboardText = new ArrayList<>(exportService
+                        .getSupportedFormats()
+                        .stream()
+                        .toList());
+                keyboardText.add("Назад");
+                response.setKeyboardText(keyboardText);
+                stateService.setLastRequestedParamKey(chatId, "exportFormat");
             }
             case "Назад" -> {
                 stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU, true);

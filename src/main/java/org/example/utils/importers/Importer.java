@@ -11,11 +11,12 @@ import java.util.List;
 public interface Importer {
     /**
      * Импортирует контакты из файла
+     * @param content содержимое файла
      */
-    List<Contact> importContacts() throws ImportException;
+    List<Contact> importContacts(String content) throws ImportException;
 
     /**
      * Возвращает поддерживаемый формат импорта. Формат задаётся в нижнем регистре
      */
-    String getSupportableFormat();
+    String getSupportedFormat();
 }

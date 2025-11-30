@@ -1,13 +1,19 @@
 package org.example.operations.data;
 
+import org.example.entity.Contact;
+import org.example.exceptions.UnsupportedFormatException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
+import org.example.service.ContactService;
 import org.example.service.ImportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Обработчик события: импорт контактов
@@ -30,12 +36,19 @@ public class ImportHandler implements OperationHandler {
     private final ImportService importService;
 
     /**
+     * Сервис контактов
+     */
+    private final ContactService contactService;
+
+    /**
      * Конструктор
      */
     @Autowired
-    public ImportHandler(StateService stateService, ImportService importService){
+    public ImportHandler(StateService stateService, ImportService importService,
+                         ContactService contactService){
         this.stateService = stateService;
         this.importService = importService;
+        this.contactService = contactService;
     }
 
     @Override
@@ -45,6 +58,22 @@ public class ImportHandler implements OperationHandler {
 
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
-        return null;
+        BotResponse response = new BotResponse();
+        if(Objects.equals(messageText, "Назад")) {
+            response.setText("Вы вернулись назад");
+            stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+            response.setKeyboardText(keyboardCreator.dataMenu());
+            return response;
+        }
+        try {
+            String fileName = stateService.getParamByKey(chatId, "fileName");
+            List<Contact> contacts = importService.importContacts(fileName, messageText);
+            for(Contact contact : contacts) {
+                //TODO Добавить contactService.tryAddContact(chatId, contact);
+            }
+        } catch (UnsupportedFormatException e) {
+            response.setText(e.getMessage());
+        }
+        return response;
     }
 }

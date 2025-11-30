@@ -131,4 +131,11 @@ public class ReplyKeyboardConstants {
     public List<String> dataMenu() {
         return List.of("Импорт контактов", "Экспорт контактов", "Назад");
     }
+
+    /**
+     * Возвращает кнопки меню деталей экспорта
+     */
+    public List<String> exportDetailsMenu() {
+        return List.of("Добавить контакт", "Экспортировать", "Назад");
+    }
 }

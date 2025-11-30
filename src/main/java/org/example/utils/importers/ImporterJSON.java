@@ -12,12 +12,12 @@ import java.util.List;
 @Component
 public class ImporterJSON implements Importer {
     @Override
-    public List<Contact> importContacts() throws ImportException {
+    public List<Contact> importContacts(String content) throws ImportException {
         return List.of();
     }
 
     @Override
-    public String getSupportableFormat() {
+    public String getSupportedFormat() {
         return "json";
     }
 }

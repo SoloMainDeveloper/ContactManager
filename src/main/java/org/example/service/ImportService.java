@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.apache.commons.io.FilenameUtils;
 import org.example.entity.Contact;
 import org.example.exceptions.ImportException;
 import org.example.exceptions.UnsupportedFormatException;
@@ -29,25 +30,28 @@ public class ImportService {
     public ImportService(List<Importer> importers) {
         this.importers = importers.stream().collect(
                 Collectors.toMap(
-                        Importer::getSupportableFormat,
+                        Importer::getSupportedFormat,
                         Function.identity()
                 ));
     }
 
     /**
      * Импортирует контакты из файла
+     * @param content содержимое импортируемого файла
      * @return список контактов из файла
-     * @throws UnsupportedFormatException ошибка импорта
+     * @throws UnsupportedFormatException неподдерживаемый формат импорта
      */
-    public List<Contact> importContacts() throws UnsupportedFormatException {
-        String key = "Нужно откуда-то взять";
-        if(!importers.containsKey(key)){
+    public List<Contact> importContacts(String fileName, String content)
+            throws UnsupportedFormatException {
+        String format = FilenameUtils.getExtension(fileName);
+        if(!importers.containsKey(format)) {
+            String supportedFormats = String.join("/", importers.keySet()) ;
             throw new UnsupportedFormatException("Данный формат файла не " +
-                    "поддерживается");
+                    "поддерживается. Используйте " + supportedFormats);
         }
-        Importer importer = importers.get(key);
+        Importer importer = importers.get(format);
         try {
-            return importer.importContacts();
+            return importer.importContacts(content);
         } catch (ImportException exp) {
             //TODO
         }
