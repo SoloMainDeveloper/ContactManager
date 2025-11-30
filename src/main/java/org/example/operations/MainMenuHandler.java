@@ -54,6 +54,12 @@ public class MainMenuHandler implements OperationHandler {
                         + " действие хотите совершить");
                 response.setKeyboardText(keyboardCreator.groupsMenu());
             }
+            case "Данные" -> {
+                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+                response.setText("Взаимодействие с данными. Выберите какое"
+                        + " действие хотите совершить");
+                response.setKeyboardText(keyboardCreator.dataMenu());
+            }
             default -> response.setText("Я не понимаю эту команду");
         }
         return response;

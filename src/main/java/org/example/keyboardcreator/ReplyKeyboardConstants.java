@@ -10,7 +10,7 @@ public class ReplyKeyboardConstants {
      * Возвращает кнопки главного меню
      */
     public final List<String> mainMenu() {
-        return List.of("Контакты", "Группы");
+        return List.of("Контакты", "Группы", "Данные");
     }
 
     /**
@@ -123,5 +123,19 @@ public class ReplyKeyboardConstants {
                 "В порядке убывания кол-ва участников",
                 "В порядке возрастания кол-ва участников",
                 "Назад к выбору");
+    }
+
+    /**
+     * Возвращает кнопки меню Данные
+     */
+    public List<String> dataMenu() {
+        return List.of("Импорт контактов", "Экспорт контактов", "Назад");
+    }
+
+    /**
+     * Возвращает кнопки меню деталей экспорта
+     */
+    public List<String> exportDetailsMenu() {
+        return List.of("Добавить контакт", "Экспортировать", "Назад");
     }
 }
