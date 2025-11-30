@@ -23,5 +23,9 @@ public enum Operation {
 
     CURRENT_GROUP_MENU,
     EDIT_GROUP,
-    DELETE_GROUP
+    DELETE_GROUP,
+
+    DATA_MENU,
+    IMPORT_CONTACTS,
+    EXPORT_CONTACTS
 }
