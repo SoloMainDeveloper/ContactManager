@@ -27,15 +27,16 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     /**
      * Обработчик сообщений
      */
-    @Autowired
-    private MessageHandler messageHandler;
+    private final MessageHandler messageHandler;
 
     /**
-     * Конструктор. Инициализируем API-token
+     * Конструктор. Инициализируем API-token, инжектим MessageHandler
      */
+    @Autowired
     public ContactManagerBot(BotConfig config, MessageHandler messageHandler){
         super(config.getBotToken());
         this.botUsername = config.getBotUsername();
+        this.messageHandler = messageHandler;
     }
 
     @Override
