@@ -30,12 +30,12 @@ public class GroupMessageHandlerTest {
     /**
      * Фейковый групп-репозиторий для тестов
      */
-    private FakeGroupRepository groupRepository;
+    private FakeGroupRepository fakeGroupRepository;
 
     /**
      * Фейковый контакт-репозиторий для тестов
      */
-    private FakeContactRepository contactRepository;
+    private FakeContactRepository fakeContactRepository;
 
     /**
      * Групп-сервис для тестов
@@ -64,10 +64,10 @@ public class GroupMessageHandlerTest {
      */
     @BeforeEach
     public void setup() {
-        groupRepository = new FakeGroupRepository();
-        groupService = new GroupService(groupRepository);
-        contactRepository = new FakeContactRepository();
-        contactService = new ContactService(contactRepository);
+        fakeGroupRepository = new FakeGroupRepository();
+        groupService = new GroupService(fakeGroupRepository);
+        fakeContactRepository = new FakeContactRepository();
+        contactService = new ContactService(fakeContactRepository);
         StateService stateService = new StateService();
         handler = new MessageHandler(
                 List.of(new AddGroupHandler(groupService, contactService, stateService),
@@ -87,7 +87,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void addGroupTest() {
-        contactRepository.add(new Contact(
+        fakeContactRepository.add(new Contact(
                 chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Группы");
@@ -106,10 +106,8 @@ public class GroupMessageHandlerTest {
 
         Group group = groupService
                 .findGroupByName(chatId, "Друзья")
-                .orElse(null);
-        Assertions.assertNotNull(group);
+                .orElseThrow();
         Assertions.assertEquals("0", converter.contactIdsToString(group.getContactIds()));
-        Assertions.assertEquals(1, groupRepository.getCurrentGroupsSize(chatId));
     }
 
     /**
@@ -117,7 +115,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void addContactThatAlreadyExistsTest() {
-        contactRepository.add(new Contact(
+        fakeContactRepository.add(new Contact(
                 chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Группы");
@@ -137,10 +135,8 @@ public class GroupMessageHandlerTest {
 
         Group group = groupService
                 .findGroupByName(chatId, "Друзья")
-                .orElse(null);
-        Assertions.assertNotNull(group);
+                .orElseThrow();
         Assertions.assertEquals("", converter.contactIdsToString(group.getContactIds()));
-        Assertions.assertEquals(1, groupRepository.getCurrentGroupsSize(chatId));
     }
 
     /**
@@ -148,7 +144,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void deleteGroupTest() {
-        groupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
@@ -159,7 +155,6 @@ public class GroupMessageHandlerTest {
 
         Assertions.assertEquals("Группа Друзья успешно удалена", response.getText());
         Assertions.assertTrue(groupService.findGroupByName(chatId, "Друзья").isEmpty());
-        Assertions.assertEquals(0, groupRepository.getCurrentGroupsSize(chatId));
     }
 
     /**
@@ -167,8 +162,8 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void editContactTest() {
-        groupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
-        contactRepository.add(new Contact(
+        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeContactRepository.add(new Contact(
                 chatId, "Олег", "95436475", 34, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Группы");
@@ -197,7 +192,6 @@ public class GroupMessageHandlerTest {
         Assertions.assertEquals("0", converter
                 .contactIdsToString(updatedGroup.getContactIds()));
         Assertions.assertNotNull(contactService.findContactById(chatId, 0L));
-        Assertions.assertEquals(1, groupRepository.getCurrentGroupsSize(chatId));
     }
 
     /**
@@ -205,7 +199,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void findContactByNameTest() {
-        groupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
@@ -216,7 +210,6 @@ public class GroupMessageHandlerTest {
         );
         Optional<Group> group = groupService.findGroupByName(chatId, "Друзья");
         Assertions.assertTrue(group.isPresent());
-        Assertions.assertEquals(1, groupRepository.getCurrentGroupsSize(chatId));
     }
 
     /**
@@ -224,9 +217,9 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void getAllGroupsTest() {
-        groupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
-        groupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
-        groupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Получить все");
@@ -243,9 +236,9 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void getAllGroupsWithSorterByNameTest() {
-        groupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
-        groupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
-        groupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Получить все");

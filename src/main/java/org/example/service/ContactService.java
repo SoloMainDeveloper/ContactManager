@@ -119,7 +119,7 @@ public class ContactService {
      */
     public void toggleContactBlocked(Contact contact) {
         contact.setBlocked(!contact.isBlocked());
-        repository.update(contact);
+        repository.update(contact.getName(), contact);
     }
 
     /**
@@ -146,7 +146,7 @@ public class ContactService {
         if(params.containsKey("contactGender")) {
             contact.setGender(Gender.fromDisplayName(params.get("contactGender")));
         }
-        repository.update(contact);
+        repository.update(name, contact);
     }
 
     /**

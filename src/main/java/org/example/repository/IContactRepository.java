@@ -36,8 +36,9 @@ public interface IContactRepository {
 
     /**
      * Обновить контакт
+     * @param currentName имя контакта до обновления
      */
-    void update(Contact contact);
+    void update(String currentName, Contact contact);
 
     /**
      * Удалить контакт по имени, соответствующий конкретному пользователю по chatId
