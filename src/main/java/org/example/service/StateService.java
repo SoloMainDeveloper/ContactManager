@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.repository.StateRepository;
+import org.example.state.InMemoryStateStorage;
 import org.example.state.Operation;
 import org.example.state.State;
 import org.springframework.stereotype.Service;
@@ -16,23 +16,23 @@ public class StateService {
     /**
      * Репозиторий состояний
      */
-    private final StateRepository repository;
+    private final InMemoryStateStorage inMemoryStateStorage;
 
     /**
      * Конструктор
      */
-    public StateService(StateRepository repository){
-        this.repository = repository;
+    public StateService(){
+        this.inMemoryStateStorage = new InMemoryStateStorage();
     }
 
     /**
      * Возвращает существующее состояние, в ином случае сначала его создаёт
      */
     private State getOrCreateState(Long chatId){
-        if(!repository.containsKey(chatId)){
-            repository.add(chatId, new State());
+        if(!inMemoryStateStorage.containsKey(chatId)){
+            inMemoryStateStorage.add(chatId, new State());
         }
-        return repository.getStateById(chatId);
+        return inMemoryStateStorage.getStateById(chatId);
     }
 
     /**
