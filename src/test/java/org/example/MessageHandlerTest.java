@@ -3,7 +3,6 @@ package org.example;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.*;
-import org.example.repository.StateRepository;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.StateService;
@@ -47,7 +46,7 @@ class MessageHandlerTest {
     public void setup() {
         fakeRepository = new FakeContactRepository();
         contactService = new ContactService(fakeRepository);
-        StateService stateService = new StateService(new StateRepository());
+        StateService stateService = new StateService();
         handler = new MessageHandler(
                 List.of(new AddContactHandler(contactService, stateService),
                         new BlockContactHandler(contactService, stateService),
