@@ -34,5 +34,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-### Secure Key ###
-API_KEY.txt
+### Secure properties ###
+src/main/resources/application.properties
+root.crt
