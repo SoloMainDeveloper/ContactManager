@@ -118,13 +118,14 @@ public class ContactRepository implements IContactRepository {
     }
 
     @Override
-    public void update(Contact contact) {
+    public void update(String currentName, Contact contact) {
         String sql = "UPDATE public.contacts SET name = :name, phone_number = "
                 + ":phoneNumber, age = :age, gender = :gender, is_blocked = :isBlocked "
-                + "WHERE chat_id = :chatId and name = :name";
+                + "WHERE chat_id = :chatId and name = :currentName";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", contact.getChatId())
+                .addValue("currentName", currentName)
                 .addValue("name", contact.getName())
                 .addValue("phoneNumber", contact.getPhoneNumber())
                 .addValue("age", contact.getAge())

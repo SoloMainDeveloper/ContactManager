@@ -253,7 +253,7 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "5236790");
 
         Assertions.assertEquals(
-                "По номеру 5236790 контакт успешно найден.",
+                "По номеру 5236790 контакты успешно найдены.",
                 response.getText()
         );
         Assertions.assertEquals(

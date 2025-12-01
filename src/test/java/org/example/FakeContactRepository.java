@@ -174,7 +174,7 @@ public class FakeContactRepository implements IContactRepository {
     }
 
     @Override
-    public void update(Contact contact) {
+    public void update(String currentName, Contact contact) {
         Map<String, Contact> currentChatIdContacts = contacts.get(contact.getChatId());
         if(currentChatIdContacts != null) {
             currentChatIdContacts.put(contact.getName(), contact);
