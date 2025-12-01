@@ -4,9 +4,7 @@ import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.entity.Group;
 import org.example.operations.MainMenuHandler;
-import org.example.operations.contact.*;
 import org.example.operations.group.*;
-import org.example.repository.StateRepository;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.GroupService;
@@ -50,11 +48,6 @@ public class GroupMessageHandlerTest {
     private ContactService contactService;
 
     /**
-     * Сервис состояний
-     */
-    private StateService stateService;
-
-    /**
      * Обработчик сообщений
      */
     private MessageHandler handler;
@@ -75,11 +68,12 @@ public class GroupMessageHandlerTest {
         groupService = new GroupService(groupRepository);
         contactRepository = new FakeContactRepository();
         contactService = new ContactService(contactRepository);
-        stateService = new StateService(new StateRepository());
+        StateService stateService = new StateService();
         handler = new MessageHandler(
                 List.of(new AddGroupHandler(groupService, contactService, stateService),
                         new GroupsMenuHandler(stateService),
-                        new CurrentGroupMenuHandler(groupService, contactService, stateService),
+                        new CurrentGroupMenuHandler(
+                                groupService, contactService, stateService),
                         new DeleteGroupHandler(groupService, stateService),
                         new EditGroupHandler(groupService, contactService, stateService),
                         new FindGroupHandler(groupService, stateService),

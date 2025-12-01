@@ -2,7 +2,9 @@ package org.example.service;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
-import org.example.repository.ContactRepository;
+import org.example.exceptions.ContactAlreadyExistsException;
+import org.example.exceptions.ContactDoesNotExistException;
+import org.example.repository.IContactRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,34 +17,37 @@ public class ContactService {
     /**
      * Репозиторий для контактов
      */
-    private final ContactRepository repository;
+    private final IContactRepository repository;
 
     /**
      * Конструктор. Инициализируем repository, создавая подключение к БД
      */
-    public ContactService(ContactRepository repository){
+    public ContactService(IContactRepository repository){
         this.repository = repository;
     }
 
     /**
-     * Попытаться добавить контакт, при успешном выполнении возвращается true
+     * Попытаться добавить контакт
+     * @param chatId идентификатор чата пользователя
+     * @param params параметры создаваемого контакта
+     * @throws ContactAlreadyExistsException если контакт уже существует
      */
-    public boolean tryAddContact(Long chatId, Map<String, String> params) {
-        try {
-            Contact contact = new Contact(chatId,
-                    params.get("contactName"),
-                    params.getOrDefault("contactNumber", ""),
-                    Integer.parseInt(params.getOrDefault("contactAge",
-                            String.valueOf(-1))),
-                    Gender.fromDisplayName(params.get("contactGender")),
-                    false
-            );
+    public void tryAddContact(Long chatId, Map<String, String> params)
+            throws ContactAlreadyExistsException {
+        Contact contact = new Contact(chatId,
+                params.get("contactName"),
+                params.getOrDefault("contactNumber", ""),
+                Integer.parseInt(params.getOrDefault("contactAge",
+                        String.valueOf(-1))),
+                Gender.fromDisplayName(params.get("contactGender")),
+                false
+        );
+        String contactName = contact.getName();
+        if(findContactByName(chatId, contactName).isEmpty()) {
             repository.add(contact);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Произошла ошибка при попытке добавить контакт: " + e);
-            return false;
+        } else {
+            throw new ContactAlreadyExistsException(
+                    "Контакт %s уже существует".formatted(contactName));
         }
     }
 
@@ -61,10 +66,11 @@ public class ContactService {
     }
 
     /**
-     * Найти контакт по номеру у данного пользователя
+     * Найти контакты по номеру
+     * @return контакты в случае успеха, в ином случае пустой List.of().
      */
-    public Optional<Contact> findContactByNumber(Long chatId, String number) {
-        return repository.findContactByNumber(number, chatId);
+    public List<Contact> findContactsByNumber(Long chatId, String number) {
+        return repository.findContactsByNumber(number, chatId);
     }
 
     /**
@@ -108,37 +114,39 @@ public class ContactService {
     }
 
     /**
-     * Обновляет поле блокировки пользователя
+     * Изменяет состояние блокировки контакта на противоположное и вызывает update
+     * репозитория для данного контакта
      */
-    public void updateBlockField(Contact contact) {
-        repository.updateBlockField(contact);
+    public void toggleContactBlocked(Contact contact) {
+        contact.setBlocked(!contact.isBlocked());
+        repository.update(contact);
     }
 
     /**
      * Попытаться обновить все поля пользователя, кроме блокировки
+     * @param chatId идентификатор чата пользователя
+     * @param name имя контакта
+     * @param params отредактированные параметры контакта
+     * @throws ContactDoesNotExistException если контакт не существует
      */
-    public Boolean tryUpdateContact(Long chatId, String name, Map<String, String> params) {
-        try {
-            Contact oldContact = findContactByName(chatId, name).orElseThrow();
-            if(params.containsKey("contactName")) {
-                oldContact.setName(params.get("contactName"));
-            }
-            if(params.containsKey("contactNumber")) {
-                oldContact.setPhoneNumber(params.get("contactNumber"));
-            }
-            if(params.containsKey("contactAge")) {
-                oldContact.setAge(Integer.parseInt(params.get("contactAge")));
-            }
-            if(params.containsKey("contactGender")) {
-                oldContact.setGender(Gender.fromDisplayName(params.get("contactGender")));
-            }
-            repository.update(oldContact);
-            return true;
-        } catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Произошла ошибка при попытке изменить контакт: " + e);
-            return false;
+    public void tryUpdateContact(Long chatId, String name, Map<String, String> params)
+            throws ContactDoesNotExistException {
+        Optional<Contact> foundContact = findContactByName(chatId, name);
+        Contact contact = foundContact.orElseThrow(() -> new ContactDoesNotExistException(
+                "Контакт %s не существует".formatted(name)));
+        if(params.containsKey("contactName")) {
+            contact.setName(params.get("contactName"));
         }
+        if(params.containsKey("contactNumber")) {
+            contact.setPhoneNumber(params.get("contactNumber"));
+        }
+        if(params.containsKey("contactAge")) {
+            contact.setAge(Integer.parseInt(params.get("contactAge")));
+        }
+        if(params.containsKey("contactGender")) {
+            contact.setGender(Gender.fromDisplayName(params.get("contactGender")));
+        }
+        repository.update(contact);
     }
 
     /**
