@@ -62,6 +62,8 @@ public class CurrentGroupMenuHandler implements OperationHandler {
         Group group = groupService.findGroupByName(chatId, groupName).orElse(null);
         if(group == null) {
             response.setText("Группа " + groupName + " не была найдена");
+            response.setKeyboardText(keyboardCreator.groupsMenu());
+            stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
             return response;
         }
         switch (messageText) {
