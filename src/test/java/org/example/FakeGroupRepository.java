@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class FakeGroupRepository implements IGroupRepository {
     /**
-     * Объект хранения групп вместо БД
+     * Хранилище групп
      */
     private final Map<Long, Map<String, Group>> groups;
 

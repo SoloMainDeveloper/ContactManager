@@ -130,7 +130,7 @@ public class GroupMessageHandlerTest {
         BotResponse response = handler.handleMessage(
                 chatId, "Сохранить группу");
         Assertions.assertEquals(
-                "Группа не была сохранена, так как уже существует группа с этим именем",
+                "Произошла ошибка при добавлении группы: Группа Друзья уже существует",
                 response.getText());
 
         Group group = groupService
