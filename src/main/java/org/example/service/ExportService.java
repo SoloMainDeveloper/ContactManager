@@ -51,9 +51,8 @@ public class ExportService {
         try {
             return exporter.exportContacts(fileName, contacts);
         } catch (ExportException e) {
-            //TODO
+            throw new UnsupportedFormatException(e.getMessage());
         }
-        return null;
     }
 
     /**

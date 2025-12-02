@@ -52,9 +52,8 @@ public class ImportService {
         Importer importer = importers.get(format);
         try {
             return importer.importContacts(content);
-        } catch (ImportException exp) {
-            //TODO
+        } catch (ImportException ex) {
+            throw new UnsupportedFormatException(ex.getMessage());
         }
-        return null; //TODO удалить это
     }
 }

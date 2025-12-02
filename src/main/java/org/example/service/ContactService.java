@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
+import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.repository.ContactRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,25 +25,47 @@ public class ContactService {
         this.repository = repository;
     }
 
-    /**
-     * Попытаться добавить контакт, при успешном выполнении возвращается true
+     /**
+     * Попытаться добавить контакт
+     * @param chatId идентификатор чата пользователя
+     * @param params параметры создаваемого контакта
+     * @throws ContactAlreadyExistsException если контакт уже существует
      */
-    public boolean tryAddContact(Long chatId, Map<String, String> params) {
-        try {
-            Contact contact = new Contact(chatId,
-                    params.get("contactName"),
-                    params.getOrDefault("contactNumber", ""),
-                    Integer.parseInt(params.getOrDefault("contactAge",
-                            String.valueOf(-1))),
-                    Gender.fromDisplayName(params.get("contactGender")),
-                    false
-            );
+    public void tryAddContact(Long chatId, Map<String, String> params)
+            throws ContactAlreadyExistsException {
+        Contact contact = new Contact(chatId,
+                params.get("contactName"),
+                params.getOrDefault("contactNumber", ""),
+                Integer.parseInt(params.getOrDefault("contactAge",
+                        String.valueOf(-1))),
+                Gender.fromDisplayName(params.get("contactGender")),
+                false
+        );
+        String contactName = contact.getName();
+        if(findContactByName(chatId, contactName).isEmpty()) {
             repository.add(contact);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Произошла ошибка при попытке добавить контакт: " + e);
-            return false;
+        } else {
+            throw new ContactAlreadyExistsException(
+                    "Контакт %s уже существует".formatted(contactName));
+        }
+    }
+
+    /**
+     * Попытаться добавить контакт.
+     * Устанавливает chatId добавляемому контакту
+     * @param chatId идентификатор чата пользователя
+     * @param contact контакт без chatId
+     * @throws ContactAlreadyExistsException если контакт уже существует
+     */
+    public void tryAddContact(Long chatId, Contact contact)
+            throws ContactAlreadyExistsException {
+        contact.setChatId(chatId);
+        String contactName = contact.getName();
+        if(findContactByName(chatId, contactName).isEmpty()) {
+            repository.add(contact);
+        } else {
+            throw new ContactAlreadyExistsException(
+                    "Контакт %s уже существует".formatted(contactName));
         }
     }
 

@@ -8,7 +8,7 @@ import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.GroupConverter;
+import org.example.utils.converter.GroupConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

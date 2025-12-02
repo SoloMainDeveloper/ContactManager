@@ -1,8 +1,8 @@
 package org.example.repository;
 
 import org.example.entity.Group;
-import org.example.utils.GroupConverter;
-import org.example.utils.GroupMapper;
+import org.example.utils.converter.GroupConverter;
+import org.example.utils.mapper.GroupMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

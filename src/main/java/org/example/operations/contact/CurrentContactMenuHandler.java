@@ -8,6 +8,7 @@ import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.converter.ContactConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -60,7 +61,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 response.setKeyboardText(keyboardCreator.currentContactMenu());
             }
             case "Информация" -> {
-                response.setText(getContactInfo(contact));
+                ContactConverter converter = new ContactConverter();
+                response.setText(converter.contactToTxtFormat(contact));
                 response.setKeyboardText(keyboardCreator.contactsMenu());
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
@@ -102,29 +104,5 @@ public class CurrentContactMenuHandler implements OperationHandler {
             default -> response.setText("Я не понимаю эту команду");
         }
         return response;
-    }
-
-    /**
-     * Возвращает информацию о контакте
-     */
-    private String getContactInfo(Contact contact) {
-        String phoneNumberInfo = contact.getPhoneNumber().isEmpty()
-                ? "не указан"
-                : contact.getPhoneNumber();
-        String genderInfo = "";
-        switch (contact.getGender()){
-            case Gender.MALE -> genderInfo = "мужской";
-            case Gender.FEMALE -> genderInfo = "женский";
-            case Gender.NOT_SPECIFIED -> genderInfo = "не указан";
-        }
-        String ageInfo = contact.getAge() == -1
-                ? "не указан"
-                : String.valueOf(contact.getAge());
-        String isBlockedInfo = contact.isBlocked()
-                ? "Заблокирован"
-                : "Не заблокирован";
-
-        return String.format("Контакт: %s\nНомер: %s\nПол: %s\nВозраст: %s\n%s",
-                contact.getName(), phoneNumberInfo, genderInfo, ageInfo, isBlockedInfo);
     }
 }

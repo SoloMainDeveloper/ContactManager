@@ -3,7 +3,7 @@ package org.example.service;
 import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.repository.GroupRepository;
-import org.example.utils.GroupConverter;
+import org.example.utils.converter.GroupConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
