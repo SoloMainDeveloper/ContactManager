@@ -69,7 +69,7 @@ public class ImportHandler implements OperationHandler {
             String fileName = stateService.getParamByKey(chatId, "fileName");
             List<Contact> contacts = importService.importContacts(fileName, messageText);
             for(Contact contact : contacts) {
-                contactService.tryAddContact(chatId, contact);
+                //contactService.tryAddContact(chatId, contact);
             }
         } catch (UnsupportedFormatException e) {
             response.setText(e.getMessage());

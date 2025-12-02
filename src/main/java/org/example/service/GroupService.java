@@ -2,8 +2,10 @@ package org.example.service;
 
 import org.example.entity.Contact;
 import org.example.entity.Group;
-import org.example.repository.GroupRepository;
 import org.example.utils.converter.GroupConverter;
+import org.example.exceptions.GroupAlreadyExistsException;
+import org.example.exceptions.GroupDoesNotExistException;
+import org.example.repository.IGroupRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,29 +18,32 @@ public class GroupService {
     /**
      * Репозиторий для групп
      */
-    private final GroupRepository repository;
+    private final IGroupRepository repository;
 
     /**
      * Конструктор. Инициализируем repository, создавая подключение к БД
      */
-    public GroupService(GroupRepository repository) {
+    public GroupService(IGroupRepository repository) {
         this.repository = repository;
     }
 
     /**
-     * Попытаться добавить группу, при успешном выполнении возвращается true
+     * Попытаться добавить группу
+     * @param chatId идентификатор чата
+     * @param params параметры добавляемой группы
+     * @throws GroupAlreadyExistsException если группа уже существует
      */
-    public Boolean tryAddGroup(Long chatId, Map<String, String> params) {
-        try {
-            Set<Long> contactIds = new GroupConverter()
-                    .stringToContactIds(params.getOrDefault("contactIds", ""));
-            Group group = new Group(chatId, params.get("groupName"), contactIds);
+    public void tryAddGroup(Long chatId, Map<String, String> params)
+            throws GroupAlreadyExistsException {
+        Set<Long> contactIds = new GroupConverter()
+                .stringToContactIds(params.getOrDefault("contactIds", ""));
+        String groupName = params.get("groupName");
+        Group group = new Group(chatId, groupName, contactIds);
+        if(findGroupByName(chatId, groupName).isEmpty()){
             repository.add(group);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Произошла ошибка при попытке добавить группу: " + e);
-            return false;
+        } else {
+            throw new GroupAlreadyExistsException(
+                    "Группа %s уже существует".formatted(groupName));
         }
     }
 
@@ -92,55 +97,52 @@ public class GroupService {
     }
 
     /**
-     * Попытаться обновить группу
+     * Попытаться обновить имя группы
+     * @param chatId идентификатор чата
+     * @param oldName старое имя группы
+     * @param newName новое имя группы
+     * @throws GroupDoesNotExistException если группа не существует
      */
-    public Boolean tryUpdateGroupWithNewName(Long chatId, String oldName, String newName) {
-        try {
-            Group group = findGroupByName(chatId, oldName).orElseThrow();
-            group.setName(newName);
-            repository.update(oldName, group);
-            return true;
-        } catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Произошла ошибка при попытке изменить группу: " + e);
-            return false;
-        }
+    public void tryUpdateGroupWithNewName(Long chatId, String oldName, String newName)
+            throws GroupDoesNotExistException {
+        Group group = findGroupByName(chatId, oldName)
+                .orElseThrow(() -> new GroupDoesNotExistException(
+                        "Группа %s не существует".formatted(oldName)));
+        group.setName(newName);
+        repository.update(oldName, group);
     }
 
     /**
      * Попытаться добавить контакт в группу
+     * @param chatId идентификатор чата
+     * @param groupName имя группы
+     * @param contact добавляемый контакт
+     * @throws GroupDoesNotExistException если группа не существует
      */
-    public Boolean tryAddContactToGroup(Long chatId, String groupName, Contact contact) {
-        try {
-            Group group = findGroupByName(chatId, groupName).orElseThrow();
-            Long contactId = contact.getId();
-            group.addContactId(contactId);
-            repository.update(groupName, group);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Произошла ошибка: при добавлении контакта в группу. "
-                    + "Группа не была найдена. Ошибка: " + e);
-            return false;
-        }
+    public void tryAddContactToGroup(Long chatId, String groupName, Contact contact)
+            throws GroupDoesNotExistException {
+        Group group = findGroupByName(chatId, groupName)
+                .orElseThrow(() -> new GroupDoesNotExistException(
+                        "Группа %s не существует".formatted(groupName)));
+        Long contactId = contact.getId();
+        group.addContactId(contactId);
+        repository.update(groupName, group);
     }
 
     /**
      * Попытаться удалить контакт из группы
+     * @param chatId идентификатор чата
+     * @param groupName имя группы
+     * @param contact удаляемый контакт
+     * @throws GroupDoesNotExistException если группа не существует
      */
-    public Boolean tryRemoveContactFromGroup(
-            Long chatId, String groupName, Contact contact) {
-        try {
-            Group group = findGroupByName(chatId, groupName).orElseThrow();
-            group.removeContactId(contact.getId());
-            repository.update(groupName, group);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Произошла ошибка: при добавлении контакта в группу. "
-                    + "Группа не была найдена. Ошибка: " + e);
-            return false;
-        }
+    public void tryRemoveContactFromGroup(Long chatId, String groupName, Contact contact)
+            throws GroupDoesNotExistException {
+        Group group = findGroupByName(chatId, groupName)
+                .orElseThrow(() -> new GroupDoesNotExistException(
+                        "Группа %s не существует".formatted(groupName)));
+        group.removeContactId(contact.getId());
+        repository.update(groupName, group);
     }
 
     /**

@@ -53,6 +53,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
         Contact contact = contactService.findContactByName(chatId, contactName).orElse(null);
         if(contact == null){
             response.setText("Контакт " + contactName + " не был найден");
+            response.setKeyboardText(keyboardCreator.contactsMenu());
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             return response;
         }
         switch (messageText) {

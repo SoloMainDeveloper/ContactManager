@@ -39,7 +39,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     private final TelegramDocumentReader telegramDocumentReader;
 
     /**
-     * Конструктор. Инициализируем API-token
+     * Конструктор. Инициализируем API-token, инжектим MessageHandler
      */
     @Autowired
     public ContactManagerBot(BotConfig config, MessageHandler messageHandler,

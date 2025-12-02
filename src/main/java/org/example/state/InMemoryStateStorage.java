@@ -1,16 +1,12 @@
-package org.example.repository;
-
-import org.example.state.State;
-import org.springframework.stereotype.Repository;
+package org.example.state;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Репозиторий состояний
+ * Хранилище состояний в оперативной памяти
  */
-@Repository
-public class StateRepository {
+public class InMemoryStateStorage {
     /**
      * Хранилище состояний
      */

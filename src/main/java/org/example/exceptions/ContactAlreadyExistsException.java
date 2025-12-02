@@ -1,7 +1,7 @@
 package org.example.exceptions;
 
 /**
- * Исключение: группа уже существует
+ * Исключение: контакт уже существует
  */
 public class ContactAlreadyExistsException extends Exception {
     /**
