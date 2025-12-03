@@ -1,4 +1,4 @@
-package org.example.utils;
+package org.example.utils.converter;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * Преобразователь поля id-шников контактов группы
  */
 public class GroupConverter {
-    private static final String DELIMITER = ";";
+    private final String DELIMITER = ";";
 
     /**
      * Преобразовать сет id-шников контактов группы в строку

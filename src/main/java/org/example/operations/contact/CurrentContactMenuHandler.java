@@ -1,9 +1,9 @@
 package org.example.operations.contact;
 
+import org.example.entity.ContactDto;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
@@ -52,6 +52,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
         Contact contact = contactService.findContactByName(chatId, contactName).orElse(null);
         if(contact == null){
             response.setText("Контакт " + contactName + " не был найден");
+            response.setKeyboardText(keyboardCreator.contactsMenu());
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             return response;
         }
         switch (messageText) {
@@ -105,26 +107,18 @@ public class CurrentContactMenuHandler implements OperationHandler {
     }
 
     /**
-     * Возвращает информацию о контакте
+     * Получить информацию о контакте
      */
     private String getContactInfo(Contact contact) {
-        String phoneNumberInfo = contact.getPhoneNumber().isEmpty()
-                ? "не указан"
-                : contact.getPhoneNumber();
-        String genderInfo = "";
-        switch (contact.getGender()){
-            case Gender.MALE -> genderInfo = "мужской";
-            case Gender.FEMALE -> genderInfo = "женский";
-            case Gender.NOT_SPECIFIED -> genderInfo = "не указан";
-        }
-        String ageInfo = contact.getAge() == -1
-                ? "не указан"
-                : String.valueOf(contact.getAge());
-        String isBlockedInfo = contact.isBlocked()
-                ? "Заблокирован"
-                : "Не заблокирован";
+        ContactDto info = new ContactDto(contact);
 
-        return String.format("Контакт: %s\nНомер: %s\nПол: %s\nВозраст: %s\n%s",
-                contact.getName(), phoneNumberInfo, genderInfo, ageInfo, isBlockedInfo);
+        return String.format("""
+                    Имя контакта: %s
+                    Номер телефона: %s
+                    Возраст: %s
+                    Пол: %s
+                    %s
+                    """, info.getName(), info.getPhoneNumber(),
+                info.getAge(), info.getGender(), info.getIsBlocked());
     }
 }

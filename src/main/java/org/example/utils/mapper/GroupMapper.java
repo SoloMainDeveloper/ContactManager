@@ -1,6 +1,7 @@
-package org.example.utils;
+package org.example.utils.mapper;
 
 import org.example.entity.Group;
+import org.example.utils.converter.GroupConverter;
 
 import java.sql.ResultSet;
 

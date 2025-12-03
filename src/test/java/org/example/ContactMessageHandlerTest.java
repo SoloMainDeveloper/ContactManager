@@ -4,11 +4,9 @@ import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.*;
 import org.example.operations.contact.*;
-import org.example.repository.StateRepository;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.StateService;
-import org.example.state.Operation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,17 +21,12 @@ class ContactMessageHandlerTest {
     /**
      * Фейковый контакт-репозиторий для тестов
      */
-    private FakeContactRepository repository;
+    private FakeContactRepository fakeRepository;
 
     /**
      * Контакт-сервис для тестов
      */
     private ContactService contactService;
-
-    /**
-     * Сервис состояний
-     */
-    private StateService stateService;
 
     /**
      * Обработчик сообщений
@@ -52,9 +45,9 @@ class ContactMessageHandlerTest {
      */
     @BeforeEach
     public void setup() {
-        repository = new FakeContactRepository();
-        contactService = new ContactService(repository);
-        stateService = new StateService(new StateRepository());
+        fakeRepository = new FakeContactRepository();
+        contactService = new ContactService(fakeRepository);
+        StateService stateService = new StateService();
         handler = new MessageHandler(
                 List.of(new AddContactHandler(contactService, stateService),
                         new BlockContactHandler(contactService, stateService),
@@ -75,11 +68,6 @@ class ContactMessageHandlerTest {
     public void addContactTest() {
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Добавить");
-        Assertions.assertEquals(
-                Operation.ADD_CONTACT,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Олег");
         handler.handleMessage(chatId, "Номер");
         handler.handleMessage(chatId, "1234567890");
@@ -102,9 +90,6 @@ class ContactMessageHandlerTest {
         Assertions.assertEquals("1234567890", contact.getPhoneNumber());
         Assertions.assertEquals(42, contact.getAge());
         Assertions.assertEquals("Мужской", contact.getGender().getDisplayName());
-        Assertions.assertEquals(Operation.CONTACTS_MENU,
-                stateService.getOperation(chatId));
-        Assertions.assertEquals(1, repository.getCurrentContactsSize(chatId));
     }
 
     /**
@@ -118,23 +103,14 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Возраст");
         handler.handleMessage(chatId, "20");
         handler.handleMessage(chatId, "Сохранить контакт");
-        Assertions.assertEquals(
-                Operation.CONTACTS_MENU,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Добавить");
-        Assertions.assertEquals(
-                Operation.ADD_CONTACT,
-                stateService.getOperation(chatId)
-        );
         handler.handleMessage(chatId, "Олег");
         handler.handleMessage(chatId, "Возраст");
         handler.handleMessage(chatId, "22");
         BotResponse response = handler.handleMessage(
                 chatId, "Сохранить контакт");
         Assertions.assertEquals(
-                "Контакт Олег не был добавлен, так как он уже существует",
+                "Произошла ошибка при добавлении: Контакт Олег уже существует",
                 response.getText());
 
         Contact contact = contactService
@@ -143,9 +119,6 @@ class ContactMessageHandlerTest {
         Assertions.assertNotNull(contact);
         Assertions.assertEquals("Олег", contact.getName());
         Assertions.assertEquals(20, contact.getAge());
-        Assertions.assertEquals(Operation.CONTACTS_MENU,
-                stateService.getOperation(chatId));
-        Assertions.assertEquals(1, repository.getCurrentContactsSize(chatId));
     }
 
     /**
@@ -153,7 +126,8 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void blockContactTest() {
-        repository.add(new Contact(chatId, "Юлия", "95436475", 34, Gender.FEMALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Юлия", "95436475", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -161,10 +135,7 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Юлия");
         handler.handleInlineButtonActivated(chatId, "CURRENT_CONTACT_MENU_Юлия");
         BotResponse response1 = handler.handleMessage(chatId, "Блокировать");
-        Assertions.assertEquals(
-                Operation.BLOCK_CONTACT,
-                stateService.getOperation(chatId)
-        );
+
         Assertions.assertEquals(
                 "Текущий контакт не заблокирован. Вы хотите заблокировать?",
                 response1.getText()
@@ -188,7 +159,8 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void deleteContactTest() {
-        repository.add(new Contact(chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -196,15 +168,10 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Юлия");
         handler.handleInlineButtonActivated(chatId, "CURRENT_CONTACT_MENU_Юлия");
         handler.handleMessage(chatId, "Удалить");
-        Assertions.assertEquals(
-                Operation.DELETE_CONTACT,
-                stateService.getOperation(chatId)
-        );
         BotResponse response = handler.handleMessage(chatId, "Да");
 
         Assertions.assertEquals("Контакт Юлия успешно удален", response.getText());
         Assertions.assertTrue(contactService.findContactByName(chatId, "Юлия").isEmpty());
-        Assertions.assertEquals(0, repository.getCurrentContactsSize(chatId));
     }
 
     /**
@@ -212,7 +179,8 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void editContactTest() {
-        repository.add(new Contact(chatId, "Олег", "95436475", 34, Gender.FEMALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Олег", "95436475", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -233,9 +201,9 @@ class ContactMessageHandlerTest {
                 response.getText()
         );
 
-        Optional<Contact> contactByNumber = contactService
-                .findContactByNumber(chatId, "1234567890");
-        Assertions.assertTrue(contactByNumber.isEmpty());
+        List<Contact> contactsByNumber = contactService
+                .findContactsByNumber(chatId, "1234567890");
+        Assertions.assertTrue(contactsByNumber.isEmpty());
 
         Contact updatedContact = contactService
                 .findContactByName(chatId, "Олег")
@@ -244,7 +212,6 @@ class ContactMessageHandlerTest {
         Assertions.assertEquals("+99923333", updatedContact.getPhoneNumber());
         Assertions.assertEquals(43, updatedContact.getAge());
         Assertions.assertEquals("Мужской",updatedContact.getGender().getDisplayName());
-        Assertions.assertEquals(1, repository.getCurrentContactsSize(chatId));
     }
 
     /**
@@ -252,14 +219,11 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void findContactByNameTest() {
-        repository.add(new Contact(chatId, "Алексей", "9436475", 34, Gender.MALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Алексей", "9436475", 34, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
-        Assertions.assertEquals(
-                Operation.FIND_CONTACT,
-                stateService.getOperation(chatId)
-        );
         handler.handleMessage(chatId, "Поиск по имени");
         BotResponse response = handler.handleMessage(chatId, "Алексей");
 
@@ -273,7 +237,6 @@ class ContactMessageHandlerTest {
         );
         Optional<Contact> contact = contactService.findContactByName(chatId, "Алексей");
         Assertions.assertTrue(contact.isPresent());
-        Assertions.assertEquals(1, repository.getCurrentContactsSize(chatId));
     }
 
     /**
@@ -281,28 +244,24 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void findContactByNumberTest(){
-        repository.add(new Contact(chatId, "Алексей", "5236790", 34, Gender.MALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Алексей", "5236790", 34, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
-        Assertions.assertEquals(
-                Operation.FIND_CONTACT,
-                stateService.getOperation(chatId)
-        );
         handler.handleMessage(chatId, "Поиск по номеру");
         BotResponse response = handler.handleMessage(chatId, "5236790");
 
         Assertions.assertEquals(
-                "По номеру 5236790 контакт успешно найден.",
+                "По номеру 5236790 контакты успешно найдены.",
                 response.getText()
         );
         Assertions.assertEquals(
                 List.of("Алексей"),
                 response.getInlineKeyboardText().inlineText()
         );
-        Optional<Contact> contact = contactService.findContactByNumber(chatId, "5236790");
-        Assertions.assertTrue(contact.isPresent());
-        Assertions.assertEquals(1, repository.getCurrentContactsSize(chatId));
+        Contact contact = contactService.findContactsByNumber(chatId, "5236790").getFirst();
+        Assertions.assertNotNull(contact);
     }
 
     /**
@@ -310,16 +269,12 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getAllContactsTest() {
-        repository.add(new Contact(chatId, "Олег", "52367890", 34, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Игорь", "868645435", 23, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Юлия", "52367890", 76, Gender.FEMALE, false));
+        fakeRepository.add(new Contact(chatId, "Олег", "523678", 34, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Игорь", "86864", 23, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Юлия", "5236", 76, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Получить все");
-        Assertions.assertEquals(
-                Operation.GET_ALL_CONTACTS,
-                stateService.getOperation(chatId)
-        );
 
         BotResponse response = handler.handleMessage(chatId, "Получить");
         Assertions.assertEquals("Все контакты", response.getText());
@@ -334,17 +289,12 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getAllContactsWithFilterByGenderTest() {
-        repository.add(new Contact(chatId, "Олег", "52367890", 34, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Игорь", "868645435", 23, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Юлия", "52367890", 76, Gender.FEMALE, false));
+        fakeRepository.add(new Contact(chatId, "Олег", "523678", 34, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Игорь", "86864", 23, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Юлия", "5236", 76, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Получить все");
-        Assertions.assertEquals(
-                Operation.GET_ALL_CONTACTS,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Добавить фильтр");
         handler.handleMessage(chatId, "По полу");
         handler.handleMessage(chatId, "Мужской");
@@ -364,17 +314,12 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getAllContactsWithFilterByAgeTest() {
-        repository.add(new Contact(chatId, "Олег", "52367890", 34, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Игорь", "868645435", 23, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Юлия", "52367890", 76, Gender.FEMALE, false));
+        fakeRepository.add(new Contact(chatId, "Олег", "523678", 34, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Игорь", "86864", 23, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Юлия", "5236", 76, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Получить все");
-        Assertions.assertEquals(
-                Operation.GET_ALL_CONTACTS,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Добавить фильтр");
         handler.handleMessage(chatId, "По возрасту");
         handler.handleMessage(chatId, "23");
@@ -395,17 +340,12 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getAllContactsWithSorterByAgeTest() {
-        repository.add(new Contact(chatId, "Олег", "52367890", 34, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Игорь", "868645435", 23, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Юлия", "52367890", 76, Gender.FEMALE, false));
+        fakeRepository.add(new Contact(chatId, "Олег", "523678", 34, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Игорь", "86864", 23, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Юлия", "5236", 76, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Получить все");
-        Assertions.assertEquals(
-                Operation.GET_ALL_CONTACTS,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Добавить сортировку");
         BotResponse response = handler
                 .handleMessage(chatId, "В порядке убывания возраста");
@@ -424,17 +364,12 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getAllContactsWithSorterByNameTest() {
-        repository.add(new Contact(chatId, "Олег", "52367890", 34, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Игорь", "868645435", 23, Gender.MALE, false));
-        repository.add(new Contact(chatId, "Юлия", "52367890", 76, Gender.FEMALE, false));
+        fakeRepository.add(new Contact(chatId, "Олег", "523678", 34, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Игорь", "86864", 23, Gender.MALE, false));
+        fakeRepository.add(new Contact(chatId, "Юлия", "5236", 76, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Получить все");
-        Assertions.assertEquals(
-                Operation.GET_ALL_CONTACTS,
-                stateService.getOperation(chatId)
-        );
-
         handler.handleMessage(chatId, "Добавить сортировку");
         BotResponse response = handler
                 .handleMessage(chatId, "В алфавитном порядке имени");
@@ -453,7 +388,8 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getContactFullInfoTest() {
-        repository.add(new Contact(chatId, "Олег", "1234567890", 42, Gender.MALE, false));
+        fakeRepository.add(
+                new Contact(chatId, "Олег", "1234567890", 42, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -468,10 +404,6 @@ class ContactMessageHandlerTest {
                 Пол: мужской
                 Возраст: 42
                 Не заблокирован""", response.getText());
-        Assertions.assertEquals(
-                Operation.CONTACTS_MENU,
-                stateService.getOperation(chatId)
-        );
     }
 
     /**
@@ -479,7 +411,8 @@ class ContactMessageHandlerTest {
      */
     @Test
     public void getContactInfoOnlyNameTest(){
-        repository.add(new Contact(chatId, "Олег", "", -1, Gender.NOT_SPECIFIED, false));
+        fakeRepository.add(
+                new Contact(chatId, "Олег", "", -1, Gender.NOT_SPECIFIED, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");

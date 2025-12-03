@@ -1,6 +1,7 @@
 package org.example.operations.group;
 
 import org.example.entity.Contact;
+import org.example.exceptions.GroupAlreadyExistsException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -8,7 +9,7 @@ import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.GroupConverter;
+import org.example.utils.converter.GroupConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -64,14 +65,14 @@ public class AddGroupHandler implements OperationHandler {
             }
             case "Сохранить группу" -> {
                 String groupName = stateService.getParamByKey(chatId, "groupName");
-                Boolean isSuccessful = groupService.tryAddGroup(chatId,
-                        stateService.getParams(chatId));
-                if(isSuccessful){
+                try {
+                    groupService.tryAddGroup(chatId, stateService.getParams(chatId));
                     response.setText("Группа " + groupName + " успешна сохранена");
                     response.setKeyboardText(keyboardCreator.addGroupMenu());
-                } else {
-                    response.setText("Группа не была сохранена, так как уже существует"
-                            + " группа с этим именем");
+                } catch (GroupAlreadyExistsException e) {
+                    e.printStackTrace();
+                    response.setText(
+                            "Произошла ошибка при добавлении группы: " + e.getMessage());
                 }
                 response.setKeyboardText(keyboardCreator.groupsMenu());
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
@@ -119,7 +120,6 @@ public class AddGroupHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
         GroupConverter converter = new GroupConverter();
-        String dfs = stateService.getParamByKey(chatId, "contactIds");
         Set<Long> contactIds = converter.stringToContactIds(
                 stateService.getParamByKey(chatId, "contactIds"));
         if(contact.isPresent()) {

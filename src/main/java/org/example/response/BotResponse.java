@@ -56,6 +56,13 @@ public class BotResponse {
     }
 
     /**
+     * Есть ли документ в ответе бота
+     */
+    public Boolean hasDocument() {
+        return document != null;
+    }
+
+    /**
      * Возвращает документ, прилагаемый к ответу бота
      */
     public AppDocument getDocument() {

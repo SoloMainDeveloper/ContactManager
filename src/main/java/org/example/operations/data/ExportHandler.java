@@ -2,7 +2,7 @@ package org.example.operations.data;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
-import org.example.exceptions.UnsupportedFormatException;
+import org.example.exceptions.ExportException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -10,13 +10,10 @@ import org.example.service.ContactService;
 import org.example.service.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.GroupConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Обработчик события: экспорт контактов
@@ -48,7 +45,7 @@ public class ExportHandler implements OperationHandler {
      */
     @Autowired
     public ExportHandler(StateService stateService, ExportService exportService,
-                         ContactService contactService){
+                         ContactService contactService) {
         this.stateService = stateService;
         this.exportService = exportService;
         this.contactService = contactService;
@@ -62,48 +59,6 @@ public class ExportHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        switch (messageText) {
-            case "Добавить контакт" -> {
-                stateService.setLastRequestedParamKey(chatId, "exportContactName");
-                response.setText("Введите имя контакта для добавления в экспорт");
-            }
-            case "Экспортировать" -> {
-                String fileName = stateService.getParamByKey(chatId, "exportFileName");
-                String format = stateService.getParamByKey(chatId, "exportFormat");
-                Set<Long> contactIds = new GroupConverter().stringToContactIds(
-                        stateService.getParamByKey(chatId, "exportContactIds"));
-                List<Contact> contacts = contactIds.stream()
-                        .map(id -> contactService.findContactById(chatId, id))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .toList();
-                try {
-                    AppDocument document = exportService.exportContacts(
-                            fileName, format, contacts);
-                    response.setDocument(document);
-                    response.setText("Контакты были успешно экспортированы в файл");
-                } catch (UnsupportedFormatException e) {
-                    response.setText(e.getMessage());
-                }
-            }
-            case "Назад" -> {
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
-                response.setKeyboardText(keyboardCreator.dataMenu());
-            }
-            default -> {
-                return handleMessageWithContext(chatId, messageText);
-            }
-        }
-        return response;
-    }
-
-    /**
-     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными,
-     * которые были запрошены ботом
-     */
-    private BotResponse handleMessageWithContext(Long chatId, String messageText) {
-        BotResponse response = new BotResponse();
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
             response.setText("Я не понимаю эту команду.");
@@ -116,32 +71,20 @@ public class ExportHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "exportFileName");
             }
             case "exportFileName" -> {
-                stateService.addParameter(chatId, lastRequestedParamKey, messageText);
-                response.setText("Добавьте контакты, которые хотите экспортировать");
-                response.setKeyboardText(keyboardCreator.exportDetailsMenu());
-            }
-            case "exportContactName" -> {
-                Optional<Contact> contact = contactService.findContactByName(
-                        chatId, messageText);
-                if(contact.isPresent()) {
-                    GroupConverter converter = new GroupConverter();
-                    Set<Long> contactIds = converter.stringToContactIds(
-                            stateService.getParamByKey(chatId, "exportContactIds"));
-                    Long contactId = contact.get().getId();
-                    if(contactIds.contains(contactId)) {
-                        response.setText("Контакт с таким именем уже добавлен");
-                    } else {
-                        contactIds.add(contactId);
-                        stateService.addParameter(chatId, "exportContactIds",
-                                converter.contactIdsToString(contactIds));
-                        response.setText("Контакт " + messageText + " успешно добавлен в "
-                                + "группу. Желаете добавить ещё контактов к экспорту?");
-                        response.setKeyboardText(keyboardCreator.exportDetailsMenu());
-                    }
-                } else {
-                    response.setText("Контакт с именем '" + messageText + "' не найден");
-                    response.setKeyboardText(keyboardCreator.exportDetailsMenu());
+                String format = stateService.getParamByKey(chatId, "exportFormat");
+                List<Contact> contacts = contactService.findContactsByChatId(chatId);
+                try {
+                    AppDocument document = exportService
+                            .exportContacts(messageText, format, contacts);
+                    response.setDocument(document);
+                    response.setText("Контакты были успешно экспортированы в файл");
+                } catch (ExportException e) {
+                    e.printStackTrace();
+                    response.setText("Произошла ошибка при экспорте: " + e.getMessage());
                 }
+
+                response.setKeyboardText(keyboardCreator.dataMenu());
+                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
             }
             default -> response.setText("Я не понимаю эту команду.");
         }

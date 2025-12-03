@@ -1,17 +1,16 @@
 package org.example;
 
 import org.example.entity.Group;
-import org.example.repository.GroupRepository;
-import org.postgresql.ds.PGSimpleDataSource;
+import org.example.repository.IGroupRepository;
 
 import java.util.*;
 
 /**
  * Фейковое хранилище групп. Необходимо для тестов
  */
-public class FakeGroupRepository extends GroupRepository {
+public class FakeGroupRepository implements IGroupRepository {
     /**
-     * Объект хранения групп вместо БД
+     * Хранилище групп
      */
     private final Map<Long, Map<String, Group>> groups;
 
@@ -19,18 +18,7 @@ public class FakeGroupRepository extends GroupRepository {
      * Конструктор
      */
     public FakeGroupRepository() {
-        super(new PGSimpleDataSource());
         groups = new LinkedHashMap<>();
-    }
-
-    /**
-     * Возвращает количество групп у пользователя с данным chatId
-     */
-    public int getCurrentGroupsSize(Long chatId) {
-        if (groups.containsKey(chatId)) {
-            return groups.get(chatId).size();
-        }
-        return 0;
     }
 
     @Override
@@ -80,11 +68,11 @@ public class FakeGroupRepository extends GroupRepository {
     }
 
     @Override
-    public void update(String oldName, Group group) {
+    public void update(String currentName, Group group) {
         Map<String, Group> userGroups = groups.get(group.getChatId());
         if (userGroups != null) {
-            if (!oldName.equals(group.getName())) {
-                userGroups.remove(oldName);
+            if (!currentName.equals(group.getName())) {
+                userGroups.remove(currentName);
             }
             userGroups.put(group.getName(), group);
         }

@@ -2,7 +2,7 @@ package org.example.utils.exporters;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
-import org.example.exceptions.ExportException;
+import org.example.entity.ContactDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,10 +12,32 @@ import java.util.List;
  */
 @Component
 public class ExporterTXT implements Exporter {
-    public AppDocument exportContacts(String fileName, List<Contact> contacts)
-            throws ExportException {
-        String content = "";
-        return new AppDocument(fileName, content);
+    @Override
+    public AppDocument exportContacts(String fileName, List<Contact> contacts) {
+        StringBuilder content = new StringBuilder();
+        for (Contact contact : contacts) {
+            content.append(convertToTxtFormat(contact));
+        }
+        String fileNameWithFormat = String.format("%s.%s",
+                fileName, getSupportedFormat());
+        return new AppDocument(fileNameWithFormat, content.toString());
+    }
+
+    /**
+     * Преобразовать контакт в текстовый формат
+     */
+    private String convertToTxtFormat(Contact contact) {
+        ContactDto dto = new ContactDto(contact);
+
+        return String.format("""
+                    Имя контакта: %s
+                    Номер телефона: %s
+                    Возраст: %s
+                    Пол: %s
+                    Блокировка: %s
+                    
+                    """, dto.getName(), dto.getPhoneNumber(),
+                dto.getAge(), dto.getGender(), dto.getIsBlocked());
     }
 
     @Override

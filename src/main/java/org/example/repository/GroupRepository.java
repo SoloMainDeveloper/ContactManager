@@ -1,8 +1,8 @@
 package org.example.repository;
 
 import org.example.entity.Group;
-import org.example.utils.GroupConverter;
-import org.example.utils.GroupMapper;
+import org.example.utils.converter.GroupConverter;
+import org.example.utils.mapper.GroupMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -16,7 +16,7 @@ import java.util.Optional;
  * Репозиторий групп
  */
 @Repository
-public class GroupRepository {
+public class GroupRepository implements IGroupRepository {
     /**
      * Объект по управлению обработки событий и соединений с БД
      */
@@ -29,9 +29,7 @@ public class GroupRepository {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    /**
-     * Добавить группу в БД
-     */
+    @Override
     public void add(Group group) {
         String sql = "INSERT INTO public.groups (chat_id, name, contact_ids) " +
                 "VALUES (:chatId, :name, :contactIds)";
@@ -46,9 +44,7 @@ public class GroupRepository {
         jdbcTemplate.update(sql, params);
     }
 
-    /**
-     * Найти группу по названию в БД, соответствующую конкретному пользователю по chatId
-     */
+    @Override
     public Optional<Group> findGroupByName(String name, Long chatId) {
         String sql = "SELECT * FROM public.groups " +
                 "WHERE chat_id = :chatId and name = :name";
@@ -69,9 +65,7 @@ public class GroupRepository {
         }
     }
 
-    /**
-     * Найти все группы по id пользователя
-     */
+    @Override
     public List<Group> findGroupsByChatId(Long chatId, String sorter) {
         String sql = "SELECT * FROM public.groups WHERE chat_id = :chatId" + sorter;
 
@@ -88,10 +82,8 @@ public class GroupRepository {
         }
     }
 
-    /**
-     * Обновить группу в БД
-     */
-    public void update(String oldName, Group group) {
+    @Override
+    public void update(String currentName, Group group) {
         String sql = "UPDATE public.groups " +
                 "SET name = :newName, contact_ids = :contactIds " +
                 "WHERE chat_id = :chatId and name = :oldName";
@@ -99,7 +91,7 @@ public class GroupRepository {
         GroupConverter converter = new GroupConverter();
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", group.getChatId())
-                .addValue("oldName", oldName)
+                .addValue("oldName", currentName)
                 .addValue("newName", group.getName())
                 .addValue("contactIds", converter
                         .contactIdsToString(group.getContactIds()));
@@ -107,9 +99,7 @@ public class GroupRepository {
         jdbcTemplate.update(sql, params);
     }
 
-    /**
-     * Удалить группу из БД по имени, соответствующую конкретному пользователю
-     */
+    @Override
     public void deleteByName(String name, Long chatId) {
         String sql = "DELETE FROM public.groups " +
                 "WHERE chat_id = :chatId and name = :name";
