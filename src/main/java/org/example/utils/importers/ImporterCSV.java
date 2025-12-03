@@ -33,7 +33,7 @@ public class ImporterCSV implements Importer {
      * Преобразовать csv-строку в контакт
      */
     private Contact convertFromCsvFormat(String csvContact) {
-        List<String> contactFields = List.of(csvContact.split(","));
+        List<String> contactFields = List.of(csvContact.split(";"));
 
         String phoneNumber = contactFields.get(1).equals("Не указан")
                 ? ""

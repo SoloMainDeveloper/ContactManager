@@ -26,7 +26,6 @@ public class ExportService {
     /**
      * Конструктор
      */
-    @Autowired
     public ExportService(List<Exporter> exporters) {
         this.exporters = exporters.stream().collect(
                 Collectors.toMap(
