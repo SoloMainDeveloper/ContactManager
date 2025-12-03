@@ -9,7 +9,10 @@ import java.util.stream.Collectors;
  * Преобразователь поля id-шников контактов группы
  */
 public class GroupConverter {
-    private static final String DELIMITER = ";";
+    /**
+     * Разделяет id-шники контактов в строке
+     */
+    private final String DELIMITER = ";";
 
     /**
      * Преобразовать сет id-шников контактов группы в строку
