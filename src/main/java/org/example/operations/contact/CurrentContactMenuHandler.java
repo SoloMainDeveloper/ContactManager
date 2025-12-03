@@ -106,6 +106,9 @@ public class CurrentContactMenuHandler implements OperationHandler {
         return response;
     }
 
+    /**
+     * Получить информацию о контакте
+     */
     private String getContactInfo(Contact contact) {
         ContactDto info = new ContactDto(contact);
 

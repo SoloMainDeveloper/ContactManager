@@ -3,7 +3,6 @@ package org.example.service;
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ExportException;
-import org.example.exceptions.UnsupportedFormatException;
 import org.example.utils.exporters.Exporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,21 +37,18 @@ public class ExportService {
 
     /**
      * Экспортирует контакты в файл
+     * @throws ExportException если формат не поддерживается
      */
     public AppDocument exportContacts(
             String fileName, String format, List<Contact> contacts)
-            throws UnsupportedFormatException {
+            throws ExportException {
         if(!exporters.containsKey(format)) {
             String supportedFormats = String.join("/", getSupportedFormats());
-            throw new UnsupportedFormatException("Данный формат файла не " +
+            throw new ExportException("Данный формат файла не " +
                     "поддерживается. Используйте " + supportedFormats);
         }
         Exporter exporter = exporters.get(format);
-        try {
-            return exporter.exportContacts(fileName, contacts);
-        } catch (ExportException e) {
-            throw new UnsupportedFormatException(e.getMessage());
-        }
+        return exporter.exportContacts(fileName, contacts);
     }
 
     /**

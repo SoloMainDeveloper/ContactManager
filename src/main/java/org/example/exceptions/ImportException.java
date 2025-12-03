@@ -3,11 +3,18 @@ package org.example.exceptions;
 /**
  * Исключение: ошибка импорта
  */
-public class ImportException extends RuntimeException {
+public class ImportException extends Exception {
     /**
-     * Конструктор
+     * Конструктор, принимающий сообщение
      */
     public ImportException(String message) {
         super(message);
+    }
+
+    /**
+     * Конструктор, принимающий {@link IncorrectImportDataException}
+     */
+    public ImportException(IncorrectImportDataException e) {
+        super(e);
     }
 }

@@ -3,7 +3,6 @@ package org.example.utils.exporters;
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.entity.ContactDto;
-import org.example.exceptions.ExportException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -15,20 +14,15 @@ import java.util.List;
  */
 @Component
 public class ExporterJSON implements Exporter {
-    public AppDocument exportContacts(String fileName, List<Contact> contacts)
-            throws ExportException {
-        try {
-            JSONArray content = new JSONArray();
-            for (Contact contact : contacts) {
-                content.put(convertToJsonFormat(contact));
-            }
-            String fileNameWithFormat = String.format("%s.%s",
-                    fileName, getSupportedFormat());
-            return new AppDocument(fileNameWithFormat, content.toString());
-        } catch (ExportException e) {
-            throw new ExportException("Произошла ошибка при экспорте файла в формате "
-                    + getSupportedFormat());
+    @Override
+    public AppDocument exportContacts(String fileName, List<Contact> contacts) {
+        JSONArray content = new JSONArray();
+        for (Contact contact : contacts) {
+            content.put(convertToJsonFormat(contact));
         }
+        String fileNameWithFormat = String.format("%s.%s",
+                fileName, getSupportedFormat());
+        return new AppDocument(fileNameWithFormat, content.toString());
     }
 
     /**

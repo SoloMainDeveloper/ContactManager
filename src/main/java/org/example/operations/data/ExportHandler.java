@@ -2,7 +2,7 @@ package org.example.operations.data;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
-import org.example.exceptions.UnsupportedFormatException;
+import org.example.exceptions.ExportException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -10,13 +10,10 @@ import org.example.service.ContactService;
 import org.example.service.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.converter.GroupConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Обработчик события: экспорт контактов
@@ -81,8 +78,9 @@ public class ExportHandler implements OperationHandler {
                             .exportContacts(messageText, format, contacts);
                     response.setDocument(document);
                     response.setText("Контакты были успешно экспортированы в файл");
-                } catch (UnsupportedFormatException e) {
-                    response.setText(e.getMessage());
+                } catch (ExportException e) {
+                    e.printStackTrace();
+                    response.setText("Произошла ошибка при экспорте: " + e.getMessage());
                 }
 
                 response.setKeyboardText(keyboardCreator.dataMenu());

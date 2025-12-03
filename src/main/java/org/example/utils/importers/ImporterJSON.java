@@ -2,7 +2,7 @@ package org.example.utils.importers;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
-import org.example.exceptions.ImportException;
+import org.example.exceptions.IncorrectImportDataException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,8 @@ import java.util.Objects;
 @Component
 public class ImporterJSON implements Importer {
     @Override
-    public List<Contact> importContacts(String content) throws ImportException {
+    public List<Contact> importContacts(String content)
+            throws IncorrectImportDataException {
         try {
             JSONArray jsonArray = new JSONArray(content);
             List<Contact> contacts = new ArrayList<>();
@@ -27,37 +28,31 @@ public class ImporterJSON implements Importer {
                 contacts.add(contact);
             }
             return contacts;
-        } catch (RuntimeException e) {
-            throw new ImportException("Произошла ошибка при импорте файла в формате "
-                    + getSupportedFormat());
+        } catch (Exception e) {
+            throw new IncorrectImportDataException("Некорректные данные");
         }
     }
 
     /**
      * Преобразовать json-объект в контакт
      */
-    public Contact convertFromJsonFormat(JSONObject jsonContact)
-            throws RuntimeException {
-        try {
-            String phoneNumber = jsonContact.getString("phoneNumber").equals("Не указан")
-                    ? ""
-                    : jsonContact.getString("phoneNumber");
-            int age = jsonContact.getString("age").equals("Не указан")
-                    ? -1
-                    : Integer.parseInt(jsonContact.getString("age"));
+    public Contact convertFromJsonFormat(JSONObject jsonContact) {
+        String phoneNumber = jsonContact.getString("phoneNumber").equals("Не указан")
+                ? ""
+                : jsonContact.getString("phoneNumber");
+        int age = jsonContact.getString("age").equals("Не указан")
+                ? -1
+                : Integer.parseInt(jsonContact.getString("age"));
 
-            Contact contact = new Contact();
-            contact.setName(jsonContact.getString("name"));
-            contact.setPhoneNumber(phoneNumber);
-            contact.setAge(age);
-            contact.setGender(Gender.fromDisplayName(
-                    jsonContact.getString("gender")));
-            contact.setBlocked(Objects.equals(
-                    jsonContact.getString("isBlocked"), "Заблокирован"));
-            return contact;
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        Contact contact = new Contact();
+        contact.setName(jsonContact.getString("name"));
+        contact.setPhoneNumber(phoneNumber);
+        contact.setAge(age);
+        contact.setGender(Gender.fromDisplayName(
+                jsonContact.getString("gender")));
+        contact.setBlocked(Objects.equals(
+                jsonContact.getString("isBlocked"), "Заблокирован"));
+        return contact;
     }
 
     @Override

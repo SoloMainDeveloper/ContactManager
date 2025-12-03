@@ -2,7 +2,6 @@ package org.example.utils.exporters;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
-import org.example.exceptions.ExportException;
 
 import java.util.List;
 
@@ -11,12 +10,10 @@ import java.util.List;
  */
 public interface Exporter {
     /**
-     * Экспортирует контакты в файл
+     * Экспортирует контакты в {@link AppDocument}
      * @return экспортируемый документ
-     * @throws ExportException ошибка экспорта
      */
-    AppDocument exportContacts(String fileName, List<Contact> contacts)
-            throws ExportException;
+    AppDocument exportContacts(String fileName, List<Contact> contacts);
 
     /**
      * Возвращает поддерживаемый формат экспорта. Формат задаётся в нижнем регистре

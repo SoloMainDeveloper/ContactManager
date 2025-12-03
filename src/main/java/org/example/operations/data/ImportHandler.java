@@ -1,8 +1,9 @@
 package org.example.operations.data;
 
+import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ContactAlreadyExistsException;
-import org.example.exceptions.UnsupportedFormatException;
+import org.example.exceptions.ImportException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -13,9 +14,7 @@ import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Обработчик события: импорт контактов
@@ -64,12 +63,14 @@ public class ImportHandler implements OperationHandler {
         List<Contact> contacts;
         try {
             String fileName = stateService.getParamByKey(chatId, "fileName");
-            contacts = importService.importContacts(fileName, messageText);
-        } catch (UnsupportedFormatException e) {
-            response.setText(e.getMessage());
+            contacts = importService.importContacts(
+                    new AppDocument(fileName, messageText));
+        } catch (ImportException e) {
+            e.printStackTrace();
+            response.setText("Произошла ошибка при импорте: " + e.getMessage());
             response.setKeyboardText(keyboardCreator.dataMenu());
             stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
-            return  response;
+            return response;
         }
 
         StringBuilder responseText = new StringBuilder();

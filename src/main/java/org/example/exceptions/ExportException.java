@@ -3,7 +3,7 @@ package org.example.exceptions;
 /**
  * Исключение: ошибка экспорта
  */
-public class ExportException extends RuntimeException {
+public class ExportException extends Exception {
     /**
      * Конструктор
      */

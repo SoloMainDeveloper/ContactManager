@@ -1,5 +1,8 @@
 package org.example.entity;
 
+/**
+ * Dto класса {@link Contact}
+ */
 public class ContactDto {
     /**
      * Имя контакта
