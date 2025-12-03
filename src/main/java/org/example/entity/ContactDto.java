@@ -1,6 +1,6 @@
 package org.example.entity;
 
-public class ContactInfo {
+public class ContactDto {
     /**
      * Имя контакта
      */
@@ -29,7 +29,7 @@ public class ContactInfo {
     /**
      * Конструктор, где поля контакта преобразуются в строки
      */
-    public ContactInfo(Contact contact) {
+    public ContactDto(Contact contact) {
         name = contact.getName();
         phoneNumber = contact.getPhoneNumber().isEmpty()
                 ? "Не указан"

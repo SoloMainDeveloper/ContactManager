@@ -1,14 +1,13 @@
 package org.example.operations.contact;
 
+import org.example.entity.ContactDto;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.converter.ContactConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -63,8 +62,7 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 response.setKeyboardText(keyboardCreator.currentContactMenu());
             }
             case "Информация" -> {
-                ContactConverter converter = new ContactConverter();
-                response.setText(converter.contactToTxtFormat(contact));
+                response.setText(getContactInfo(contact));
                 response.setKeyboardText(keyboardCreator.contactsMenu());
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
@@ -106,5 +104,18 @@ public class CurrentContactMenuHandler implements OperationHandler {
             default -> response.setText("Я не понимаю эту команду");
         }
         return response;
+    }
+
+    private String getContactInfo(Contact contact) {
+        ContactDto info = new ContactDto(contact);
+
+        return String.format("""
+                    Имя контакта: %s
+                    Номер телефона: %s
+                    Возраст: %s
+                    Пол: %s
+                    %s
+                    """, info.getName(), info.getPhoneNumber(),
+                info.getAge(), info.getGender(), info.getIsBlocked());
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Импортёр контактов из CSV
@@ -18,20 +19,41 @@ public class ImporterCSV implements Importer {
         try {
             List<Contact> contacts = new ArrayList<>();
             List<String> contactLines = List.of(content.split("\n"));
-            for(String line : contactLines) {
-                List<String> splitLine = List.of(line.split(";"));
-                contacts.add(new Contact(
-                        Long.valueOf(splitLine.get(0)),
-                        splitLine.get(1),
-                        splitLine.get(2),
-                        Integer.parseInt(splitLine.get(3)),
-                        Gender.valueOf(splitLine.get(4)),
-                        Boolean.valueOf(splitLine.get(5))
-                ));
+            for(int i = 1; i < contactLines.size(); i++) {
+                contacts.add(convertFromCsvFormat(contactLines.get(i)));
             }
             return contacts;
-        } catch (Exception ex) {
-            throw new ImportException(ex.getMessage());
+        } catch (RuntimeException ex) {
+            throw new ImportException("Произошла ошибка при импорте файла в формате "
+                    + getSupportedFormat());
+        }
+    }
+
+    /**
+     * Преобразовать csv-строку в контакт
+     */
+    private Contact convertFromCsvFormat(String csvContact) throws RuntimeException {
+        try {
+            List<String> contactFields = List.of(csvContact.split(","));
+
+            String phoneNumber = contactFields.get(1).equals("Не указан")
+                    ? ""
+                    : contactFields.get(1);
+            int age = contactFields.get(2).equals("Не указан")
+                    ? -1
+                    : Integer.parseInt(contactFields.get(2));
+
+            Contact contact = new Contact();
+            contact.setName(contactFields.get(0));
+            contact.setPhoneNumber(phoneNumber);
+            contact.setAge(age);
+            contact.setGender(Gender.fromDisplayName(
+                    contactFields.get(3)));
+            contact.setBlocked(Objects.equals(
+                    contactFields.get(4), "Заблокирован"));
+            return contact;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 

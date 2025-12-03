@@ -75,17 +75,11 @@ public class ContactManagerBot extends TelegramLongPollingBot {
             String content = telegramDocumentReader.read(document.getFileId());
             BotResponse response = messageHandler.handleMessageWithDocument(
                     chatId, document.getFileName(), content);
-            SendMessage sendMessage = adaptBotResponseToTelegram(response);
-            sendMessage(chatId, sendMessage);
+            sendBotResponse(chatId, response);
         } else if(message.hasText()) {
             BotResponse response = messageHandler
                     .handleMessage(chatId, message.getText());
-            SendMessage sendMessage = adaptBotResponseToTelegram(response);
-            sendMessage(chatId, sendMessage);
-
-            if(response.hasDocument()) {
-                sendDocument(chatId, response.getDocument());
-            }
+            sendBotResponse(chatId, response);
         }
     }
 
@@ -95,10 +89,22 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     public void handleCallbackQuery(CallbackQuery callbackQuery) {
         String callbackData = callbackQuery.getData();
         Message message = (Message) callbackQuery.getMessage();
-        BotResponse response = messageHandler.handleInlineButtonActivated(
-                message.getChatId(), callbackData);
+        Long chatId = message.getChatId();
+        BotResponse response = messageHandler
+                .handleInlineButtonActivated(chatId, callbackData);
+        sendBotResponse(chatId, response);
+    }
+
+    /**
+     * Отправить ответ пользователю
+     */
+    public void sendBotResponse(Long chatId, BotResponse response) {
         SendMessage sendMessage = adaptBotResponseToTelegram(response);
-        sendMessage(message.getChatId(), sendMessage);
+        sendMessage(chatId, sendMessage);
+
+        if(response.hasDocument()) {
+            sendDocument(chatId, response.getDocument());
+        }
     }
 
     /**

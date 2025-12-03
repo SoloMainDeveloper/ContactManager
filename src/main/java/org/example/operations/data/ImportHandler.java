@@ -1,6 +1,7 @@
 package org.example.operations.data;
 
 import org.example.entity.Contact;
+import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.exceptions.UnsupportedFormatException;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
@@ -12,6 +13,7 @@ import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,21 +61,34 @@ public class ImportHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        if(Objects.equals(messageText, "Назад")) {
-            response.setText("Вы вернулись назад");
-            stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
-            response.setKeyboardText(keyboardCreator.dataMenu());
-            return response;
-        }
+        List<Contact> contacts;
         try {
             String fileName = stateService.getParamByKey(chatId, "fileName");
-            List<Contact> contacts = importService.importContacts(fileName, messageText);
-            for(Contact contact : contacts) {
-                //contactService.tryAddContact(chatId, contact);
-            }
+            contacts = importService.importContacts(fileName, messageText);
         } catch (UnsupportedFormatException e) {
             response.setText(e.getMessage());
+            response.setKeyboardText(keyboardCreator.dataMenu());
+            stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+            return  response;
         }
+
+        StringBuilder responseText = new StringBuilder();
+        Integer counter = 0;
+        for(Contact contact : contacts) {
+            try {
+                contactService.tryAddContact(chatId, contact);
+                counter++;
+            } catch (ContactAlreadyExistsException e) {
+                responseText.append(e.getMessage()).append("\n");
+            }
+        }
+        responseText.append("Импорт контактов закончен, добавилось %d из %d"
+                .formatted(counter, contacts.size()));
+
+        response.setText(responseText.toString());
+        response.setKeyboardText(keyboardCreator.dataMenu());
+        stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+
         return response;
     }
 }

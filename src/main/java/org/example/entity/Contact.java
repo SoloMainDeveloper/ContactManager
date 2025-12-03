@@ -45,7 +45,7 @@ public class Contact {
     public Contact() {}
 
     /**
-     * Конструктор с заполнением всех полей контакта
+     * Конструктор для еще несуществующего контакта
      */
     public Contact(Long chatId, String name, String phoneNumber, int age,
                    Gender gender, Boolean isBlocked) {

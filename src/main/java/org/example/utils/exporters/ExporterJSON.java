@@ -2,9 +2,10 @@ package org.example.utils.exporters;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
+import org.example.entity.ContactDto;
 import org.example.exceptions.ExportException;
-import org.example.utils.converter.ContactConverter;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,17 +19,31 @@ public class ExporterJSON implements Exporter {
             throws ExportException {
         try {
             JSONArray content = new JSONArray();
-            ContactConverter converter = new ContactConverter();
             for (Contact contact : contacts) {
-                content.put(converter.contactToJsonFormat(contact));
+                content.put(convertToJsonFormat(contact));
             }
             String fileNameWithFormat = String.format("%s.%s",
                     fileName, getSupportedFormat());
             return new AppDocument(fileNameWithFormat, content.toString());
         } catch (ExportException e) {
-            throw new ExportException("Произошла ошибка экспорта в формате "
+            throw new ExportException("Произошла ошибка при экспорте файла в формате "
                     + getSupportedFormat());
         }
+    }
+
+    /**
+     * Преобразовать контакт в json формат
+     */
+    private JSONObject convertToJsonFormat(Contact contact) {
+        ContactDto dto = new ContactDto(contact);
+
+        JSONObject jsonContact = new JSONObject();
+        jsonContact.put("name", dto.getName());
+        jsonContact.put("phoneNumber", dto.getPhoneNumber());
+        jsonContact.put("age", dto.getAge());
+        jsonContact.put("gender", dto.getGender());
+        jsonContact.put("isBlocked", dto.getIsBlocked());
+        return jsonContact;
     }
 
     @Override

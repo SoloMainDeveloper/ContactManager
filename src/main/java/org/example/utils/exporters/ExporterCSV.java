@@ -2,8 +2,8 @@ package org.example.utils.exporters;
 
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
+import org.example.entity.ContactDto;
 import org.example.exceptions.ExportException;
-import org.example.utils.converter.ContactConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,11 +18,10 @@ public class ExporterCSV implements Exporter {
             throws ExportException {
         try {
             StringBuilder content = new StringBuilder();
-            ContactConverter converter = new ContactConverter();
             content.append("\uFEFF");
-            content.append("name;phone;age;gender;isBlocked\n");
+            content.append("name,phone,age,gender,isBlocked\n");
             for(Contact contact : contacts) {
-                content.append(converter.contactToCsvFormat(contact)).append("\n");
+                content.append(convertToCsvFormat(contact));
             }
             String fileNameWithFormat = String.format("%s.%s",
                     fileName, getSupportedFormat());
@@ -31,7 +30,16 @@ public class ExporterCSV implements Exporter {
             throw new ExportException("Произошла ошибка экспорта в формате "
                     + getSupportedFormat());
         }
+    }
 
+    /**
+     * Преобразовать контакт в csv формат
+     */
+    private String convertToCsvFormat(Contact contact) {
+        ContactDto dto = new ContactDto(contact);
+
+        return String.format("%s,%s,%s,%s,%s\n", dto.getName(), dto.getPhoneNumber(),
+                dto.getAge(), dto.getGender(), dto.getIsBlocked());
     }
 
     @Override
