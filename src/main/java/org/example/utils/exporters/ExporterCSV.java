@@ -16,7 +16,7 @@ public class ExporterCSV implements Exporter {
     public AppDocument exportContacts(String fileName, List<Contact> contacts) {
         StringBuilder content = new StringBuilder();
         content.append("\uFEFF");
-        content.append("name,phone,age,gender,isBlocked\n");
+        content.append("name;phone;age;gender;isBlocked\n");
         for(Contact contact : contacts) {
             content.append(convertToCsvFormat(contact));
         }
@@ -31,7 +31,7 @@ public class ExporterCSV implements Exporter {
     private String convertToCsvFormat(Contact contact) {
         ContactDto dto = new ContactDto(contact);
 
-        return String.format("%s,%s,%s,%s,%s\n", dto.getName(), dto.getPhoneNumber(),
+        return String.format("%s;%s;%s;%s;%s\n", dto.getName(), dto.getPhoneNumber(),
                 dto.getAge(), dto.getGender(), dto.getIsBlocked());
     }
 

@@ -15,6 +15,6 @@ public class ImportException extends Exception {
      * Конструктор, принимающий {@link IncorrectImportDataException}
      */
     public ImportException(IncorrectImportDataException e) {
-        super(e);
+        super(e.getMessage());
     }
 }

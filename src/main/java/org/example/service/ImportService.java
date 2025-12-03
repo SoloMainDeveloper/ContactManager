@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,6 @@ public class ImportService {
     /**
      * Конструктор
      */
-    @Autowired
     public ImportService(List<Importer> importers) {
         this.importers = importers.stream().collect(
                 Collectors.toMap(
@@ -47,7 +47,7 @@ public class ImportService {
             throws ImportException {
         String format = FilenameUtils.getExtension(document.fileName());
         if(!importers.containsKey(format)) {
-            String supportedFormats = String.join("/", importers.keySet()) ;
+            String supportedFormats = String.join("/", getSupportedFormats()) ;
             throw new ImportException("Данный формат файла не " +
                     "поддерживается. Используйте " + supportedFormats);
         }
@@ -57,5 +57,12 @@ public class ImportService {
         } catch (IncorrectImportDataException e) {
             throw new ImportException(e);
         }
+    }
+
+    /**
+     * Возвращает список поддерживаемых форматов импорта
+     */
+    public Set<String> getSupportedFormats() {
+        return importers.keySet();
     }
 }
