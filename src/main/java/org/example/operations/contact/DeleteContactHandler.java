@@ -1,5 +1,6 @@
 package org.example.operations.contact;
 
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
@@ -13,11 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DeleteContactHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис контактов
      */
@@ -44,25 +40,23 @@ public class DeleteContactHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        switch(messageText) {
-            case "Да":
+        switch (messageText) {
+            case "Да" -> {
                 String contactName = stateService.getParamByKey(chatId,
                         "currentContactName");
                 contactService.deleteByName(chatId, contactName);
                 response.setText("Контакт " + contactName + " успешно удален");
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
-                break;
-            case "Нет":
+            }
+            case "Нет" -> {
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
                 response.setText("Действие удаления текущего контакта отменено");
-                response.setKeyboardText(keyboardCreator.contactsMenu());
-                break;
-            default:
-                response.setText("Я не понимаю эту команду.");
-                break;
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
+            }
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

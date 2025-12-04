@@ -2,13 +2,14 @@ package org.example.repository;
 
 import org.example.entity.Group;
 import org.example.utils.GroupConverter;
-import org.example.utils.GroupMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,12 +56,11 @@ public class GroupRepository implements IGroupRepository {
 
         try {
             Group group = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> {
-                GroupMapper mapper = new GroupMapper();
-                return mapper.resultSetToGroupEntity(resultSet);
-            });
+                    (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
             return Optional.ofNullable(group);
-        } catch (EmptyResultDataAccessException exception) {
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске группы по имени:" + e);
             return Optional.empty();
         }
     }
@@ -73,11 +73,11 @@ public class GroupRepository implements IGroupRepository {
                 .addValue("chatId", chatId);
 
         try {
-            return jdbcTemplate.query(sql, params, (resultSet, rowNum) -> {
-                GroupMapper mapper = new GroupMapper();
-                return mapper.resultSetToGroupEntity(resultSet);
-            });
-        } catch (EmptyResultDataAccessException exception) {
+            return jdbcTemplate.query(sql, params,
+                    (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске групп по chatId:" + e);
             return List.of();
         }
     }
@@ -109,5 +109,17 @@ public class GroupRepository implements IGroupRepository {
                 .addValue("name", name);
 
         jdbcTemplate.update(sql, params);
+    }
+
+    /**
+     * Создаёт группу на основе ответа от БД
+     */
+    private Group resultSetToGroupEntity(ResultSet resultSet) throws SQLException {
+        GroupConverter converter = new GroupConverter();
+        return new Group(
+                resultSet.getLong("chat_id"),
+                resultSet.getString("name"),
+                converter.stringToContactIds(resultSet.getString("contact_ids"))
+        );
     }
 }

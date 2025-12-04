@@ -6,6 +6,8 @@ package org.example.exceptions;
 public class ContactDoesNotExistException extends Exception {
     /**
      * Конструктор
+     *
+     * @param message сообщение ошибки
      */
     public ContactDoesNotExistException(String message) {
         super(message);

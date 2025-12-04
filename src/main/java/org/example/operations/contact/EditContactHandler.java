@@ -1,6 +1,7 @@
 package org.example.operations.contact;
 
 import org.example.exceptions.ContactDoesNotExistException;
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
@@ -16,11 +17,6 @@ import java.util.List;
  */
 @Component
 public class EditContactHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис контактов
      */
@@ -49,7 +45,7 @@ public class EditContactHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         String contactName = stateService.getParamByKey(chatId, "currentContactName");
 
-        switch(messageText) {
+        switch (messageText) {
             case "Имя" -> {
                 response.setText("Введите имя контакта");
                 stateService.setLastRequestedParamKey(chatId, "contactName");
@@ -76,13 +72,13 @@ public class EditContactHandler implements OperationHandler {
                     e.printStackTrace();
                     response.setText("Произошла ошибка при изменении: " + e.getMessage());
                 }
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
+                response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {
                 return handleMessageWithContext(chatId, messageText);
@@ -99,12 +95,12 @@ public class EditContactHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
-            response.setText("Я не понимаю эту команду.");
+            response.setText(ReplyConstants.UNKNOWN_COMMAND);
             return response;
         }
         stateService.addParameter(chatId, lastRequestedParamKey, messageText);
         response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-        response.setKeyboardText(keyboardCreator.editContactMenu());
+        response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
         return response;
     }
 }

@@ -1,7 +1,9 @@
 package org.example.operations.group;
 
 import org.example.entity.Contact;
+import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -12,6 +14,7 @@ import org.example.state.Operation;
 import org.example.utils.GroupConverter;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,11 +23,6 @@ import java.util.Set;
  */
 @Component
 public class AddGroupHandler implements OperationHandler {
-    /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис групп
      */
@@ -58,35 +56,39 @@ public class AddGroupHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        switch (messageText){
+        switch (messageText) {
             case "Добавить контакт" -> {
                 response.setText("Введите имя контакта для добавления в группу");
                 stateService.setLastRequestedParamKey(chatId, "contactToAdd");
             }
             case "Сохранить группу" -> {
-                String groupName = stateService.getParamByKey(chatId, "groupName");
                 try {
-                    groupService.tryAddGroup(chatId, stateService.getParams(chatId));
+                    Map<String, String> params = stateService.getParams(chatId);
+                    Set<Long> contactIds = new GroupConverter()
+                            .stringToContactIds(params.getOrDefault("contactIds", ""));
+                    String groupName = params.get("groupName");
+                    Group group = new Group(chatId, groupName, contactIds);
+                    groupService.tryAddGroup(chatId, group);
                     response.setText("Группа " + groupName + " успешна сохранена");
-                    response.setKeyboardText(keyboardCreator.addGroupMenu());
+                    response.setKeyboardText(ReplyKeyboardConstants.ADD_GROUP_MENU);
                 } catch (GroupAlreadyExistsException e) {
                     e.printStackTrace();
                     response.setText(
                             "Произошла ошибка при добавлении группы: " + e.getMessage());
                 }
-                response.setKeyboardText(keyboardCreator.groupsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
+                response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
-                response.setKeyboardText(keyboardCreator.groupsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
             default -> {
                 return handleMessageWithContext(chatId, messageText);
             }
         }
-        return  response;
+        return response;
     }
 
 
@@ -94,11 +96,11 @@ public class AddGroupHandler implements OperationHandler {
      * Обработать сообщение с учётом контекста операции
      */
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
-         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
-         return switch(lastRequestedParamKey) {
+        String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
+        return switch (lastRequestedParamKey) {
             case "groupName" -> handleGroupNameMessage(chatId, messageText);
             case "contactToAdd" -> handleContactToAddMessage(chatId, messageText);
-            default -> new BotResponse("Я не понимаю эту команду.");
+            default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
 
@@ -109,7 +111,7 @@ public class AddGroupHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         stateService.addParameter(chatId, "groupName", messageText);
         response.setText("Отлично. Выберите дальнейшие действия");
-        response.setKeyboardText(keyboardCreator.addGroupMenu());
+        response.setKeyboardText(ReplyKeyboardConstants.ADD_GROUP_MENU);
         return response;
     }
 
@@ -122,9 +124,9 @@ public class AddGroupHandler implements OperationHandler {
         GroupConverter converter = new GroupConverter();
         Set<Long> contactIds = converter.stringToContactIds(
                 stateService.getParamByKey(chatId, "contactIds"));
-        if(contact.isPresent()) {
+        if (contact.isPresent()) {
             Long contactId = contact.get().getId();
-            if(contactIds.contains(contactId)) {
+            if (contactIds.contains(contactId)) {
                 response.setText("Контакт с таким именем уже добавлен");
             } else {
                 contactIds.add(contactId);

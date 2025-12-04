@@ -22,28 +22,22 @@ public class ContactService {
     /**
      * Конструктор. Инициализируем repository, создавая подключение к БД
      */
-    public ContactService(IContactRepository repository){
+    public ContactService(IContactRepository repository) {
         this.repository = repository;
     }
 
     /**
      * Попытаться добавить контакт
+     *
      * @param chatId идентификатор чата пользователя
-     * @param params параметры создаваемого контакта
+     * @param contact добавляемый контакт
      * @throws ContactAlreadyExistsException если контакт уже существует
      */
-    public void tryAddContact(Long chatId, Map<String, String> params)
+    public void tryAddContact(Long chatId, Contact contact)
             throws ContactAlreadyExistsException {
-        Contact contact = new Contact(chatId,
-                params.get("contactName"),
-                params.getOrDefault("contactNumber", ""),
-                Integer.parseInt(params.getOrDefault("contactAge",
-                        String.valueOf(-1))),
-                Gender.fromDisplayName(params.get("contactGender")),
-                false
-        );
+
         String contactName = contact.getName();
-        if(findContactByName(chatId, contactName).isEmpty()) {
+        if (findContactByName(chatId, contactName).isEmpty()) {
             repository.add(contact);
         } else {
             throw new ContactAlreadyExistsException(
@@ -67,6 +61,7 @@ public class ContactService {
 
     /**
      * Найти контакты по номеру
+     *
      * @return контакты в случае успеха, в ином случае пустой List.of().
      */
     public List<Contact> findContactsByNumber(Long chatId, String number) {
@@ -87,26 +82,26 @@ public class ContactService {
             Long chatId, Map<String, String> params) {
         String filter = "";
         String sorter = "";
-        if(params.containsKey("filterByGender")) {
+        if (params.containsKey("filterByGender")) {
             String gender = Gender.fromDisplayName(params.get("filterByGender")).name();
             filter = " and gender = '" + gender + "'";
         }
-        if(params.containsKey("filterByAge")) {
+        if (params.containsKey("filterByAge")) {
             String ageCondition = params.get("filterByAge");
             filter = " and age " + ageCondition;
         }
-        if(params.containsKey("sorter")) {
+        if (params.containsKey("sorter")) {
             String sorterValue = params.get("sorter");
-            if(Objects.equals(sorterValue, "В порядке возрастания возраста")) {
+            if (Objects.equals(sorterValue, "В порядке возрастания возраста")) {
                 sorter = " ORDER BY age ASC";
             }
-            if(Objects.equals(sorterValue, "В порядке убывания возраста")) {
+            if (Objects.equals(sorterValue, "В порядке убывания возраста")) {
                 sorter = " ORDER BY age DESC";
             }
-            if(Objects.equals(sorterValue, "В алфавитном порядке имени")) {
+            if (Objects.equals(sorterValue, "В алфавитном порядке имени")) {
                 sorter = " ORDER BY name ASC";
             }
-            if(Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) {
+            if (Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) {
                 sorter = " ORDER BY name DESC";
             }
         }
@@ -124,8 +119,9 @@ public class ContactService {
 
     /**
      * Попытаться обновить все поля пользователя, кроме блокировки
+     *
      * @param chatId идентификатор чата пользователя
-     * @param name имя контакта
+     * @param name   имя контакта
      * @param params отредактированные параметры контакта
      * @throws ContactDoesNotExistException если контакт не существует
      */
@@ -134,16 +130,16 @@ public class ContactService {
         Optional<Contact> foundContact = findContactByName(chatId, name);
         Contact contact = foundContact.orElseThrow(() -> new ContactDoesNotExistException(
                 "Контакт %s не существует".formatted(name)));
-        if(params.containsKey("contactName")) {
+        if (params.containsKey("contactName")) {
             contact.setName(params.get("contactName"));
         }
-        if(params.containsKey("contactNumber")) {
+        if (params.containsKey("contactNumber")) {
             contact.setPhoneNumber(params.get("contactNumber"));
         }
-        if(params.containsKey("contactAge")) {
+        if (params.containsKey("contactAge")) {
             contact.setAge(Integer.parseInt(params.get("contactAge")));
         }
-        if(params.containsKey("contactGender")) {
+        if (params.containsKey("contactGender")) {
             contact.setGender(Gender.fromDisplayName(params.get("contactGender")));
         }
         repository.update(name, contact);

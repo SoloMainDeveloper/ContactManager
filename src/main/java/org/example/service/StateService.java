@@ -21,15 +21,15 @@ public class StateService {
     /**
      * Конструктор
      */
-    public StateService(){
+    public StateService() {
         this.inMemoryStateStorage = new InMemoryStateStorage();
     }
 
     /**
      * Возвращает существующее состояние, в ином случае сначала его создаёт
      */
-    private State getOrCreateState(Long chatId){
-        if(!inMemoryStateStorage.containsKey(chatId)){
+    private State getOrCreateState(Long chatId) {
+        if (!inMemoryStateStorage.containsKey(chatId)) {
             inMemoryStateStorage.add(chatId, new State());
         }
         return inMemoryStateStorage.getStateById(chatId);
@@ -38,7 +38,7 @@ public class StateService {
     /**
      * Возвращает тип текущей операции у state по Id
      */
-    public Operation getOperation(Long chatId){
+    public Operation getOperation(Long chatId) {
         State state = getOrCreateState(chatId);
         return state.getOperation();
     }
@@ -71,7 +71,7 @@ public class StateService {
     /**
      * Добавление параметра в контекст состояния
      */
-    public void addParameter(Long chatId, String key, String value){
+    public void addParameter(Long chatId, String key, String value) {
         State state = getOrCreateState(chatId);
         state.addParameter(key, value);
     }

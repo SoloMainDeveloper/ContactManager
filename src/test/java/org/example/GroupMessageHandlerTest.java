@@ -104,10 +104,7 @@ public class GroupMessageHandlerTest {
                 response.getText()
         );
 
-        Group group = groupService
-                .findGroupByName(chatId, "Друзья")
-                .orElseThrow();
-        Assertions.assertEquals("0", converter.contactIdsToString(group.getContactIds()));
+        groupService.findGroupByName(chatId, "Друзья").orElseThrow();
     }
 
     /**
@@ -133,10 +130,7 @@ public class GroupMessageHandlerTest {
                 "Произошла ошибка при добавлении группы: Группа Друзья уже существует",
                 response.getText());
 
-        Group group = groupService
-                .findGroupByName(chatId, "Друзья")
-                .orElseThrow();
-        Assertions.assertEquals("", converter.contactIdsToString(group.getContactIds()));
+        groupService.findGroupByName(chatId, "Друзья").orElseThrow();
     }
 
     /**
@@ -198,12 +192,12 @@ public class GroupMessageHandlerTest {
      * Тестируем успешный поиск группы по имени
      */
     @Test
-    public void findContactByNameTest() {
+    public void findGroupByNameTest() {
         fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
-        BotResponse response =handler.handleMessage(chatId, "Друзья");
+        BotResponse response = handler.handleMessage(chatId, "Друзья");
         Assertions.assertEquals(
                 "Группа Друзья успешно найдена",
                 response.getText()

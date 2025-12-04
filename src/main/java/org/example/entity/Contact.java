@@ -37,32 +37,27 @@ public class Contact {
     /**
      * Заблокирован/не заблокирован контакт
      */
-    private Boolean isBlocked;
+    private boolean isBlocked = false;
 
     /**
      * Конструктор по умолчанию
      */
-    public Contact() {}
+    public Contact() {
+    }
 
     /**
-     * Конструктор с заполнением всех полей контакта
+     * Конструктор для нового контакта, которому ещё не присвоен id от репозитория
      */
     public Contact(Long chatId, String name, String phoneNumber, int age,
-                   Gender gender, Boolean isBlocked) {
-        this.chatId = chatId;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.age = age;
-        this.gender = gender;
-        this.isBlocked = isBlocked;
-        this.id = null;
+                   Gender gender, boolean isBlocked) {
+        this(null, chatId, name, phoneNumber, age, gender, isBlocked);
     }
 
     /**
      * Конструктор для уже существующего контакта
      */
     public Contact(Long id, Long chatId, String name, String phoneNumber,
-                   int age, Gender gender, Boolean isBlocked) {
+                   int age, Gender gender, boolean isBlocked) {
         this.chatId = chatId;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -152,14 +147,14 @@ public class Contact {
     /**
      * Возвращает состояние блокировки true/false
      */
-    public Boolean isBlocked() {
+    public boolean isBlocked() {
         return isBlocked;
     }
 
     /**
      * Устанавливает значение блокировки
      */
-    public void setBlocked(Boolean blocked) {
+    public void setBlocked(boolean blocked) {
         isBlocked = blocked;
     }
 }

@@ -1,5 +1,6 @@
 package org.example.operations.contact;
 
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.entity.Contact;
@@ -11,17 +12,13 @@ import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Обработчик события: действия пользователя в меню текущего контакта
  */
 @Component
 public class CurrentContactMenuHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис контактов
      */
@@ -49,21 +46,23 @@ public class CurrentContactMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         String contactName = stateService.getParamByKey(chatId, "currentContactName");
-        Contact contact = contactService.findContactByName(chatId, contactName).orElse(null);
-        if(contact == null){
+        Optional<Contact> contactOptional = contactService.findContactByName(
+                chatId, contactName);
+        if (contactOptional.isEmpty()) {
             response.setText("Контакт " + contactName + " не был найден");
-            response.setKeyboardText(keyboardCreator.contactsMenu());
+            response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             return response;
         }
+        Contact contact = contactOptional.get();
         switch (messageText) {
             case "Меню пользователя вызвано" -> {
                 response.setText("Меню для пользователя " + contactName + " вызвано");
-                response.setKeyboardText(keyboardCreator.currentContactMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CURRENT_CONTACT_MENU);
             }
             case "Информация" -> {
                 response.setText(getContactInfo(contact));
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
             }
@@ -71,7 +70,7 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT,
                         false);
                 response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-                response.setKeyboardText(keyboardCreator.editContactMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
             }
             case "Блокировать" -> {
                 stateService.changeCurrentOperation(
@@ -96,12 +95,12 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
+                response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(
                         chatId, Operation.CONTACTS_MENU, true);
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }
@@ -114,7 +113,7 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 ? "не указан"
                 : contact.getPhoneNumber();
         String genderInfo = "";
-        switch (contact.getGender()){
+        switch (contact.getGender()) {
             case Gender.MALE -> genderInfo = "мужской";
             case Gender.FEMALE -> genderInfo = "женский";
             case Gender.NOT_SPECIFIED -> genderInfo = "не указан";

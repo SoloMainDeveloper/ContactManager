@@ -32,7 +32,7 @@ public class State {
      */
     public void setOperation(Operation operation, boolean needClearContext) {
         this.operation = operation;
-        if(needClearContext){
+        if (needClearContext) {
             params.clear();
         }
     }
@@ -47,7 +47,7 @@ public class State {
     /**
      * Добавляет параметр в контекст операции
      */
-    public void addParameter(String key, String value){
+    public void addParameter(String key, String value) {
         params.put(key, value);
     }
 

@@ -27,16 +27,13 @@ public class FakeGroupRepository implements IGroupRepository {
         if (!groups.containsKey(chatId)) {
             groups.put(chatId, new LinkedHashMap<>());
         }
-        if (groups.get(chatId).containsKey(group.getName())) {
-            throw new RuntimeException();
-        }
         groups.get(chatId).put(group.getName(), group);
     }
 
     @Override
     public Optional<Group> findGroupByName(String name, Long chatId) {
         Map<String, Group> currentGroups = groups.get(chatId);
-        return currentGroups == null || currentGroups.isEmpty() || currentGroups.get(name) == null
+        return currentGroups == null || currentGroups.isEmpty()
                 ? Optional.empty()
                 : Optional.of(currentGroups.get(name));
     }
@@ -71,9 +68,7 @@ public class FakeGroupRepository implements IGroupRepository {
     public void update(String currentName, Group group) {
         Map<String, Group> userGroups = groups.get(group.getChatId());
         if (userGroups != null) {
-            if (!currentName.equals(group.getName())) {
-                userGroups.remove(currentName);
-            }
+            userGroups.remove(currentName);
             userGroups.put(group.getName(), group);
         }
     }

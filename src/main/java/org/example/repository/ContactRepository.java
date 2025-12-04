@@ -1,13 +1,15 @@
 package org.example.repository;
 
 import org.example.entity.Contact;
-import org.example.utils.ContactMapper;
+import org.example.entity.Gender;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,12 +56,11 @@ public class ContactRepository implements IContactRepository {
 
         try {
             Contact contact = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> {
-                ContactMapper mapper = new ContactMapper();
-                return mapper.resultSetToContactEntity(resultSet);
-            });
+                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
-        } catch (EmptyResultDataAccessException exception) {
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске контакта по id:" + e);
             return Optional.empty();
         }
     }
@@ -73,29 +74,30 @@ public class ContactRepository implements IContactRepository {
                 .addValue("name", name);
 
         try {
-            Contact contact = jdbcTemplate.queryForObject(sql, params, (resultSet, rowNum) -> {
-                ContactMapper mapper = new ContactMapper();
-                return mapper.resultSetToContactEntity(resultSet);
-            });
+            Contact contact = jdbcTemplate.queryForObject(sql, params,
+                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
-        } catch (EmptyResultDataAccessException exception) {
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске контакта по имени:" + e);
             return Optional.empty();
         }
     }
 
     @Override
     public List<Contact> findContactsByNumber(String number, Long chatId) {
-        String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId and phone_number = :phoneNumber";
+        String sql = "SELECT * FROM public.contacts WHERE " +
+                "chat_id = :chatId and phone_number = :phoneNumber";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId)
                 .addValue("phoneNumber", number);
         try {
-            return jdbcTemplate.query(sql, params, (resultSet, rowNum) -> {
-                ContactMapper mapper = new ContactMapper();
-                return mapper.resultSetToContactEntity(resultSet);
-            });
-        } catch (EmptyResultDataAccessException exception) {
+            return jdbcTemplate.query(sql, params,
+                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске контактов по номеру:" + e);
             return List.of();
         }
     }
@@ -108,11 +110,11 @@ public class ContactRepository implements IContactRepository {
                 .addValue("chatId", chatId);
 
         try {
-            return jdbcTemplate.query(sql, params, (resultSet, rowNum) -> {
-                ContactMapper mapper = new ContactMapper();
-                return mapper.resultSetToContactEntity(resultSet);
-            });
-        } catch (EmptyResultDataAccessException exception) {
+            return jdbcTemplate.query(sql, params,
+                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+        } catch (EmptyResultDataAccessException e) {
+            e.printStackTrace();
+            System.out.println("Ошибка запроса к БД при поиске контактов по chatId:" + e);
             return List.of();
         }
     }
@@ -144,5 +146,20 @@ public class ContactRepository implements IContactRepository {
                 .addValue("name", name);
 
         jdbcTemplate.update(sql, params);
+    }
+
+    /**
+     * Создаёт контакт на основе ответа от БД
+     */
+    public Contact resultSetToContactEntity(ResultSet resultSet) throws SQLException {
+        return new Contact(
+                resultSet.getLong("id"),
+                resultSet.getLong("chat_id"),
+                resultSet.getString("name"),
+                resultSet.getString("phone_number"),
+                resultSet.getInt("age"),
+                Gender.valueOf(resultSet.getString("gender")),
+                resultSet.getBoolean("is_blocked")
+        );
     }
 }

@@ -24,7 +24,7 @@ public class MessageHandler {
     private final StateService stateService;
 
     public MessageHandler(List<OperationHandler> operationHandlers,
-                          StateService stateService){
+                          StateService stateService) {
         this.handlers = operationHandlers.stream()
                 .collect(Collectors.toMap(
                         OperationHandler::getSupportedOperation,
@@ -48,8 +48,9 @@ public class MessageHandler {
      * Из callBackData достаёт, какую Operation нужно выставить как текущую, а также
      * контекст для этой операции. После этого вызывает обработку сообщения в
      * handleMessage()
+     *
      * @param callbackData текст, скрытно хранящийся в inline-кнопке, необходимый для
-     * обработки действий при нажатии на эту кнопку
+     *                     обработки действий при нажатии на эту кнопку
      */
     public BotResponse handleInlineButtonActivated(Long chatId, String callbackData) {
         if (callbackData.startsWith("CURRENT_CONTACT_MENU_")) {
