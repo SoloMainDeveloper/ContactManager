@@ -1,5 +1,6 @@
 package org.example.operations.contact;
 
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
@@ -19,11 +20,6 @@ import java.util.Optional;
  */
 @Component
 public class FindContactHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants replyKeyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Создает кнопки в ответе текста сообщения
      */
@@ -55,7 +51,7 @@ public class FindContactHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        switch(messageText){
+        switch (messageText) {
             case "Поиск по имени" -> {
                 response.setText("Введите имя");
                 stateService.setLastRequestedParamKey(chatId, "contactName");
@@ -65,9 +61,9 @@ public class FindContactHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "contactNumber");
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
+                response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
-                response.setKeyboardText(replyKeyboardCreator.contactsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {
                 return handleMessageWithContext(chatId, messageText);
@@ -83,14 +79,14 @@ public class FindContactHandler implements OperationHandler {
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
-            return new BotResponse("Я не понимаю эту команду.");
+            return new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         }
         stateService.addParameter(chatId, lastRequestedParamKey, messageText);
 
         return switch (lastRequestedParamKey) {
             case "contactName" -> handleFindContactByName(chatId);
             case "contactNumber" -> handleFindContactByPhoneNumber(chatId);
-            default -> new BotResponse("Я не понимаю эту команду.");
+            default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
 
@@ -102,7 +98,7 @@ public class FindContactHandler implements OperationHandler {
         String name = stateService.getParamByKey(chatId, "contactName");
         Optional<Contact> contact = contactService.findContactByName(chatId, name);
 
-        if(contact.isPresent()) {
+        if (contact.isPresent()) {
             response.setText("По имени " + name + " контакт успешно найден.");
             response.setInlineKeyboardText(new InlineKeyboardText(
                     List.of(contact.get().getName()),
@@ -110,7 +106,7 @@ public class FindContactHandler implements OperationHandler {
         } else {
             stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             response.setText("По имени " + name + " контакты не найдены.");
-            response.setKeyboardText(replyKeyboardCreator.contactsMenu());
+            response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
         }
         return response;
     }
@@ -123,10 +119,10 @@ public class FindContactHandler implements OperationHandler {
         String number = stateService.getParamByKey(chatId, "contactNumber");
         List<Contact> contacts = contactService.findContactsByNumber(chatId, number);
 
-        if(contacts.isEmpty()) {
+        if (contacts.isEmpty()) {
             stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
             response.setText("По номеру " + number + " контакты не найдены.");
-            response.setKeyboardText(replyKeyboardCreator.contactsMenu());
+            response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
         } else {
             response.setText("По номеру " + number + " контакты успешно найдены.");
             List<String> names = contacts.stream()

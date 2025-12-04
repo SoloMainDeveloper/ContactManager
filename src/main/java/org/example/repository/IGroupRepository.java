@@ -26,6 +26,7 @@ public interface IGroupRepository {
 
     /**
      * Обновить группу
+     *
      * @param currentName имя группы до обновления
      */
     void update(String currentName, Group group);

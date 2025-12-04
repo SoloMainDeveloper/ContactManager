@@ -6,6 +6,8 @@ package org.example.exceptions;
 public class GroupDoesNotExistException extends Exception {
     /**
      * Конструктор
+     *
+     * @param message сообщение ошибки
      */
     public GroupDoesNotExistException(String message) {
         super(message);

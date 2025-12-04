@@ -5,7 +5,6 @@ import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
 import org.example.exceptions.GroupDoesNotExistException;
 import org.example.repository.IGroupRepository;
-import org.example.utils.GroupConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -29,17 +28,15 @@ public class GroupService {
 
     /**
      * Попытаться добавить группу
+     *
      * @param chatId идентификатор чата
-     * @param params параметры добавляемой группы
+     * @param group добавляемая группы
      * @throws GroupAlreadyExistsException если группа уже существует
      */
-    public void tryAddGroup(Long chatId, Map<String, String> params)
+    public void tryAddGroup(Long chatId, Group group)
             throws GroupAlreadyExistsException {
-        Set<Long> contactIds = new GroupConverter()
-                .stringToContactIds(params.getOrDefault("contactIds", ""));
-        String groupName = params.get("groupName");
-        Group group = new Group(chatId, groupName, contactIds);
-        if(findGroupByName(chatId, groupName).isEmpty()){
+        String groupName = group.getName();
+        if (findGroupByName(chatId, groupName).isEmpty()) {
             repository.add(group);
         } else {
             throw new GroupAlreadyExistsException(
@@ -66,28 +63,28 @@ public class GroupService {
      */
     public List<Group> findGroupsByChatIdWithSorter(
             Long chatId, Map<String, String> params) {
-        if(!params.containsKey("sorter")) {
+        if (!params.containsKey("sorter")) {
             return repository.findGroupsByChatId(chatId, "");
         }
 
         String sorter = "";
         String sorterValue = params.get("sorter");
 
-        if(Objects.equals(sorterValue, "В алфавитном порядке имени")) {
+        if (Objects.equals(sorterValue, "В алфавитном порядке имени")) {
             sorter = " ORDER BY name ASC";
         }
-        if(Objects.equals(sorterValue, "В обратном алфавитному порядке имени")) {
+        if (Objects.equals(sorterValue, "В обратном алфавитному порядке имени")) {
             sorter = " ORDER BY name DESC";
         }
         List<Group> groups = repository.findGroupsByChatId(chatId, sorter);
 
-        if(Objects.equals(sorterValue, "В порядке возрастания кол-ва участников")) {
+        if (Objects.equals(sorterValue, "В порядке возрастания кол-ва участников")) {
             groups = groups.stream()
                     .sorted(Comparator.comparingInt(group ->
                             group.getContactIds().size()))
                     .toList();
         }
-        if(Objects.equals(sorterValue, "В порядке убывания кол-ва участников")) {
+        if (Objects.equals(sorterValue, "В порядке убывания кол-ва участников")) {
             groups = groups.stream()
                     .sorted(Comparator.comparingInt((Group group) ->
                             group.getContactIds().size()).reversed())
@@ -98,7 +95,8 @@ public class GroupService {
 
     /**
      * Попытаться обновить имя группы
-     * @param chatId идентификатор чата
+     *
+     * @param chatId  идентификатор чата
      * @param oldName старое имя группы
      * @param newName новое имя группы
      * @throws GroupDoesNotExistException если группа не существует
@@ -114,9 +112,10 @@ public class GroupService {
 
     /**
      * Попытаться добавить контакт в группу
-     * @param chatId идентификатор чата
+     *
+     * @param chatId    идентификатор чата
      * @param groupName имя группы
-     * @param contact добавляемый контакт
+     * @param contact   добавляемый контакт
      * @throws GroupDoesNotExistException если группа не существует
      */
     public void tryAddContactToGroup(Long chatId, String groupName, Contact contact)
@@ -131,9 +130,10 @@ public class GroupService {
 
     /**
      * Попытаться удалить контакт из группы
-     * @param chatId идентификатор чата
+     *
+     * @param chatId    идентификатор чата
      * @param groupName имя группы
-     * @param contact удаляемый контакт
+     * @param contact   удаляемый контакт
      * @throws GroupDoesNotExistException если группа не существует
      */
     public void tryRemoveContactFromGroup(Long chatId, String groupName, Contact contact)
@@ -148,7 +148,13 @@ public class GroupService {
     /**
      * Удалить группу по имени
      */
-    public void deleteGroupByName(Long chatId, String groupName) {
-        repository.deleteByName(groupName, chatId);
+    public void deleteGroupByName(Long chatId, String groupName)
+            throws GroupDoesNotExistException {
+        if (repository.findGroupByName(groupName, chatId).isEmpty()) {
+            repository.deleteByName(groupName, chatId);
+        } else {
+            throw new GroupDoesNotExistException(
+                    "Группа %s не существует".formatted(groupName));
+        }
     }
 }

@@ -33,7 +33,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
      * Конструктор. Инициализируем API-token, инжектим MessageHandler
      */
     @Autowired
-    public ContactManagerBot(BotConfig config, MessageHandler messageHandler){
+    public ContactManagerBot(BotConfig config, MessageHandler messageHandler) {
         super(config.getBotToken());
         this.botUsername = config.getBotUsername();
         this.messageHandler = messageHandler;
@@ -69,12 +69,12 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     private SendMessage adaptBotResponseToTelegram(BotResponse response) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(response.getText());
-        if(response.getKeyboardText() != null){
+        if (response.getKeyboardText() != null) {
             sendMessage.setReplyMarkup(new ReplyKeyboardCreator()
                     .createKeyboard(response.getKeyboardText()));
         }
         InlineKeyboardText inlineKeyboardText = response.getInlineKeyboardText();
-        if(inlineKeyboardText != null && inlineKeyboardText.isNeeded()) {
+        if (inlineKeyboardText != null && inlineKeyboardText.isNeeded()) {
             sendMessage.setReplyMarkup(new InlineKeyboardCreator()
                     .createKeyboard(inlineKeyboardText));
         }

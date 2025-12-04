@@ -6,8 +6,10 @@ package org.example.exceptions;
 public class GroupEditException extends Exception {
     /**
      * Конструктор
+     *
+     * @param message сообщение ошибки
      */
-    public GroupEditException(Exception e) {
-        super(e);
+    public GroupEditException(String message) {
+        super(message);
     }
 }

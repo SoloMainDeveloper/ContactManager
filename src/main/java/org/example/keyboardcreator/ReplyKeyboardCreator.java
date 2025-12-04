@@ -22,7 +22,7 @@ public class ReplyKeyboardCreator {
         for (int i = 0; i < buttonsText.size(); i += 2) {
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(buttonsText.get(i));
-            if(i + 1 < buttonsText.size()){
+            if (i + 1 < buttonsText.size()) {
                 currentRow.add(buttonsText.get(i + 1));
             }
             keyboard.add(currentRow);

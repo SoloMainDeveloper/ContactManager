@@ -45,7 +45,7 @@ public class FindGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String groupName) {
         BotResponse response = new BotResponse();
         Optional<Group> group = groupService.findGroupByName(chatId, groupName);
-        if(group.isPresent()) {
+        if (group.isPresent()) {
             response.setText("Группа " + groupName + " успешно найдена");
             response.setInlineKeyboardText(new InlineKeyboardText(List.of(groupName),
                     Operation.CURRENT_GROUP_MENU.toString()));

@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public interface IContactRepository {
     /**
-     * Добавить контакт
+     * Добавить контакт, при этом присвоив ему id
      */
     void add(Contact contact);
 
@@ -36,6 +36,7 @@ public interface IContactRepository {
 
     /**
      * Обновить контакт
+     *
      * @param currentName имя контакта до обновления
      */
     void update(String currentName, Contact contact);
