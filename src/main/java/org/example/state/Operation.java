@@ -25,12 +25,24 @@ public enum Operation {
     EDIT_GROUP(false),
     DELETE_GROUP(false);
 
+    /**
+     * Показывает необходимо ли очистить контекст перед установкой данной операции
+     */
     private final boolean shouldClearContext;
 
+    /**
+     * Конструктор
+     * @param shouldClearContext показывает необходимо ли очистить контекст перед
+     *                           установкой данной операции
+     */
     Operation(boolean shouldClearContext) {
         this.shouldClearContext = shouldClearContext;
     }
 
+    /**
+     * Возвращает true, если необходимо ли очистить контекст перед установкой данной
+     * операции
+     */
     public boolean shouldClearContext() {
         return shouldClearContext;
     }

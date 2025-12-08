@@ -86,7 +86,7 @@ public class GroupService {
      */
     public void deleteGroupByName(Long chatId, String groupName)
             throws GroupDoesNotExistException {
-        if (repository.findGroupByName(groupName, chatId).isEmpty()) {
+        if (repository.findGroupByName(groupName, chatId).isPresent()) {
             repository.deleteByName(groupName, chatId);
         } else {
             throw new GroupDoesNotExistException(

@@ -15,6 +15,7 @@ import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Обработчик события: Редактирование группы
@@ -99,13 +100,11 @@ public class EditGroupHandler implements OperationHandler {
         if (lastRequestedParamKey == null) {
             return new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         }
-        Contact contact = contactService
-                .findContactByName(chatId, messageText).orElse(null);
 
         return switch (lastRequestedParamKey) {
             case "newName" -> handleRenameGroup(chatId, messageText);
-            case "deleteContact" -> handleDeleteContactFromGroup(chatId, contact);
-            case "addContact" -> handleAddContactToGroup(chatId, contact);
+            case "deleteContact" -> handleDeleteContactFromGroup(chatId, messageText);
+            case "addContact" -> handleAddContactToGroup(chatId, messageText);
             default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
@@ -131,15 +130,15 @@ public class EditGroupHandler implements OperationHandler {
     /**
      * Обработать сообщение на удаление контакта из группы
      */
-    private BotResponse handleDeleteContactFromGroup(
-            Long chatId, Contact contact) {
+    private BotResponse handleDeleteContactFromGroup(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
-        if (contact == null) {
+        Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
+        if (contact.isEmpty()) {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
         Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
-        group.removeContact(contact);
+        group.removeContact(contact.get());
         response.setText("Контакт добавлен на удаление.\n" +
                 "Желаете внести ещё изменения в группу?");
         return response;
@@ -148,15 +147,15 @@ public class EditGroupHandler implements OperationHandler {
     /**
      * Обработать сообщение на добавление контакта в группу
      */
-    private BotResponse handleAddContactToGroup(
-            Long chatId, Contact contact) {
+    private BotResponse handleAddContactToGroup(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
-        if (contact == null) {
+        Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
+        if (contact.isEmpty()) {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
         Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
-        group.addContact(contact);
+        group.addContact(contact.get());
         response.setText("Контакт внесен на добавление.\n" +
                 "Желаете внести ещё изменения в группу?");
         return response;

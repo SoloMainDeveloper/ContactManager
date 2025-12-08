@@ -3,7 +3,8 @@ package org.example.keyboardcreator;
 import java.util.List;
 
 /**
- * Класс, содержащий часто используемые наборы клавиатур
+ * Класс, содержащий часто используемые наборы клавиатур.
+ * Вячеслав Юрьевич, константы Вы нам тут разрешили
  */
 public class ReplyKeyboardConstants {
     /**
