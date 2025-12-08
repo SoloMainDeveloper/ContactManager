@@ -1,7 +1,6 @@
 package org.example.service;
 
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.exceptions.ContactDoesNotExistException;
 import org.example.repository.IContactRepository;

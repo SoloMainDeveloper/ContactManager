@@ -1,7 +1,6 @@
 package org.example.operations.group;
 
 import org.example.entity.Group;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
