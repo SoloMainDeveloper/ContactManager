@@ -79,32 +79,7 @@ public class ContactService {
      * Возвращает все контакты, имеющееся у данного пользователя с применением фильтрации и сортировки
      */
     public List<Contact> findContactsByChatIdWithFilterAndSorter(
-            Long chatId, Map<String, String> params) {
-        String filter = "";
-        String sorter = "";
-        if (params.containsKey("filterByGender")) {
-            String gender = Gender.fromDisplayName(params.get("filterByGender")).name();
-            filter = " and gender = '" + gender + "'";
-        }
-        if (params.containsKey("filterByAge")) {
-            String ageCondition = params.get("filterByAge");
-            filter = " and age " + ageCondition;
-        }
-        if (params.containsKey("sorter")) {
-            String sorterValue = params.get("sorter");
-            if (Objects.equals(sorterValue, "В порядке возрастания возраста")) {
-                sorter = " ORDER BY age ASC";
-            }
-            if (Objects.equals(sorterValue, "В порядке убывания возраста")) {
-                sorter = " ORDER BY age DESC";
-            }
-            if (Objects.equals(sorterValue, "В алфавитном порядке имени")) {
-                sorter = " ORDER BY name ASC";
-            }
-            if (Objects.equals(sorterValue, "В обратном алфавитному порядку имени")) {
-                sorter = " ORDER BY name DESC";
-            }
-        }
+            Long chatId, String filter, String sorter) {
         return repository.findContactsByChatId(chatId, filter, sorter);
     }
 
@@ -122,26 +97,14 @@ public class ContactService {
      *
      * @param chatId идентификатор чата пользователя
      * @param name   имя контакта
-     * @param params отредактированные параметры контакта
+     * @param contact обновляемый контакт
      * @throws ContactDoesNotExistException если контакт не существует
      */
-    public void tryUpdateContact(Long chatId, String name, Map<String, String> params)
+    public void tryUpdateContact(Long chatId, String name, Contact contact)
             throws ContactDoesNotExistException {
         Optional<Contact> foundContact = findContactByName(chatId, name);
-        Contact contact = foundContact.orElseThrow(() -> new ContactDoesNotExistException(
+        foundContact.orElseThrow(() -> new ContactDoesNotExistException(
                 "Контакт %s не существует".formatted(name)));
-        if (params.containsKey("contactName")) {
-            contact.setName(params.get("contactName"));
-        }
-        if (params.containsKey("contactNumber")) {
-            contact.setPhoneNumber(params.get("contactNumber"));
-        }
-        if (params.containsKey("contactAge")) {
-            contact.setAge(Integer.parseInt(params.get("contactAge")));
-        }
-        if (params.containsKey("contactGender")) {
-            contact.setGender(Gender.fromDisplayName(params.get("contactGender")));
-        }
         repository.update(name, contact);
     }
 

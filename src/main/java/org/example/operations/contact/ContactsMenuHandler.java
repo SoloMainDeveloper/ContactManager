@@ -35,25 +35,24 @@ public class ContactsMenuHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Добавить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.ADD_CONTACT, true);
+                stateService.changeCurrentOperation(chatId, Operation.ADD_CONTACT);
                 response.setText("Напишите имя добавляемого контакта");
                 stateService.setLastRequestedParamKey(chatId, "contactName");
             }
             case "Получить все" -> {
-                stateService.changeCurrentOperation(chatId,
-                        Operation.GET_ALL_CONTACTS, true);
+                stateService.changeCurrentOperation(chatId, Operation.GET_ALL_CONTACTS);
                 response.setText("Желаете получить все контакты сразу или добавить" +
                         " фильтрацию/сортировку?");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
             }
             case "Найти" -> {
-                stateService.changeCurrentOperation(chatId, Operation.FIND_CONTACT, true);
+                stateService.changeCurrentOperation(chatId, Operation.FIND_CONTACT);
                 response.setText("Выберите по какому признаку будет произведен поиск");
                 response.setKeyboardText(ReplyKeyboardConstants.FIND_CONTACT_MENU);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
             default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);

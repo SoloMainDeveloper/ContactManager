@@ -1,11 +1,19 @@
 package org.example.entity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Группа контактов
  */
 public class Group {
+    /**
+     * Идентификатор группы. Генерируется в базе данных
+     */
+    private Long id;
+
     /**
      * id чата общения пользователя с ботом
      */
@@ -17,9 +25,9 @@ public class Group {
     private String name;
 
     /**
-     * Сет имен id-шников внутри группы
+     * Хранилище контактов группы
      */
-    private Set<Long> contactIds;
+    private final Map<Long, Contact> contacts = new HashMap<>();
 
     /**
      * Конструктор по умолчанию
@@ -28,16 +36,30 @@ public class Group {
     }
 
     /**
-     * Конструктор с заполнением всех полей
+     * Конструктор для новой группы, которой ещё не присвоен id от репозитория
      */
-    public Group(Long chatId, String name, Set<Long> contactIds) {
-        this.chatId = chatId;
-        this.name = name;
-        this.contactIds = contactIds;
+    public Group(Long chatId, String name) {
+        this(null, chatId, name);
     }
 
     /**
-     * Получить уникальный идентификатор
+     * Конструктор с заполнением всех полей для уже существующей группы
+     */
+    public Group(Long id, Long chatId, String name) {
+        this.id = id;
+        this.chatId = chatId;
+        this.name = name;
+    }
+
+    /**
+     * Получить уникальный идентификатор группы
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * Получить уникальный идентификатор чата с ботом
      */
     public Long getChatId() {
         return chatId;
@@ -65,23 +87,30 @@ public class Group {
     }
 
     /**
-     * Получить id-шники контактов группы
+     * Получить контакты группы
+     */
+    public List<Contact> getContacts() {
+        return contacts.values().stream().toList();
+    }
+
+    /**
+     * Получить id-шники контактов
      */
     public Set<Long> getContactIds() {
-        return contactIds;
+        return contacts.keySet();
     }
 
     /**
-     * Добавить id-шник контакта в группу
+     * Добавить контакт в группу
      */
-    public void addContactId(Long contactId) {
-        contactIds.add(contactId);
+    public void addContact(Contact contact) {
+        contacts.put(contact.getId(), contact);
     }
 
     /**
-     * Удалить id-шник контакта из группы
+     * Удалить контакт из группы
      */
-    public void removeContactId(Long contactId) {
-        contactIds.remove(contactId);
+    public void removeContact(Contact contact) {
+        contacts.remove(contact.getId());
     }
 }

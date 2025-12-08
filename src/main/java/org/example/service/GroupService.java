@@ -1,6 +1,5 @@
 package org.example.service;
 
-import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
 import org.example.exceptions.GroupDoesNotExistException;
@@ -62,87 +61,24 @@ public class GroupService {
      * Найти все контакты, имеющееся у данного пользователя с применением сортировки
      */
     public List<Group> findGroupsByChatIdWithSorter(
-            Long chatId, Map<String, String> params) {
-        if (!params.containsKey("sorter")) {
-            return repository.findGroupsByChatId(chatId, "");
-        }
-
-        String sorter = "";
-        String sorterValue = params.get("sorter");
-
-        if (Objects.equals(sorterValue, "В алфавитном порядке имени")) {
-            sorter = " ORDER BY name ASC";
-        }
-        if (Objects.equals(sorterValue, "В обратном алфавитному порядке имени")) {
-            sorter = " ORDER BY name DESC";
-        }
-        List<Group> groups = repository.findGroupsByChatId(chatId, sorter);
-
-        if (Objects.equals(sorterValue, "В порядке возрастания кол-ва участников")) {
-            groups = groups.stream()
-                    .sorted(Comparator.comparingInt(group ->
-                            group.getContactIds().size()))
-                    .toList();
-        }
-        if (Objects.equals(sorterValue, "В порядке убывания кол-ва участников")) {
-            groups = groups.stream()
-                    .sorted(Comparator.comparingInt((Group group) ->
-                            group.getContactIds().size()).reversed())
-                    .toList();
-        }
-        return groups;
+            Long chatId, String sorter) {
+        return repository.findGroupsByChatId(chatId, sorter);
     }
 
     /**
-     * Попытаться обновить имя группы
+     * Попытаться обновить группу
      *
      * @param chatId  идентификатор чата
-     * @param oldName старое имя группы
-     * @param newName новое имя группы
+     * @param currentName имя группы до обновления
+     * @param group обновляемая группа
      * @throws GroupDoesNotExistException если группа не существует
      */
-    public void tryUpdateGroupWithNewName(Long chatId, String oldName, String newName)
+    public void tryUpdateGroup(Long chatId, String currentName, Group group)
             throws GroupDoesNotExistException {
-        Group group = findGroupByName(chatId, oldName)
-                .orElseThrow(() -> new GroupDoesNotExistException(
-                        "Группа %s не существует".formatted(oldName)));
-        group.setName(newName);
-        repository.update(oldName, group);
-    }
-
-    /**
-     * Попытаться добавить контакт в группу
-     *
-     * @param chatId    идентификатор чата
-     * @param groupName имя группы
-     * @param contact   добавляемый контакт
-     * @throws GroupDoesNotExistException если группа не существует
-     */
-    public void tryAddContactToGroup(Long chatId, String groupName, Contact contact)
-            throws GroupDoesNotExistException {
-        Group group = findGroupByName(chatId, groupName)
-                .orElseThrow(() -> new GroupDoesNotExistException(
-                        "Группа %s не существует".formatted(groupName)));
-        Long contactId = contact.getId();
-        group.addContactId(contactId);
-        repository.update(groupName, group);
-    }
-
-    /**
-     * Попытаться удалить контакт из группы
-     *
-     * @param chatId    идентификатор чата
-     * @param groupName имя группы
-     * @param contact   удаляемый контакт
-     * @throws GroupDoesNotExistException если группа не существует
-     */
-    public void tryRemoveContactFromGroup(Long chatId, String groupName, Contact contact)
-            throws GroupDoesNotExistException {
-        Group group = findGroupByName(chatId, groupName)
-                .orElseThrow(() -> new GroupDoesNotExistException(
-                        "Группа %s не существует".formatted(groupName)));
-        group.removeContactId(contact.getId());
-        repository.update(groupName, group);
+        findGroupByName(chatId, currentName).orElseThrow(() ->
+                new GroupDoesNotExistException(
+                        "Группа %s не существует".formatted(currentName)));
+        repository.update(currentName, group);
     }
 
     /**

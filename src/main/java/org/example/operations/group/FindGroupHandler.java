@@ -52,7 +52,7 @@ public class FindGroupHandler implements OperationHandler {
         } else {
             response.setText("По имени " + groupName + " группа не найдена");
         }
-        stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+        stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
         return response;
     }
 }

@@ -45,7 +45,7 @@ public class BlockContactHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Да" -> {
-                String contactName = stateService.getParamByKey(
+                String contactName = (String) stateService.getParamByKey(
                         chatId,
                         "currentContactName");
                 Optional<Contact> contactOptional = contactService
@@ -66,12 +66,10 @@ public class BlockContactHandler implements OperationHandler {
                             + " не существует. Блокировка не применена");
                 }
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU,
-                        true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Нет" -> {
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU,
-                        true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Действие изменения блокировки отменено");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }

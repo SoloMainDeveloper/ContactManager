@@ -9,7 +9,6 @@ import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
-import org.example.utils.GroupConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,11 +21,6 @@ import java.util.Optional;
  * Тестируем обработчики сообщений, взаимодействующие с группами
  */
 public class GroupMessageHandlerTest {
-    /**
-     * Преобразует поля id-шников контактов групп
-     */
-    private final GroupConverter converter = new GroupConverter();
-
     /**
      * Фейковый групп-репозиторий для тестов
      */
@@ -55,7 +49,7 @@ public class GroupMessageHandlerTest {
     /**
      * ChatId пользователя
      */
-    public final Long chatId = 123245663L;
+    private final Long chatId = 123245663L;
 
     /**
      * Инициализируем фейковые репозитории, чтобы не работать напрямую с БД.
@@ -138,7 +132,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void deleteGroupTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья"));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
@@ -156,7 +150,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void editContactTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья"));
         fakeContactRepository.add(new Contact(
                 chatId, "Олег", "95436475", 34, Gender.MALE, false));
 
@@ -193,7 +187,7 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void findGroupByNameTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья"));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
@@ -211,9 +205,9 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void getAllGroupsTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
-        fakeGroupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
-        fakeGroupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья"));
+        fakeGroupRepository.add(new Group(chatId, "Коллеги"));
+        fakeGroupRepository.add(new Group(chatId, "Баскетбол"));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Получить все");
@@ -230,9 +224,9 @@ public class GroupMessageHandlerTest {
      */
     @Test
     public void getAllGroupsWithSorterByNameTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья", new HashSet<>()));
-        fakeGroupRepository.add(new Group(chatId, "Коллеги", new HashSet<>()));
-        fakeGroupRepository.add(new Group(chatId, "Баскетбол", new HashSet<>()));
+        fakeGroupRepository.add(new Group(chatId, "Друзья"));
+        fakeGroupRepository.add(new Group(chatId, "Коллеги"));
+        fakeGroupRepository.add(new Group(chatId, "Баскетбол"));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Получить все");

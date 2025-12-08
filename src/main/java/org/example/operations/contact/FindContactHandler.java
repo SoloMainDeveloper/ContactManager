@@ -62,7 +62,7 @@ public class FindContactHandler implements OperationHandler {
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {
@@ -95,7 +95,7 @@ public class FindContactHandler implements OperationHandler {
      */
     private BotResponse handleFindContactByName(Long chatId) {
         BotResponse response = new BotResponse();
-        String name = stateService.getParamByKey(chatId, "contactName");
+        String name = (String) stateService.getParamByKey(chatId, "contactName");
         Optional<Contact> contact = contactService.findContactByName(chatId, name);
 
         if (contact.isPresent()) {
@@ -104,7 +104,7 @@ public class FindContactHandler implements OperationHandler {
                     List.of(contact.get().getName()),
                     Operation.CURRENT_CONTACT_MENU.toString()));
         } else {
-            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             response.setText("По имени " + name + " контакты не найдены.");
             response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
         }
@@ -116,11 +116,11 @@ public class FindContactHandler implements OperationHandler {
      */
     private BotResponse handleFindContactByPhoneNumber(Long chatId) {
         BotResponse response = new BotResponse();
-        String number = stateService.getParamByKey(chatId, "contactNumber");
+        String number = (String) stateService.getParamByKey(chatId, "contactNumber");
         List<Contact> contacts = contactService.findContactsByNumber(chatId, number);
 
         if (contacts.isEmpty()) {
-            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             response.setText("По номеру " + number + " контакты не найдены.");
             response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
         } else {

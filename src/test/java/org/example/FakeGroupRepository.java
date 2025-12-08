@@ -12,14 +12,7 @@ public class FakeGroupRepository implements IGroupRepository {
     /**
      * Хранилище групп
      */
-    private final Map<Long, Map<String, Group>> groups;
-
-    /**
-     * Конструктор
-     */
-    public FakeGroupRepository() {
-        groups = new LinkedHashMap<>();
-    }
+    private final Map<Long, Map<String, Group>> groups = new LinkedHashMap<>();
 
     @Override
     public void add(Group group) {
