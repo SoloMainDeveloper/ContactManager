@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,19 +26,9 @@ public class GroupMessageHandlerTest {
     private FakeGroupRepository fakeGroupRepository;
 
     /**
-     * Фейковый контакт-репозиторий для тестов
-     */
-    private FakeContactRepository fakeContactRepository;
-
-    /**
      * Групп-сервис для тестов
      */
     private GroupService groupService;
-
-    /**
-     * Контакт-сервис для тестов
-     */
-    private ContactService contactService;
 
     /**
      * Обработчик сообщений
@@ -54,14 +43,15 @@ public class GroupMessageHandlerTest {
     /**
      * Инициализируем фейковые репозитории, чтобы не работать напрямую с БД.
      * Инициализируем сервисы для более детального тестирования внутренностей.
-     * Инициализируем MessageHandler.
+     * Инициализируем MessageHandler. Добавляем несколько контактов в
+     * fakeContactRepository
      */
     @BeforeEach
     public void setup() {
         fakeGroupRepository = new FakeGroupRepository();
         groupService = new GroupService(fakeGroupRepository);
-        fakeContactRepository = new FakeContactRepository();
-        contactService = new ContactService(fakeContactRepository);
+        FakeContactRepository fakeContactRepository = new FakeContactRepository();
+        ContactService contactService = new ContactService(fakeContactRepository);
         StateService stateService = new StateService();
         handler = new MessageHandler(
                 List.of(new AddGroupHandler(groupService, contactService, stateService),
@@ -74,16 +64,21 @@ public class GroupMessageHandlerTest {
                         new GetAllGroupsHandler(groupService, stateService),
                         new MainMenuHandler(stateService)),
                 stateService);
+
+        fakeContactRepository.add(new Contact(
+                chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
+        fakeContactRepository.add(new Contact(
+                chatId, "Олег", "12345", 45, Gender.MALE, false));
+        fakeContactRepository.add(new Contact(
+                chatId, "Михаил", "11", 21, Gender.MALE, true));
     }
 
     /**
-     * Тестируем успешное добавление группы
+     * Тестируем успешное добавление группы, добавление в неё существующего и не
+     * существующего контактов и затем её поиск по имени
      */
     @Test
     public void addGroupTest() {
-        fakeContactRepository.add(new Contact(
-                chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
-
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
 
@@ -91,24 +86,42 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Добавить контакт");
         handler.handleMessage(chatId, "Юлия");
         handler.handleMessage(chatId, "Добавить контакт");
-        handler.handleMessage(chatId, "Константин");
-        BotResponse response = handler.handleMessage(chatId, "Сохранить группу");
+        Assertions.assertEquals(
+                "Контакт Константин не был найден.",
+                handler.handleMessage(chatId, "Константин").getText()
+        );
         Assertions.assertEquals(
                 "Группа Друзья успешна сохранена",
-                response.getText()
+                handler.handleMessage(chatId, "Сохранить группу").getText()
         );
+        Group group = groupService.findGroupByName(chatId, "Друзья").orElseThrow();
+        List<Contact> contacts = group.getContacts();
+        Assertions.assertEquals(1, contacts.size());
+        Contact contact = contacts.getFirst();
+        Assertions.assertEquals("Юлия", contact.getName());
+        Assertions.assertEquals("95436575", contact.getPhoneNumber());
+        Assertions.assertEquals(34, contact.getAge());
+        Assertions.assertEquals(Gender.FEMALE, contact.getGender());
+        Assertions.assertFalse(contact.isBlocked());
 
-        groupService.findGroupByName(chatId, "Друзья").orElseThrow();
+        handler.handleMessage(chatId, "Найти");
+        Assertions.assertEquals(
+                "Группа Друзья успешно найдена",
+                handler.handleMessage(chatId, "Друзья").getText()
+        );
+        handler.handleInlineButtonActivated(chatId, "CURRENT_GROUP_MENU_Друзья");
+        BotResponse response = handler.handleMessage(
+                chatId, "Вывести все контакты группы");
+        Assertions.assertEquals(
+                List.of("Юлия"),
+                response.getInlineKeyboardText().inlineText());
     }
 
     /**
      * Неуспешное добавление группы, так как уже существует группа с таким именем
      */
     @Test
-    public void addContactThatAlreadyExistsTest() {
-        fakeContactRepository.add(new Contact(
-                chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
-
+    public void addGroupThatAlreadyExistsTest() {
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Друзья");
@@ -118,13 +131,13 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Друзья");
         handler.handleMessage(chatId, "Добавить контакт");
         handler.handleMessage(chatId, "Юлия");
-        BotResponse response = handler.handleMessage(
-                chatId, "Сохранить группу");
+        BotResponse response = handler.handleMessage(chatId, "Сохранить группу");
         Assertions.assertEquals(
                 "Произошла ошибка при добавлении группы: Группа Друзья уже существует",
                 response.getText());
 
-        groupService.findGroupByName(chatId, "Друзья").orElseThrow();
+        Group group = groupService.findGroupByName(chatId, "Друзья").orElseThrow();
+        Assertions.assertTrue(group.getContacts().isEmpty());
     }
 
     /**
@@ -139,32 +152,43 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Друзья");
         handler.handleInlineButtonActivated(chatId, "CURRENT_GROUP_MENU_Друзья");
         handler.handleMessage(chatId, "Удалить");
-        BotResponse response = handler.handleMessage(chatId, "Да");
 
-        Assertions.assertEquals("Группа Друзья успешно удалена", response.getText());
+        Assertions.assertEquals(
+                "Группа Друзья успешно удалена",
+                handler.handleMessage(chatId, "Да").getText()
+        );
         Assertions.assertTrue(groupService.findGroupByName(chatId, "Друзья").isEmpty());
+        BotResponse response = handler.handleInlineButtonActivated(
+                chatId, "CURRENT_GROUP_MENU_Друзья");
+        Assertions.assertEquals("Группа Друзья не была найдена", response.getText());
     }
 
     /**
      * Тестируем успешное редактирование группы
+     * <ol>
+     *     <li>Изменение имени</li>
+     *     <li>Удаление контакта из группы</li>
+     *     <li>Добавление контакта в группу</li>
+     * </ol>
      */
     @Test
     public void editContactTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья"));
-        fakeContactRepository.add(new Contact(
-                chatId, "Олег", "95436475", 34, Gender.MALE, false));
-
         handler.handleMessage(chatId, "Группы");
-        handler.handleMessage(chatId, "Найти");
-        handler.handleMessage(chatId, "Друзья");
+        handler.handleMessage(chatId, "Добавить");
+        handler.handleMessage(chatId, "Магазин");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Юлия");
+        handler.handleMessage(chatId, "Сохранить группу");
+        handler.handleInlineButtonActivated(chatId, "CURRENT_GROUP_MENU_Магазин");
 
-        handler.handleInlineButtonActivated(chatId, "CURRENT_GROUP_MENU_Друзья");
         handler.handleMessage(chatId, "Изменить");
-        handler.handleMessage(chatId,"Изменить имя группы");
-        handler.handleMessage(chatId,"Товарищи");
-        handler.handleMessage(chatId,"Добавить контакт в группу");
-        handler.handleMessage(chatId,"Олег");
-        BotResponse response = handler.handleMessage(chatId,"Сохранить группу");
+        handler.handleMessage(chatId, "Изменить имя группы");
+        handler.handleMessage(chatId, "Товарищи");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
+        handler.handleMessage(chatId, "Олег");
+        handler.handleMessage(chatId, "Удалить контакт из группы");
+        handler.handleMessage(chatId, "Юлия");
+        BotResponse response = handler.handleMessage(chatId, "Сохранить группу");
         Assertions.assertEquals(
                 "Группа успешно отредактирована и сохранена",
                 response.getText()
@@ -174,40 +198,72 @@ public class GroupMessageHandlerTest {
         Assertions.assertTrue(oldGroup.isEmpty());
 
         Group updatedGroup = groupService
-                .findGroupByName(chatId, "Товарищи").orElse(null);
-        Assertions.assertNotNull(updatedGroup);
+                .findGroupByName(chatId, "Товарищи").orElseThrow();
         Assertions.assertEquals("Товарищи", updatedGroup.getName());
-        Assertions.assertEquals("0", converter
-                .contactIdsToString(updatedGroup.getContactIds()));
-        Assertions.assertNotNull(contactService.findContactById(chatId, 0L));
+
+        List<Contact> contacts = updatedGroup.getContacts();
+        Assertions.assertEquals(1, contacts.size());
+        Contact contact = contacts.getFirst();
+        Assertions.assertEquals("Олег", contact.getName());
+        Assertions.assertEquals("12345", contact.getPhoneNumber());
+        Assertions.assertEquals(45, contact.getAge());
+        Assertions.assertEquals(Gender.MALE, contact.getGender());
+        Assertions.assertFalse(contact.isBlocked());
     }
 
     /**
-     * Тестируем успешный поиск группы по имени
+     * Тестируем поиск несуществующей группы по имени
      */
     @Test
-    public void findGroupByNameTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья"));
+    public void findNonExistingGroupByNameTest() {
+        fakeGroupRepository.add(new Group(chatId, "Футболисты"));
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Найти");
         BotResponse response = handler.handleMessage(chatId, "Друзья");
-        Assertions.assertEquals(
-                "Группа Друзья успешно найдена",
-                response.getText()
-        );
-        Optional<Group> group = groupService.findGroupByName(chatId, "Друзья");
-        Assertions.assertTrue(group.isPresent());
+        Assertions.assertEquals("По имени Друзья группа не найдена", response.getText());
     }
 
     /**
      * Тестируем получение всех групп
+     * <p>Настройка: создаём три группы с разным количеством участников</p>
+     * <p>Проверки</p>
+     * <ol>
+     *     <li>Вывод всех групп</li>
+     *     <li>Вывод с сортировкой по алфавиту</li>
+     *     <li>Вывод с сортировкой в обратном алфавитном порядке</li>
+     *     <li>Вывод с сортировкой по убыванию кол-ва участников группы</li>
+     *     <li>Вывод с сортировкой по возрастанию кол-ва участников группы</li>
+     * </ol>
      */
     @Test
     public void getAllGroupsTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья"));
-        fakeGroupRepository.add(new Group(chatId, "Коллеги"));
-        fakeGroupRepository.add(new Group(chatId, "Баскетбол"));
+        handler.handleMessage(chatId, "Группы");
+        handler.handleMessage(chatId, "Добавить");
+        handler.handleMessage(chatId, "Друзья");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Юлия");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Олег");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Михаил");
+        handler.handleMessage(chatId, "Сохранить группу");
+
+        handler.handleMessage(chatId, "Группы");
+        handler.handleMessage(chatId, "Добавить");
+        handler.handleMessage(chatId, "Коллеги");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Юлия");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Михаил");
+        handler.handleMessage(chatId, "Сохранить группу");
+
+        handler.handleMessage(chatId, "Группы");
+        handler.handleMessage(chatId, "Добавить");
+        handler.handleMessage(chatId, "Баскетбол");
+        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Михаил");
+        handler.handleMessage(chatId, "Сохранить группу");
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Получить все");
@@ -217,29 +273,38 @@ public class GroupMessageHandlerTest {
                 List.of("Друзья", "Коллеги", "Баскетбол"),
                 response.getInlineKeyboardText().inlineText()
         );
-    }
 
-    /**
-     * Тестируем получение групп с сортировкой в алфавитном порядке по имени
-     */
-    @Test
-    public void getAllGroupsWithSorterByNameTest() {
-        fakeGroupRepository.add(new Group(chatId, "Друзья"));
-        fakeGroupRepository.add(new Group(chatId, "Коллеги"));
-        fakeGroupRepository.add(new Group(chatId, "Баскетбол"));
-
-        handler.handleMessage(chatId, "Группы");
-        handler.handleMessage(chatId, "Получить все");
         handler.handleMessage(chatId, "Сортировать");
-        BotResponse response = handler
-                .handleMessage(chatId, "В алфавитном порядке имени");
+        BotResponse responseSort1 = handler.handleMessage(
+                chatId, "В алфавитном порядке имени");
         Assertions.assertEquals(
                 "Все группы с выбранной сортировкой:",
-                response.getText()
+                responseSort1.getText()
         );
         Assertions.assertEquals(
                 List.of("Баскетбол", "Друзья", "Коллеги"),
-                response.getInlineKeyboardText().inlineText()
+                responseSort1.getInlineKeyboardText().inlineText()
+        );
+
+        handler.handleMessage(chatId, "Сортировать");
+        Assertions.assertEquals(
+                List.of("Коллеги", "Друзья", "Баскетбол"),
+                handler.handleMessage(chatId, "В обратном алфавитному порядке имени")
+                        .getInlineKeyboardText().inlineText()
+        );
+
+        handler.handleMessage(chatId, "Сортировать");
+        Assertions.assertEquals(
+                List.of("Друзья", "Коллеги", "Баскетбол"),
+                handler.handleMessage(chatId, "В порядке убывания кол-ва участников")
+                        .getInlineKeyboardText().inlineText()
+        );
+
+        handler.handleMessage(chatId, "Сортировать");
+        Assertions.assertEquals(
+                List.of("Баскетбол", "Коллеги", "Друзья"),
+                handler.handleMessage(chatId, "В порядке возрастания кол-ва участников")
+                        .getInlineKeyboardText().inlineText()
         );
     }
 }

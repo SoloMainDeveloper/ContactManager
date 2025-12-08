@@ -17,42 +17,38 @@ public class FakeGroupRepository implements IGroupRepository {
     @Override
     public void add(Group group) {
         Long chatId = group.getChatId();
-        if (!groups.containsKey(chatId)) {
-            groups.put(chatId, new LinkedHashMap<>());
-        }
-        groups.get(chatId).put(group.getName(), group);
+        getOrCreateGroupsByChatId(chatId).put(group.getName(), group);
     }
 
     @Override
     public Optional<Group> findGroupByName(String name, Long chatId) {
-        Map<String, Group> currentGroups = groups.get(chatId);
-        return currentGroups == null || currentGroups.isEmpty()
-                ? Optional.empty()
-                : Optional.of(currentGroups.get(name));
+        return Optional.ofNullable(getOrCreateGroupsByChatId(chatId).get(name));
     }
 
     @Override
     public List<Group> findGroupsByChatId(Long chatId, String sorter) {
-        Map<String, Group> userGroups = groups.getOrDefault(chatId, new HashMap<>());
-        List<Group> groupList = new ArrayList<>(userGroups.values());
-
-        return applySorter(groupList, sorter);
+        Map<String, Group> userGroups = getOrCreateGroupsByChatId(chatId);
+        return applySorter(userGroups.values().stream().toList(), sorter);
     }
 
     /**
      * Применить сортировку к списку групп
      */
     private List<Group> applySorter(List<Group> groups, String sorter) {
-        if (sorter == null || sorter.isEmpty()) {
-            return groups;
-        }
-
         List<Group> sortedGroups = new ArrayList<>(groups);
-        if (sorter.contains("ORDER BY name ASC")) {
-            sortedGroups.sort(Comparator.comparing(Group::getName));
-        }
-        else if (sorter.contains("ORDER BY name DESC")) {
-            sortedGroups.sort(Comparator.comparing(Group::getName).reversed());
+        switch (sorter) {
+            case " ORDER BY groups.name ASC" ->
+                    sortedGroups.sort(Comparator.comparing(Group::getName));
+            case " ORDER BY groups.name DESC" ->
+                    sortedGroups.sort(Comparator.comparing(Group::getName).reversed());
+            case " ORDER BY participants_count ASC, groups.name ASC" ->
+                    sortedGroups.sort(Comparator
+                            .comparingInt((Group g) -> g.getContacts().size()));
+            case " ORDER BY participants_count DESC, groups.name ASC" ->
+                    sortedGroups.sort(Comparator
+                            .comparingInt((Group g) -> g.getContacts().size())
+                            .reversed());
+            default -> {}
         }
         return sortedGroups;
     }
@@ -60,17 +56,23 @@ public class FakeGroupRepository implements IGroupRepository {
     @Override
     public void update(String currentName, Group group) {
         Map<String, Group> userGroups = groups.get(group.getChatId());
-        if (userGroups != null) {
-            userGroups.remove(currentName);
-            userGroups.put(group.getName(), group);
-        }
+        userGroups.remove(currentName);
+        userGroups.put(group.getName(), group);
     }
 
     @Override
     public void deleteByName(String name, Long chatId) {
-        Map<String, Group> userGroups = groups.get(chatId);
-        if (userGroups != null) {
-            userGroups.remove(name);
+        groups.get(chatId).remove(name);
+    }
+
+    /**
+     * Получить группу по chatId пользователя. Если ещё не существует, предварительно
+     * её создаёт.
+     */
+    private Map<String, Group> getOrCreateGroupsByChatId(Long chatId) {
+        if(!groups.containsKey(chatId)) {
+            groups.put(chatId, new LinkedHashMap<>());
         }
+        return groups.get(chatId);
     }
 }

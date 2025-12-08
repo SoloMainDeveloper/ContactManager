@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Обработчик события: Редактирование контакта
@@ -52,7 +53,7 @@ public class EditContactHandler implements OperationHandler {
         switch (messageText) {
             case "Имя" -> {
                 response.setText("Введите имя контакта");
-                stateService.setLastRequestedParamKey(chatId, "contactName");
+                stateService.setLastRequestedParamKey(chatId, "newContactName");
             }
             case "Номер" -> {
                 response.setText("Введите номер телефона");
@@ -69,15 +70,20 @@ public class EditContactHandler implements OperationHandler {
             }
             case "Изменить контакт" -> {
                 try {
+                    Contact contact = contactService.findContactByName(
+                            chatId, contactName).orElseThrow(() ->
+                            new ContactDoesNotExistException(
+                                    "Контакт %s не был найден".formatted(contactName)));
                     Map<String, Object> params = stateService.getParams(chatId);
-                    Contact contact = new Contact(chatId,
-                            (String) params.get("contactName"),
-                            (String) params.getOrDefault("contactNumber", ""),
-                            Integer.parseInt((String) params.getOrDefault("contactAge",
-                                    String.valueOf(-1))),
-                            Gender.fromDisplayName((String) params.get("contactGender")),
-                            false
-                    );
+
+                    contact.setName((String) params.getOrDefault(
+                            "newContactName", contact.getName()));
+                    contact.setPhoneNumber((String) params.getOrDefault(
+                            "contactNumber", contact.getPhoneNumber()));
+                    contact.setAge(Integer.parseInt((String) params.getOrDefault(
+                            "contactAge", contact.getAge())));
+                    contact.setGender(Gender.fromDisplayName((String) params.getOrDefault(
+                            "contactGender", contact.getGender())));
                     contactService.tryUpdateContact(chatId, contactName, contact);
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } catch (ContactDoesNotExistException e) {
