@@ -4,24 +4,34 @@ package org.example.state;
  * Функциональная операция пользователя над ботом
  */
 public enum Operation {
-    MAIN_MENU,
+    MAIN_MENU(true),
 
-    CONTACTS_MENU,
-    ADD_CONTACT,
-    FIND_CONTACT,
-    GET_ALL_CONTACTS,
+    CONTACTS_MENU(true),
+    ADD_CONTACT(true),
+    FIND_CONTACT(true),
+    GET_ALL_CONTACTS(true),
 
-    CURRENT_CONTACT_MENU,
-    EDIT_CONTACT,
-    BLOCK_CONTACT,
-    DELETE_CONTACT,
+    CURRENT_CONTACT_MENU(true),
+    EDIT_CONTACT(false),
+    BLOCK_CONTACT(false),
+    DELETE_CONTACT(false),
 
-    GROUPS_MENU,
-    ADD_GROUP,
-    FIND_GROUP,
-    GET_ALL_GROUPS,
+    GROUPS_MENU(true),
+    ADD_GROUP(true),
+    FIND_GROUP(true),
+    GET_ALL_GROUPS(true),
 
-    CURRENT_GROUP_MENU,
-    EDIT_GROUP,
-    DELETE_GROUP
+    CURRENT_GROUP_MENU(true),
+    EDIT_GROUP(false),
+    DELETE_GROUP(false);
+
+    private final boolean shouldClearContext;
+
+    Operation(boolean shouldClearContext) {
+        this.shouldClearContext = shouldClearContext;
+    }
+
+    public boolean shouldClearContext() {
+        return shouldClearContext;
+    }
 }

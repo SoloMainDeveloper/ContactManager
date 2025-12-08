@@ -65,7 +65,7 @@ public class GetAllGroupsHandler implements OperationHandler {
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
             default -> response = handleMessageWithContext(chatId, messageText);
@@ -83,9 +83,8 @@ public class GetAllGroupsHandler implements OperationHandler {
                 Objects.equals(messageText, "В порядке убывания кол-ва участников") ||
                 Objects.equals(messageText, "В порядке возрастания кол-ва участников")) {
             response.setText("Отлично. Выбрана следующая сортировка: " + messageText);
-            stateService.addParameter(chatId, "sorter", messageText);
             List<Group> groups = groupService.findGroupsByChatIdWithSorter(
-                    chatId, stateService.getParams(chatId));
+                    chatId, createSorterFromMessageText(messageText));
             if (groups.isEmpty()) {
                 response.setText("Группы не найдены с примененной фильтрацией");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
@@ -100,10 +99,25 @@ public class GetAllGroupsHandler implements OperationHandler {
         } else if (Objects.equals(messageText, "Назад к выбору")) {
             response.setText(ReplyConstants.COME_BACK);
             response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
-            stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS, true);
+            stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS);
         } else {
             response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
+    }
+
+    /**
+     * Создать сортировку из текста сообщения
+     */
+    private String createSorterFromMessageText(String message) {
+        return switch (message) {
+            case "В алфавитном порядке имени" -> " ORDER BY groups.name ASC";
+            case "В обратном алфавитному порядке имени" -> " ORDER BY groups.name DESC";
+            case "В порядке возрастания кол-ва участников" ->
+                    " ORDER BY participants_count ASC, groups.name ASC";
+            case "В порядке убывания кол-ва участников" ->
+                    " ORDER BY participants_count DESC, groups.name ASC";
+            default -> "";
+        };
     }
 }

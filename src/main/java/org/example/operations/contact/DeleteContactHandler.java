@@ -42,17 +42,15 @@ public class DeleteContactHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Да" -> {
-                String contactName = stateService.getParamByKey(chatId,
+                String contactName = (String) stateService.getParamByKey(chatId,
                         "currentContactName");
                 contactService.deleteByName(chatId, contactName);
                 response.setText("Контакт " + contactName + " успешно удален");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Нет" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Действие удаления текущего контакта отменено");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }

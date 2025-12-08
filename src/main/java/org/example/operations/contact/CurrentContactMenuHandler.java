@@ -45,13 +45,13 @@ public class CurrentContactMenuHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = stateService.getParamByKey(chatId, "currentContactName");
+        String contactName = (String) stateService.getParamByKey(chatId, "currentContactName");
         Optional<Contact> contactOptional = contactService.findContactByName(
                 chatId, contactName);
         if (contactOptional.isEmpty()) {
             response.setText("Контакт " + contactName + " не был найден");
             response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             return response;
         }
         Contact contact = contactOptional.get();
@@ -63,18 +63,15 @@ public class CurrentContactMenuHandler implements OperationHandler {
             case "Информация" -> {
                 response.setText(getContactInfo(contact));
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Изменить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT,
-                        false);
+                stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT);
                 response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
                 response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
             }
             case "Блокировать" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.BLOCK_CONTACT, false);
+                stateService.changeCurrentOperation(chatId, Operation.BLOCK_CONTACT);
 
                 String isBlockedInfo = contact.isBlocked()
                         ? "заблокирован"
@@ -89,15 +86,13 @@ public class CurrentContactMenuHandler implements OperationHandler {
                 response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Удалить" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.DELETE_CONTACT, false);
+                stateService.changeCurrentOperation(chatId, Operation.DELETE_CONTACT);
                 response.setText("Вы точно хотите удалить текущий контакт?");
                 response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);

@@ -38,14 +38,13 @@ public class MainMenuHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
             case "Контакты" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Взаимодействие с контактами. Выберите какое"
                         + " действие хотите совершить");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             case "Группы" -> {
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setText("Взаимодействие с группами. Выберите какое"
                         + " действие хотите совершить");
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);

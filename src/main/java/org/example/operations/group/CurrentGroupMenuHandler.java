@@ -55,14 +55,16 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String groupName = stateService.getParamByKey(chatId, "currentGroupName");
+        String groupName = (String) stateService.getParamByKey(
+                chatId, "currentGroupName");
         Optional<Group> group = groupService.findGroupByName(chatId, groupName);
         if (group.isEmpty()) {
             response.setText("Группа " + groupName + " не была найдена");
             response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
-            stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+            stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             return response;
         }
+        stateService.addParameter(chatId, "currentGroup", group.get());
         switch (messageText) {
             case "Меню группы вызвано" -> {
                 response.setText("Меню для группы " + groupName + " вызвано");
@@ -72,18 +74,18 @@ public class CurrentGroupMenuHandler implements OperationHandler {
                 response = handleGetAllContactsFromGroup(chatId, group.get());
             }
             case "Изменить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP, false);
+                stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP);
                 response.setText("Отлично. Выберите какие операции хотите выполнить");
                 response.setKeyboardText(ReplyKeyboardConstants.EDIT_GROUP_MENU);
             }
             case "Удалить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP, false);
+                stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP);
                 response.setText("Вы точно хотите удалить текущую группу?");
                 response.setKeyboardText(List.of("Да", "Нет"));
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);

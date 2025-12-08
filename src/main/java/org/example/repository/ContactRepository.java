@@ -1,15 +1,12 @@
 package org.example.repository;
 
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,8 +52,9 @@ public class ContactRepository implements IContactRepository {
                 .addValue("chatId", chatId);
 
         try {
+            ContactMapper mapper = new ContactMapper();
             Contact contact = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                    (resultSet, rowNum) -> mapper.resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
@@ -74,8 +72,9 @@ public class ContactRepository implements IContactRepository {
                 .addValue("name", name);
 
         try {
+            ContactMapper mapper = new ContactMapper();
             Contact contact = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                    (resultSet, rowNum) -> mapper.resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
@@ -93,8 +92,9 @@ public class ContactRepository implements IContactRepository {
                 .addValue("chatId", chatId)
                 .addValue("phoneNumber", number);
         try {
+            ContactMapper mapper = new ContactMapper();
             return jdbcTemplate.query(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                    (resultSet, rowNum) -> mapper.resultSetToContactEntity(resultSet));
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
             System.out.println("Ошибка запроса к БД при поиске контактов по номеру:" + e);
@@ -110,8 +110,9 @@ public class ContactRepository implements IContactRepository {
                 .addValue("chatId", chatId);
 
         try {
+            ContactMapper mapper = new ContactMapper();
             return jdbcTemplate.query(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                    (resultSet, rowNum) -> mapper.resultSetToContactEntity(resultSet));
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
             System.out.println("Ошибка запроса к БД при поиске контактов по chatId:" + e);
@@ -146,20 +147,5 @@ public class ContactRepository implements IContactRepository {
                 .addValue("name", name);
 
         jdbcTemplate.update(sql, params);
-    }
-
-    /**
-     * Создаёт контакт на основе ответа от БД
-     */
-    public Contact resultSetToContactEntity(ResultSet resultSet) throws SQLException {
-        return new Contact(
-                resultSet.getLong("id"),
-                resultSet.getLong("chat_id"),
-                resultSet.getString("name"),
-                resultSet.getString("phone_number"),
-                resultSet.getInt("age"),
-                Gender.valueOf(resultSet.getString("gender")),
-                resultSet.getBoolean("is_blocked")
-        );
     }
 }

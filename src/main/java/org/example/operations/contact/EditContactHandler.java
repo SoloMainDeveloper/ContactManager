@@ -1,5 +1,7 @@
 package org.example.operations.contact;
 
+import org.example.entity.Contact;
+import org.example.entity.Gender;
 import org.example.exceptions.ContactDoesNotExistException;
 import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
@@ -11,6 +13,7 @@ import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Обработчик события: Редактирование контакта
@@ -43,7 +46,8 @@ public class EditContactHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = stateService.getParamByKey(chatId, "currentContactName");
+        String contactName = (String) stateService.getParamByKey(
+                chatId, "currentContactName");
 
         switch (messageText) {
             case "Имя" -> {
@@ -65,19 +69,27 @@ public class EditContactHandler implements OperationHandler {
             }
             case "Изменить контакт" -> {
                 try {
-                    contactService.tryUpdateContact(
-                            chatId, contactName, stateService.getParams(chatId));
+                    Map<String, Object> params = stateService.getParams(chatId);
+                    Contact contact = new Contact(chatId,
+                            (String) params.get("contactName"),
+                            (String) params.getOrDefault("contactNumber", ""),
+                            Integer.parseInt((String) params.getOrDefault("contactAge",
+                                    String.valueOf(-1))),
+                            Gender.fromDisplayName((String) params.get("contactGender")),
+                            false
+                    );
+                    contactService.tryUpdateContact(chatId, contactName, contact);
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } catch (ContactDoesNotExistException e) {
                     e.printStackTrace();
                     response.setText("Произошла ошибка при изменении: " + e.getMessage());
                 }
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {

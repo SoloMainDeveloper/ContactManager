@@ -2,7 +2,6 @@ package org.example.operations.group;
 
 import org.example.entity.Contact;
 import org.example.entity.Group;
-import org.example.exceptions.ContactDoesNotExistException;
 import org.example.exceptions.GroupDoesNotExistException;
 import org.example.exceptions.GroupEditException;
 import org.example.keyboardcreator.ReplyConstants;
@@ -13,11 +12,9 @@ import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.GroupConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Обработчик события: Редактирование группы
@@ -81,13 +78,12 @@ public class EditGroupHandler implements OperationHandler {
                     e.printStackTrace();
                     response.setText(e.getMessage());
                 }
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CURRENT_GROUP_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CURRENT_GROUP_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CURRENT_GROUP_MENU);
             }
             default -> response = handleMessageWithContext(chatId, messageText);
@@ -124,7 +120,8 @@ public class EditGroupHandler implements OperationHandler {
         if (groupNames.contains(newName)) {
             response.setText("Группа с таким именем уже существует, попробуйте еще раз");
         } else {
-            stateService.addParameter(chatId, "newName", newName);
+            Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+            group.setName(newName);
             response.setText("Имя группы записано на обновление.\n" +
                     "Желаете внести ещё изменения в группу?");
         }
@@ -141,13 +138,8 @@ public class EditGroupHandler implements OperationHandler {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
-        GroupConverter converter = new GroupConverter();
-        Set<Long> contactIds = converter.stringToContactIds(
-                stateService.getParamByKey(chatId, "contactIdsToDelete"));
-        contactIds.add(contact.getId());
-        stateService.addParameter(chatId, "contactIdsToDelete",
-                converter.contactIdsToString(contactIds));
-
+        Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+        group.removeContact(contact);
         response.setText("Контакт добавлен на удаление.\n" +
                 "Желаете внести ещё изменения в группу?");
         return response;
@@ -163,13 +155,8 @@ public class EditGroupHandler implements OperationHandler {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
-        GroupConverter converter = new GroupConverter();
-        Set<Long> contactIds = converter.stringToContactIds(
-                stateService.getParamByKey(chatId, "contactIdsToAdd"));
-        contactIds.add(contact.getId());
-        stateService.addParameter(chatId, "contactIdsToAdd",
-                converter.contactIdsToString(contactIds));
-
+        Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+        group.addContact(contact);
         response.setText("Контакт внесен на добавление.\n" +
                 "Желаете внести ещё изменения в группу?");
         return response;
@@ -179,37 +166,15 @@ public class EditGroupHandler implements OperationHandler {
      * Применить изменения для редактируемой группы
      *
      * @param chatId идентификатор чата
-     * @throws GroupEditException если группа или добавляемые/удаляемые контакты не
-     *                            существуют
+     * @throws GroupEditException если группа не существует
      */
     private void applyChangesForGroup(Long chatId) throws GroupEditException {
-        GroupConverter converter = new GroupConverter();
-        String groupName = stateService.getParamByKey(chatId, "currentGroupName");
-        String newName = stateService.getParamByKey(chatId, "newName");
-        if (newName == null) {
-            newName = groupName;
-        }
+        String groupName = (String) stateService.getParamByKey(
+                chatId, "currentGroupName");
         try {
-            groupService.tryUpdateGroupWithNewName(chatId, groupName, newName);
-            Set<Long> contactIdsToAdd = converter.stringToContactIds(
-                    stateService.getParamByKey(chatId, "contactIdsToAdd"));
-            for (Long contactId : contactIdsToAdd) {
-                Contact contact = contactService
-                        .findContactById(chatId, contactId)
-                        .orElseThrow(() -> new ContactDoesNotExistException(
-                                "Контакт с id=%s не был найден".formatted(contactId)));
-                groupService.tryAddContactToGroup(chatId, newName, contact);
-            }
-            Set<Long> contactIdsToDelete = converter.stringToContactIds(
-                    stateService.getParamByKey(chatId, "contactIdsToDelete"));
-            for (Long contactId : contactIdsToDelete) {
-                Contact contact = contactService
-                        .findContactById(chatId, contactId)
-                        .orElseThrow(() -> new ContactDoesNotExistException(
-                                "Контакт с id=%s не был найден".formatted(contactId)));
-                groupService.tryRemoveContactFromGroup(chatId, newName, contact);
-            }
-        } catch (GroupDoesNotExistException | ContactDoesNotExistException e) {
+            Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+            groupService.tryUpdateGroup(chatId, groupName, group);
+        } catch (GroupDoesNotExistException e) {
             throw new GroupEditException(
                     "Произошла ошибка при редактировании группы: " + e.getMessage());
         }

@@ -14,7 +14,7 @@ public class State {
     /**
      * Контекст операции
      */
-    private final Map<String, String> params = new LinkedHashMap<>();
+    private final Map<String, Object> params = new LinkedHashMap<>();
     /**
      * Последний запрошенный ботом у пользователя параметр на ввод
      */
@@ -28,11 +28,12 @@ public class State {
     }
 
     /**
-     * Устанавливает текущую операцию
+     * Устанавливает текущую операцию.
+     * Очищает контекст, если необходимо для данной операции.
      */
-    public void setOperation(Operation operation, boolean needClearContext) {
+    public void setOperation(Operation operation) {
         this.operation = operation;
-        if (needClearContext) {
+        if (operation.shouldClearContext()) {
             params.clear();
         }
     }
@@ -40,14 +41,14 @@ public class State {
     /**
      * Возвращает параметры текущей функции
      */
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return params;
     }
 
     /**
      * Добавляет параметр в контекст операции
      */
-    public void addParameter(String key, String value) {
+    public void addParameter(String key, Object value) {
         params.put(key, value);
     }
 

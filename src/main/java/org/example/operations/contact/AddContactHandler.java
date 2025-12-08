@@ -62,13 +62,13 @@ public class AddContactHandler implements OperationHandler {
             }
             case "Сохранить контакт" -> {
                 try {
-                    Map<String, String> params = stateService.getParams(chatId);
+                    Map<String, Object> params = stateService.getParams(chatId);
                     Contact contact = new Contact(chatId,
-                            params.get("contactName"),
-                            params.getOrDefault("contactNumber", ""),
-                            Integer.parseInt(params.getOrDefault("contactAge",
+                            (String) params.get("contactName"),
+                            (String) params.getOrDefault("contactNumber", ""),
+                            Integer.parseInt((String) params.getOrDefault("contactAge",
                                     String.valueOf(-1))),
-                            Gender.fromDisplayName(params.get("contactGender")),
+                            Gender.fromDisplayName((String) params.get("contactGender")),
                             false
                     );
                     contactService.tryAddContact(chatId, contact);
@@ -79,11 +79,11 @@ public class AddContactHandler implements OperationHandler {
                     response.setText("Произошла ошибка при добавлении: " + e.getMessage());
                 }
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {
