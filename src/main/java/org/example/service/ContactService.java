@@ -4,6 +4,8 @@ import org.example.entity.Contact;
 import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.exceptions.ContactDoesNotExistException;
 import org.example.repository.IContactRepository;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -70,16 +72,9 @@ public class ContactService {
     /**
      * Возвращает все контакты, имеющееся у данного пользователя
      */
-    public List<Contact> findContactsByChatId(Long chatId) {
-        return repository.findContactsByChatId(chatId, "", "");
-    }
-
-    /**
-     * Возвращает все контакты, имеющееся у данного пользователя с применением фильтрации и сортировки
-     */
-    public List<Contact> findContactsByChatIdWithFilterAndSorter(
-            Long chatId, String filter, String sorter) {
-        return repository.findContactsByChatId(chatId, filter, sorter);
+    public List<Contact> findContactsByChatId(
+            Long chatId, ContactFilter filter, ContactOrder order) {
+        return repository.findContactsByChatId(chatId, filter, order);
     }
 
     /**

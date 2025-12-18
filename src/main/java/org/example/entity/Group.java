@@ -3,7 +3,6 @@ package org.example.entity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Группа контактов
@@ -59,6 +58,13 @@ public class Group {
     }
 
     /**
+     * Установить уникальный идентификатор группы
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
      * Получить уникальный идентификатор чата с ботом
      */
     public Long getChatId() {
@@ -91,13 +97,6 @@ public class Group {
      */
     public List<Contact> getContacts() {
         return contacts.values().stream().toList();
-    }
-
-    /**
-     * Получить id-шники контактов
-     */
-    public Set<Long> getContactIds() {
-        return contacts.keySet();
     }
 
     /**

@@ -10,6 +10,7 @@ import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,6 +32,22 @@ public class GetAllContactsHandler implements OperationHandler {
      */
     private final StateService stateService;
 
+    private static final String FILTER = "filter";
+
+    private static final String FILTER_BY_GENDER = "filterByGender";
+
+    private static final String FILTER_BY_AGE = "filterByAge";
+
+    private static final String AGE_VALUE = "ageValue";
+
+    private static final String FILTER_BY_AGE_CONDITION = "filterByAgeCondition";
+
+    private static final String CONDITION = "conditionValue";
+
+    private static final String SORTER = "sorter";
+
+    private static final String NEED_SORT = "needSort";
+
     /**
      * Конструктор
      */
@@ -51,7 +68,8 @@ public class GetAllContactsHandler implements OperationHandler {
         switch (messageText) {
             case "Получить" -> {
                 response.setText("Все контакты");
-                List<Contact> contacts = contactService.findContactsByChatId(chatId);
+                List<Contact> contacts = contactService.findContactsByChatId(
+                    chatId, ContactFilter.none(), ContactOrder.none());
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
@@ -61,12 +79,12 @@ public class GetAllContactsHandler implements OperationHandler {
             case "Добавить фильтр" -> {
                 response.setText("Выберите фильтр");
                 response.setKeyboardText(ReplyKeyboardConstants.ADD_FILTER_MENU);
-                stateService.setLastRequestedParamKey(chatId, "filter");
+                stateService.setLastRequestedParamKey(chatId, FILTER);
             }
             case "Добавить сортировку" -> {
                 response.setText("Выберите в каком порядке выполнить сортировку");
                 response.setKeyboardText(ReplyKeyboardConstants.ADD_SORTER_CONTACT_MENU);
-                stateService.setLastRequestedParamKey(chatId, "sorter");
+                stateService.setLastRequestedParamKey(chatId, SORTER);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
@@ -90,13 +108,13 @@ public class GetAllContactsHandler implements OperationHandler {
         stateService.addParameter(chatId, lastRequestedParamKey, messageText);
 
         return switch (lastRequestedParamKey) {
-            case "filter" -> handleFilterCommand(chatId, messageText);
-            case "filterByGender" -> handleFilterByGenderCommand(chatId, messageText);
-            case "filterByAge" -> handleFilterByAgeCommand(chatId, messageText);
-            case "filterByAgeCondition" ->
+            case FILTER -> handleFilterCommand(chatId, messageText);
+            case FILTER_BY_GENDER -> handleFilterByGenderCommand(chatId, messageText);
+            case FILTER_BY_AGE -> handleFilterByAgeCommand(chatId, messageText);
+            case FILTER_BY_AGE_CONDITION ->
                     handleFilterByAgeConditionCommand(chatId, messageText);
-            case "needSort" -> handleNeedSortCommand(chatId, messageText);
-            case "sorter" -> handleSorterCommand(chatId, messageText);
+            case NEED_SORT -> handleNeedSortCommand(chatId, messageText);
+            case SORTER -> handleSorterCommand(chatId, messageText);
             default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
@@ -111,11 +129,11 @@ public class GetAllContactsHandler implements OperationHandler {
             case "По полу" -> {
                 response.setText("Выберите значение фильтра по полу");
                 response.setKeyboardText(ReplyKeyboardConstants.ADD_FILTER_BY_GENDER_MENU);
-                stateService.setLastRequestedParamKey(chatId, "filterByGender");
+                stateService.setLastRequestedParamKey(chatId, FILTER_BY_GENDER);
             }
             case "По возрасту" -> {
                 response.setText("Введите значение фильтра по возрасту");
-                stateService.setLastRequestedParamKey(chatId, "filterByAge");
+                stateService.setLastRequestedParamKey(chatId, FILTER_BY_AGE);
             }
             case "Назад к выбору" -> {
                 response.setText("Вы вернулись назад к выбору");
@@ -141,9 +159,9 @@ public class GetAllContactsHandler implements OperationHandler {
                 Objects.equals(messageText, "Не выбрано")) {
             response.setText("Отлично. Выбран следующий фильтр по полу: "
                     + messageText + ".\nНе желаете ли выбрать сортировку?");
-            stateService.addParameter(chatId, "filterByGender", messageText);
+            stateService.addParameter(chatId, FILTER_BY_GENDER, messageText);
             response.setKeyboardText(List.of("Да", "Нет", "Назад к выбору"));
-            stateService.setLastRequestedParamKey(chatId, "needSort");
+            stateService.setLastRequestedParamKey(chatId, NEED_SORT);
         } else if (Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");
             response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
@@ -166,12 +184,12 @@ public class GetAllContactsHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GET_ALL_CONTACTS);
             } else {
-                Number age = Integer.parseInt(messageText);
+                int age = Integer.parseInt(messageText);
                 response.setText("Отлично. Теперь выберите условие фильтрации");
                 response.setKeyboardText(List.of(
                         "> " + age, "< " + age, "= " + age, "Назад к выбору"));
-                stateService.addParameter(chatId, "ageValue", messageText);
-                stateService.setLastRequestedParamKey(chatId, "filterByAgeCondition");
+                stateService.addParameter(chatId, AGE_VALUE, String.valueOf(age));
+                stateService.setLastRequestedParamKey(chatId, FILTER_BY_AGE_CONDITION);
             }
         } catch (NumberFormatException exception) {
             response.setText("Произошла ошибка. Неверный формат возраста");
@@ -185,16 +203,30 @@ public class GetAllContactsHandler implements OperationHandler {
      */
     private BotResponse handleFilterByAgeConditionCommand(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String age = (String) stateService.getParamByKey(chatId, "ageValue");
+        String age = (String) stateService.getParamByKey(chatId, AGE_VALUE);
+        ContactFilter.Condition condition = null;
+        boolean isCorrectFilter = false;
 
-        if (Objects.equals(messageText, "> " + age) ||
-                Objects.equals(messageText, "< " + age) ||
-                Objects.equals(messageText, "= " + age)) {
+        if (Objects.equals(messageText, "> " + age)) {
+            condition = ContactFilter.Condition.GREATER_THAN;
+            isCorrectFilter = true;
+        }
+        if (Objects.equals(messageText, "< " + age)) {
+            condition = ContactFilter.Condition.LESS_THAN;
+            isCorrectFilter = true;
+        }
+        if (Objects.equals(messageText, "= " + age)) {
+            condition = ContactFilter.Condition.EQUALS;
+            isCorrectFilter = true;
+        }
+
+
+        if (isCorrectFilter) {
             response.setText("Отлично. Выбран следующий фильтр по возрасту:"
                     + messageText + ".\nНе желаете ли выбрать сортировку?");
-            stateService.addParameter(chatId, "filterByAge", messageText);
+            stateService.addParameter(chatId, CONDITION, condition);
             response.setKeyboardText(List.of("Да", "Нет", "Назад к выбору"));
-            stateService.setLastRequestedParamKey(chatId, "needSort");
+            stateService.setLastRequestedParamKey(chatId, NEED_SORT);
         } else if (Objects.equals(messageText, "Назад к выбору")) {
             response.setText("Вы вернулись назад к выбору");
             response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
@@ -215,13 +247,14 @@ public class GetAllContactsHandler implements OperationHandler {
         switch (messageText) {
             case "Да" -> {
                 response.setKeyboardText(ReplyKeyboardConstants.ADD_SORTER_CONTACT_MENU);
-                stateService.setLastRequestedParamKey(chatId, "sorter");
+                stateService.setLastRequestedParamKey(chatId, SORTER);
                 response.setText("Выберите в каком порядке выполнить сортировку");
             }
             case "Нет" -> {
-                String filter = createFilterFromContext(stateService.getParams(chatId));
+                ContactFilter filter = createFilterFromContext(stateService.getParams(chatId));
+                ContactOrder order = createOrderFromMessageText(messageText);
                 List<Contact> contacts = contactService
-                        .findContactsByChatIdWithFilterAndSorter(chatId, filter, "");
+                        .findContactsByChatId(chatId, filter, order);
                 if (contacts.isEmpty()) {
                     response.setText("Контакты не найдены с такой фильтрацией");
                     response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
@@ -258,11 +291,11 @@ public class GetAllContactsHandler implements OperationHandler {
                 Objects.equals(messageText, "В алфавитном порядке имени") ||
                 Objects.equals(messageText, "В обратном алфавитному порядку имени")) {
             response.setText("Отлично. Выбрана следующая сортировка: " + messageText);
-            stateService.addParameter(chatId, "sorter", messageText);
-            String filter = createFilterFromContext(stateService.getParams(chatId));
-            String sorter = createSorterFromMessageText(messageText);
+            stateService.addParameter(chatId, SORTER, messageText);
+            ContactFilter filter = createFilterFromContext(stateService.getParams(chatId));
+            ContactOrder order = createOrderFromMessageText(messageText);
             List<Contact> contacts = contactService
-                    .findContactsByChatIdWithFilterAndSorter(chatId, filter, sorter);
+                .findContactsByChatId(chatId, filter, order);
             if (contacts.isEmpty()) {
                 response.setText("Контакты не найдены с такой фильтрацией");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
@@ -286,32 +319,39 @@ public class GetAllContactsHandler implements OperationHandler {
     }
 
     /**
-     * Создать сортировку из текста сообщения
+     * Создать фильтр из контекста на основе заданных пользователем параметров
      */
-    private String createSorterFromMessageText(String message) {
-        return switch (message) {
-            case "В порядке возрастания возраста" -> " ORDER BY age ASC";
-            case "В порядке убывания возраста" -> " ORDER BY age DESC";
-            case "В алфавитном порядке имени" -> " ORDER BY name ASC";
-            case "В обратном алфавитному порядку имени" -> " ORDER BY name DESC";
-            default -> "";
-        };
+    private ContactFilter createFilterFromContext(Map<String, Object> params) {
+        if (params.containsKey(FILTER_BY_GENDER)) {
+            String genderValue = Gender.fromDisplayName(
+                (String) params.get(FILTER_BY_GENDER)).name();
+            return new ContactFilter(ContactFilter.FilterProperty.GENDER,
+                ContactFilter.Condition.EQUALS, genderValue);
+        }
+        if (params.containsKey(FILTER_BY_AGE)) {
+            ContactFilter.Condition ageCondition =
+                (ContactFilter.Condition) params.get(CONDITION);
+            String ageValue = (String) params.get(AGE_VALUE);
+            return new ContactFilter(ContactFilter.FilterProperty.AGE,
+                ageCondition, ageValue);
+        }
+        return ContactFilter.none();
     }
 
     /**
-     * Создать фильтр из текста сообщения
+     * Создать порядок сортировки из текста сообщения
      */
-    private String createFilterFromContext(Map<String, Object> params) {
-        String filter = "";
-        if (params.containsKey("filterByGender")) {
-            String gender = Gender.fromDisplayName(
-                    (String) params.get("filterByGender")).name();
-            filter = " and gender = '" + gender + "'";
-        }
-        if (params.containsKey("filterByAge")) {
-            String ageCondition = (String) params.get("filterByAge");
-            filter = " and age " + ageCondition;
-        }
-        return filter;
+    private ContactOrder createOrderFromMessageText(String message) {
+        return switch (message) {
+            case "В порядке возрастания возраста" ->
+                new ContactOrder(ContactOrder.OrderProperty.AGE, ContactOrder.Direction.ASC);
+            case "В порядке убывания возраста" ->
+                new ContactOrder(ContactOrder.OrderProperty.AGE, ContactOrder.Direction.DESC);
+            case "В алфавитном порядке имени" ->
+                new ContactOrder(ContactOrder.OrderProperty.NAME, ContactOrder.Direction.ASC);
+            case "В обратном алфавитному порядку имени" ->
+                new ContactOrder(ContactOrder.OrderProperty.NAME, ContactOrder.Direction.DESC);
+            default -> ContactOrder.none();
+        };
     }
 }

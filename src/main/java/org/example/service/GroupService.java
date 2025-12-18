@@ -4,6 +4,7 @@ import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
 import org.example.exceptions.GroupDoesNotExistException;
 import org.example.repository.IGroupRepository;
+import org.example.utils.GroupOrder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -53,16 +54,8 @@ public class GroupService {
     /**
      * Найти все контакты, имеющееся у данного пользователя
      */
-    public List<Group> findGroupsByChatId(Long chatId) {
-        return repository.findGroupsByChatId(chatId, "");
-    }
-
-    /**
-     * Найти все контакты, имеющееся у данного пользователя с применением сортировки
-     */
-    public List<Group> findGroupsByChatIdWithSorter(
-            Long chatId, String sorter) {
-        return repository.findGroupsByChatId(chatId, sorter);
+    public List<Group> findGroupsByChatId(Long chatId, GroupOrder order) {
+        return repository.findGroupsByChatId(chatId, order);
     }
 
     /**

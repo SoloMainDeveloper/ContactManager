@@ -36,7 +36,7 @@ class ContactMessageHandlerTest {
     /**
      * ChatId пользователя
      */
-    private final Long chatId = 123245663L;
+    private static final Long chatId = 123245663L;
 
     /**
      * Инициализируем фейковый репозиторий, чтобы не работать напрямую с БД.

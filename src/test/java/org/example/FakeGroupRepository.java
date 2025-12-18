@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.entity.Group;
 import org.example.repository.IGroupRepository;
+import org.example.utils.GroupOrder;
 
 import java.util.*;
 
@@ -26,29 +27,30 @@ public class FakeGroupRepository implements IGroupRepository {
     }
 
     @Override
-    public List<Group> findGroupsByChatId(Long chatId, String sorter) {
+    public List<Group> findGroupsByChatId(Long chatId, GroupOrder order) {
         Map<String, Group> userGroups = getOrCreateGroupsByChatId(chatId);
-        return applySorter(userGroups.values().stream().toList(), sorter);
+        return getContactsAfterSorting(userGroups.values().stream().toList(), order);
     }
 
     /**
-     * Применить сортировку к списку групп
+     * Получить группы после примененной сортировки
      */
-    private List<Group> applySorter(List<Group> groups, String sorter) {
+    private List<Group> getContactsAfterSorting(List<Group> groups, GroupOrder order) {
         List<Group> sortedGroups = new ArrayList<>(groups);
-        switch (sorter) {
-            case " ORDER BY groups.name ASC" ->
-                    sortedGroups.sort(Comparator.comparing(Group::getName));
-            case " ORDER BY groups.name DESC" ->
-                    sortedGroups.sort(Comparator.comparing(Group::getName).reversed());
-            case " ORDER BY participants_count ASC, groups.name ASC" ->
-                    sortedGroups.sort(Comparator
-                            .comparingInt((Group g) -> g.getContacts().size()));
-            case " ORDER BY participants_count DESC, groups.name ASC" ->
-                    sortedGroups.sort(Comparator
-                            .comparingInt((Group g) -> g.getContacts().size())
-                            .reversed());
-            default -> {}
+        if(order.getProperty() == GroupOrder.OrderProperty.COUNT) {
+            switch (order.getDirection()) {
+                case ASC -> sortedGroups
+                    .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()));
+                case DESC -> sortedGroups
+                    .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()).reversed());
+            }
+        } else if(order.getProperty() == GroupOrder.OrderProperty.NAME) {
+            switch (order.getDirection()) {
+                case ASC -> sortedGroups
+                    .sort(Comparator.comparing(Group::getName));
+                case DESC -> sortedGroups
+                    .sort(Comparator.comparing(Group::getName).reversed());
+            }
         }
         return sortedGroups;
     }

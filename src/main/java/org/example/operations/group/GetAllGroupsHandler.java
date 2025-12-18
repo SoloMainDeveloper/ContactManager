@@ -9,6 +9,7 @@ import org.example.response.InlineKeyboardText;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.GroupOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -47,7 +48,8 @@ public class GetAllGroupsHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Получить" -> {
-                List<Group> groups = groupService.findGroupsByChatId(chatId);
+                List<Group> groups = groupService
+                    .findGroupsByChatId(chatId, GroupOrder.none());
                 if (groups.isEmpty()) {
                     response.setText("У вас пока нет созданных групп");
                 } else {
@@ -83,8 +85,8 @@ public class GetAllGroupsHandler implements OperationHandler {
                 Objects.equals(messageText, "В порядке убывания кол-ва участников") ||
                 Objects.equals(messageText, "В порядке возрастания кол-ва участников")) {
             response.setText("Отлично. Выбрана следующая сортировка: " + messageText);
-            List<Group> groups = groupService.findGroupsByChatIdWithSorter(
-                    chatId, createSorterFromMessageText(messageText));
+            GroupOrder order = createOrderFromMessageText(messageText);
+            List<Group> groups = groupService.findGroupsByChatId(chatId, order);
             if (groups.isEmpty()) {
                 response.setText("Группы не найдены с примененной фильтрацией");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
@@ -107,17 +109,19 @@ public class GetAllGroupsHandler implements OperationHandler {
     }
 
     /**
-     * Создать сортировку из текста сообщения
+     * Создать порядок сортировки из текста сообщения
      */
-    private String createSorterFromMessageText(String message) {
+    private GroupOrder createOrderFromMessageText(String message) {
         return switch (message) {
-            case "В алфавитном порядке имени" -> " ORDER BY groups.name ASC";
-            case "В обратном алфавитному порядке имени" -> " ORDER BY groups.name DESC";
+            case "В алфавитном порядке имени" ->
+                new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.ASC);
+            case "В обратном алфавитному порядке имени" ->
+                new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.DESC);
             case "В порядке возрастания кол-ва участников" ->
-                    " ORDER BY participants_count ASC, groups.name ASC";
+                new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.ASC);
             case "В порядке убывания кол-ва участников" ->
-                    " ORDER BY participants_count DESC, groups.name ASC";
-            default -> "";
+                new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.DESC);
+            default -> GroupOrder.none();
         };
     }
 }
