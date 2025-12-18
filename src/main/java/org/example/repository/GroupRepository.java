@@ -2,6 +2,7 @@ package org.example.repository;
 
 import org.example.entity.Contact;
 import org.example.entity.Group;
+import org.example.utils.GroupOrder;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -23,10 +24,13 @@ public class GroupRepository implements IGroupRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     /**
-     * Конструктор для инициализации NamedParameterJdbcTemplate
+     * Репозиторий контактов
      */
-    public GroupRepository(DataSource dataSource) {
+    private final IContactRepository contactRepository;
+
+    public GroupRepository(DataSource dataSource, IContactRepository contactRepository) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.contactRepository = contactRepository;
     }
 
     @Override
@@ -43,23 +47,25 @@ public class GroupRepository implements IGroupRepository {
                 groupParams,
                 Long.class
         );
-        addRelationsBetweenGroupAndContacts(groupId, group.getContactIds());
+        group.setId(groupId);
+
+        addRelationsBetweenGroupAndContacts(group);
     }
 
     /**
      * Добавить связи между группой и контактами.
      * Иными словами добавляет контакты в группу.
      */
-    private void addRelationsBetweenGroupAndContacts(
-            Long groupId, Set<Long> contactIds) {
-        if(contactIds != null && !contactIds.isEmpty()) {
+    private void addRelationsBetweenGroupAndContacts(Group group) {
+        List<Contact> contacts = group.getContacts();
+        if(!contacts.isEmpty()) {
             String addRelationSql = "INSERT INTO public.contact_groups " +
                     "(contact_id, group_id) VALUES (:contactId, :groupId)";
 
-            for (Long contactId : contactIds) {
+            for (Contact contact : contacts) {
                 MapSqlParameterSource relationParams = new MapSqlParameterSource()
-                        .addValue("contactId", contactId)
-                        .addValue("groupId", groupId);
+                        .addValue("contactId", contact.getId())
+                        .addValue("groupId", group.getId());
 
                 jdbcTemplate.update(addRelationSql, relationParams);
             }
@@ -94,16 +100,17 @@ public class GroupRepository implements IGroupRepository {
     }
 
     @Override
-    public List<Group> findGroupsByChatId(Long chatId, String sorter) {
+    public List<Group> findGroupsByChatId(Long chatId, GroupOrder order) {
+        String orderBy = getSqlForOrder(order);
         String sql = """
         SELECT groups.id, groups.chat_id, groups.name,
-            COUNT(contact_groups.contact_id) as participants_count
+            COUNT(contact_groups.contact_id) as count
         FROM public.groups AS groups
         LEFT JOIN public.contact_groups AS contact_groups
             ON groups.id = contact_groups.group_id
         WHERE groups.chat_id = :chatId
         GROUP BY groups.id, groups.chat_id, groups.name
-        """ + sorter;
+        """ + orderBy;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("chatId", chatId);
@@ -127,23 +134,21 @@ public class GroupRepository implements IGroupRepository {
     }
 
     /**
+     * Получить sql-запрос на сортировку
+     */
+    private String getSqlForOrder(GroupOrder order) {
+        return order.isEmpty()
+            ? ""
+            : " ORDER BY %s %s".formatted(
+            order.getProperty().name().toLowerCase(), order.getDirection().name());
+    }
+
+    /**
      * Загрузить уже добавленные контакты из БД в группу.
      * Вносит изменения в передаваемую группу.
      */
     private void loadContactsIntoGroup(Group group) throws SQLException {
-        String contactsSql = "SELECT contact.* FROM public.contacts AS contact " +
-                "INNER JOIN public.contact_groups AS contact_group " +
-                "ON contact.id = contact_group.contact_id " +
-                "WHERE contact_group.group_id = :groupId " +
-                "ORDER BY contact.name";
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("groupId", group.getId());
-
-        ContactMapper mapper = new ContactMapper();
-        List<Contact> contacts = jdbcTemplate.query(contactsSql, params,
-                (resultSet, rowNum) -> mapper.resultSetToContactEntity(resultSet));
-
+        List<Contact> contacts = contactRepository.findContactsByGroupId(group.getId());
         for (Contact contact : contacts) {
             group.addContact(contact);
         }
@@ -159,39 +164,23 @@ public class GroupRepository implements IGroupRepository {
                 .addValue("oldName", currentName)
                 .addValue("newName", group.getName());
 
-        Long groupId = jdbcTemplate.queryForObject(
-                updateGroupSql,
-                groupParams,
-                Long.class
-        );
+        jdbcTemplate.update(updateGroupSql, groupParams);
 
-        updateRelationsBetweenGroupAndContacts(groupId, group.getContactIds());
+        updateRelationsBetweenGroupAndContacts(group);
     }
 
     /**
      * Обновить связи между группой и контактами.
      * Иными словами обновляет контакты группы.
      */
-    private void updateRelationsBetweenGroupAndContacts(
-            Long groupId, Set<Long> contactIds) {
+    private void updateRelationsBetweenGroupAndContacts(Group group) {
         String deleteRelationsSql = "DELETE FROM public.contact_groups " +
                 "WHERE group_id = :groupId";
 
         jdbcTemplate.update(deleteRelationsSql,
-                new MapSqlParameterSource("groupId", groupId));
+                new MapSqlParameterSource("groupId", group.getId()));
 
-        if (contactIds != null && !contactIds.isEmpty()) {
-            String addRelationSql = "INSERT INTO public.contact_groups " +
-                    "(contact_id, group_id) VALUES (:contactId, :groupId)";
-
-            for (Long contactId : contactIds) {
-                MapSqlParameterSource relationParams = new MapSqlParameterSource()
-                        .addValue("contactId", contactId)
-                        .addValue("groupId", groupId);
-
-                jdbcTemplate.update(addRelationSql, relationParams);
-            }
-        }
+        addRelationsBetweenGroupAndContacts(group);
     }
 
     @Override

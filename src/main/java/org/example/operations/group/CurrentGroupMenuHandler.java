@@ -1,5 +1,6 @@
 package org.example.operations.group;
 
+import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.keyboardcreator.ReplyConstants;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
@@ -100,10 +101,10 @@ public class CurrentGroupMenuHandler implements OperationHandler {
         BotResponse response = new BotResponse();
 
         List<String> contactNames = new ArrayList<>();
-        for (Long contactId : group.getContactIds()) {
-            contactService.findContactById(chatId, contactId)
-                    .ifPresent(contact ->
-                            contactNames.add(contact.getName())
+        for (Contact contact : group.getContacts()) {
+            contactService.findContactById(chatId, contact.getId())
+                    .ifPresent(c ->
+                            contactNames.add(c.getName())
                     );
         }
         if (contactNames.isEmpty()) {

@@ -13,7 +13,11 @@ import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Обработчик события: Добавление группы
@@ -127,7 +131,14 @@ public class AddGroupHandler implements OperationHandler {
         Long contactId = contact.getId();
         Group group = (Group) stateService.getParamByKey(chatId, "newGroup");
 
-        if (group.getContactIds().contains(contactId)) {
+        List<Contact> contacts = group.getContacts();
+        Map<Long, Contact> contactMap = contacts.stream()
+            .collect(Collectors.toMap(
+                Contact::getId,
+                Function.identity()
+            ));
+
+        if (contactMap.containsKey(contactId)) {
             response.setText("Контакт с таким именем уже добавлен");
         } else {
             group.addContact(contact);

@@ -38,7 +38,7 @@ public class GroupMessageHandlerTest {
     /**
      * ChatId пользователя
      */
-    private final Long chatId = 123245663L;
+    private static final Long chatId = 123245663L;
 
     /**
      * Инициализируем фейковые репозитории, чтобы не работать напрямую с БД.

@@ -12,6 +12,7 @@ import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.GroupOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -114,7 +115,7 @@ public class EditGroupHandler implements OperationHandler {
      */
     private BotResponse handleRenameGroup(Long chatId, String newName) {
         BotResponse response = new BotResponse();
-        List<Group> groups = groupService.findGroupsByChatId(chatId);
+        List<Group> groups = groupService.findGroupsByChatId(chatId, GroupOrder.none());
         List<String> groupNames = groups.stream().map(Group::getName).toList();
         if (groupNames.contains(newName)) {
             response.setText("Группа с таким именем уже существует, попробуйте еще раз");

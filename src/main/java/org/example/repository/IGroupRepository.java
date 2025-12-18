@@ -1,6 +1,7 @@
 package org.example.repository;
 
 import org.example.entity.Group;
+import org.example.utils.GroupOrder;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public interface IGroupRepository {
     /**
      * Найти все группы по id пользователя
      */
-    List<Group> findGroupsByChatId(Long chatId, String sorter);
+    List<Group> findGroupsByChatId(Long chatId, GroupOrder order);
 
     /**
      * Обновить группу
