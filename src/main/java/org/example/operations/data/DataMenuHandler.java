@@ -18,11 +18,6 @@ import java.util.List;
 @Component
 public class DataMenuHandler implements OperationHandler {
     /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
-    /**
      * Сервис состояний
      */
     private final StateService stateService;
@@ -51,14 +46,12 @@ public class DataMenuHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Импорт контактов" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.IMPORT_CONTACTS, true);
+                stateService.changeCurrentOperation(chatId, Operation.IMPORT_CONTACTS);
                 response.setText("Отправьте файл с данными для импорта");
                 stateService.setLastRequestedParamKey(chatId, "importData");
             }
             case "Экспорт контактов" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.EXPORT_CONTACTS, true);
+                stateService.changeCurrentOperation(chatId, Operation.EXPORT_CONTACTS);
                 response.setText("Выберите желаемый формат экспорта контактов");
                 List<String> keyboardText = new ArrayList<>(exportService
                         .getSupportedFormats()
@@ -69,9 +62,9 @@ public class DataMenuHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "exportFormat");
             }
             case "Назад" -> {
-                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU, true);
+                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
                 response.setText("Вы вернулись назад");
-                response.setKeyboardText(keyboardCreator.mainMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
             default -> response.setText("Я не понимаю эту команду");
         }

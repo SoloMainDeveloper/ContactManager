@@ -22,11 +22,6 @@ import java.util.List;
 @Component
 public class ImportHandler implements OperationHandler {
     /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
-    /**
      * Сервис состояний
      */
     private final StateService stateService;
@@ -62,14 +57,14 @@ public class ImportHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         List<Contact> contacts;
         try {
-            String fileName = stateService.getParamByKey(chatId, "fileName");
+            String fileName = (String) stateService.getParamByKey(chatId, "fileName");
             contacts = importService.importContacts(
                     new AppDocument(fileName, messageText));
         } catch (ImportException e) {
             e.printStackTrace();
             response.setText("Произошла ошибка при импорте: " + e.getMessage());
-            response.setKeyboardText(keyboardCreator.dataMenu());
-            stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+            response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+            stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
             return response;
         }
 
@@ -87,8 +82,8 @@ public class ImportHandler implements OperationHandler {
                 .formatted(counter, contacts.size()));
 
         response.setText(responseText.toString());
-        response.setKeyboardText(keyboardCreator.dataMenu());
-        stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+        response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+        stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
 
         return response;
     }

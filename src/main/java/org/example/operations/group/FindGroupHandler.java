@@ -1,7 +1,6 @@
 package org.example.operations.group;
 
 import org.example.entity.Group;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
@@ -45,14 +44,14 @@ public class FindGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String groupName) {
         BotResponse response = new BotResponse();
         Optional<Group> group = groupService.findGroupByName(chatId, groupName);
-        if(group.isPresent()) {
+        if (group.isPresent()) {
             response.setText("Группа " + groupName + " успешно найдена");
             response.setInlineKeyboardText(new InlineKeyboardText(List.of(groupName),
                     Operation.CURRENT_GROUP_MENU.toString()));
         } else {
             response.setText("По имени " + groupName + " группа не найдена");
         }
-        stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+        stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
         return response;
     }
 }

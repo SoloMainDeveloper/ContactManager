@@ -2,9 +2,9 @@ package org.example.operations.group;
 
 import org.example.entity.Contact;
 import org.example.entity.Group;
-import org.example.exceptions.ContactDoesNotExistException;
 import org.example.exceptions.GroupDoesNotExistException;
 import org.example.exceptions.GroupEditException;
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -12,22 +12,17 @@ import org.example.service.ContactService;
 import org.example.service.GroupService;
 import org.example.service.StateService;
 import org.example.state.Operation;
-import org.example.utils.converter.GroupConverter;
+import org.example.utils.GroupOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 /**
  * Обработчик события: Редактирование группы
  */
 @Component
 public class EditGroupHandler implements OperationHandler {
-    /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис групп
      */
@@ -83,17 +78,15 @@ public class EditGroupHandler implements OperationHandler {
                     response.setText("Группа успешно отредактирована и сохранена");
                 } catch (GroupEditException e) {
                     e.printStackTrace();
-                    response.setText("Произошла ошибка при редактировании группы:"
-                            + e.getMessage());
+                    response.setText(e.getMessage());
                 }
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
-                response.setKeyboardText(keyboardCreator.groupsMenu());
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(
-                        chatId, Operation.CURRENT_GROUP_MENU, true);
-                response.setKeyboardText(keyboardCreator.currentGroupMenu());
+                response.setText(ReplyConstants.COME_BACK);
+                stateService.changeCurrentOperation(chatId, Operation.CURRENT_GROUP_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.CURRENT_GROUP_MENU);
             }
             default -> response = handleMessageWithContext(chatId, messageText);
         }
@@ -106,17 +99,14 @@ public class EditGroupHandler implements OperationHandler {
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
-            return new BotResponse("Я не понимаю эту команду.");
+            return new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         }
-        Contact contact = contactService
-                .findContactByName(chatId, messageText).orElse(null);
 
         return switch (lastRequestedParamKey) {
             case "newName" -> handleRenameGroup(chatId, messageText);
-            case "deleteContact" -> handleDeleteContactFromGroup
-                    (chatId, contact);
-            case "addContact" -> handleAddContactToGroup(chatId, contact);
-            default -> new BotResponse("Я не понимаю эту команду");
+            case "deleteContact" -> handleDeleteContactFromGroup(chatId, messageText);
+            case "addContact" -> handleAddContactToGroup(chatId, messageText);
+            default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
 
@@ -125,12 +115,13 @@ public class EditGroupHandler implements OperationHandler {
      */
     private BotResponse handleRenameGroup(Long chatId, String newName) {
         BotResponse response = new BotResponse();
-        List<Group> groups = groupService.findGroupsByChatId(chatId);
+        List<Group> groups = groupService.findGroupsByChatId(chatId, GroupOrder.none());
         List<String> groupNames = groups.stream().map(Group::getName).toList();
-        if(groupNames.contains(newName)) {
+        if (groupNames.contains(newName)) {
             response.setText("Группа с таким именем уже существует, попробуйте еще раз");
         } else {
-            stateService.addParameter(chatId, "newName", newName);
+            Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+            group.setName(newName);
             response.setText("Имя группы записано на обновление.\n" +
                     "Желаете внести ещё изменения в группу?");
         }
@@ -140,82 +131,52 @@ public class EditGroupHandler implements OperationHandler {
     /**
      * Обработать сообщение на удаление контакта из группы
      */
-    private BotResponse handleDeleteContactFromGroup(
-            Long chatId, Contact contact) {
+    private BotResponse handleDeleteContactFromGroup(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
-        if(contact == null) {
+        Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
+        if (contact.isEmpty()) {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
-        GroupConverter converter = new GroupConverter();
-        Set<Long> contactIds = converter.stringToContactIds(
-                stateService.getParamByKey(chatId, "contactIdsToDelete"));
-        contactIds.add(contact.getId());
-        stateService.addParameter(chatId, "contactIdsToDelete",
-                converter.contactIdsToString(contactIds));
-
+        Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+        group.removeContact(contact.get());
         response.setText("Контакт добавлен на удаление.\n" +
-                    "Желаете внести ещё изменения в группу?");
-        return  response;
+                "Желаете внести ещё изменения в группу?");
+        return response;
     }
 
     /**
      * Обработать сообщение на добавление контакта в группу
      */
-    private BotResponse handleAddContactToGroup(
-            Long chatId, Contact contact) {
+    private BotResponse handleAddContactToGroup(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
-        if(contact == null) {
+        Optional<Contact> contact = contactService.findContactByName(chatId, contactName);
+        if (contact.isEmpty()) {
             response.setText("Контакт c введенным именем не был найден");
             return response;
         }
-        GroupConverter converter = new GroupConverter();
-        Set<Long> contactIds = converter.stringToContactIds(
-                stateService.getParamByKey(chatId, "contactIdsToAdd"));
-        contactIds.add(contact.getId());
-        stateService.addParameter(chatId, "contactIdsToAdd",
-                converter.contactIdsToString(contactIds));
-
+        Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+        group.addContact(contact.get());
         response.setText("Контакт внесен на добавление.\n" +
                 "Желаете внести ещё изменения в группу?");
-        return  response;
+        return response;
     }
 
     /**
      * Применить изменения для редактируемой группы
+     *
      * @param chatId идентификатор чата
-     * @throws GroupEditException если группа или добавляемые/удаляемые контакты не
-     * существуют
+     * @throws GroupEditException если группа не существует
      */
     private void applyChangesForGroup(Long chatId) throws GroupEditException {
-        GroupConverter converter = new GroupConverter();
-        String groupName = stateService.getParamByKey(chatId, "currentGroupName");
-        String newName = stateService.getParamByKey(chatId, "newName");
-        if(newName == null) {
-            newName = groupName;
-        }
+        String groupName = (String) stateService.getParamByKey(
+                chatId, "currentGroupName");
         try {
-            groupService.tryUpdateGroupWithNewName(chatId, groupName, newName);
-            Set<Long> contactIdsToAdd = converter.stringToContactIds(
-                    stateService.getParamByKey(chatId, "contactIdsToAdd"));
-            for(Long contactId : contactIdsToAdd) {
-                Contact contact = contactService
-                        .findContactById(chatId, contactId)
-                        .orElseThrow(() -> new ContactDoesNotExistException(
-                                "Контакт с id=%s не был найден".formatted(contactId)));
-                groupService.tryAddContactToGroup(chatId, newName, contact);
-            }
-            Set<Long> contactIdsToDelete = converter.stringToContactIds(
-                    stateService.getParamByKey(chatId, "contactIdsToDelete"));
-            for(Long contactId : contactIdsToDelete) {
-                Contact contact = contactService
-                        .findContactById(chatId, contactId)
-                        .orElseThrow(() -> new ContactDoesNotExistException(
-                                "Контакт с id=%s не был найден".formatted(contactId)));
-                groupService.tryRemoveContactFromGroup(chatId, newName, contact);
-            }
-        } catch (GroupDoesNotExistException | ContactDoesNotExistException e) {
-            throw new GroupEditException(e);
+            Group group = (Group) stateService.getParamByKey(chatId, "currentGroup");
+            groupService.tryUpdateGroup(chatId, groupName, group);
+        } catch (GroupDoesNotExistException e) {
+            throw new GroupEditException(
+                    "Произошла ошибка при редактировании группы: " + e.getMessage());
         }
     }
 }

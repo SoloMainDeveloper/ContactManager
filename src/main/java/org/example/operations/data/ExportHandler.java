@@ -10,6 +10,8 @@ import org.example.service.ContactService;
 import org.example.service.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +22,6 @@ import java.util.List;
  */
 @Component
 public class ExportHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис состояний
      */
@@ -71,8 +68,9 @@ public class ExportHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "exportFileName");
             }
             case "exportFileName" -> {
-                String format = stateService.getParamByKey(chatId, "exportFormat");
-                List<Contact> contacts = contactService.findContactsByChatId(chatId);
+                String format = (String) stateService.getParamByKey(chatId, "exportFormat");
+                List<Contact> contacts = contactService.findContactsByChatId(
+                    chatId, ContactFilter.none(), ContactOrder.none());
                 try {
                     AppDocument document = exportService
                             .exportContacts(messageText, format, contacts);
@@ -83,8 +81,8 @@ public class ExportHandler implements OperationHandler {
                     response.setText("Произошла ошибка при экспорте: " + e.getMessage());
                 }
 
-                response.setKeyboardText(keyboardCreator.dataMenu());
-                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+                response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
             }
             default -> response.setText("Я не понимаю эту команду.");
         }

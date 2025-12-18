@@ -233,8 +233,8 @@ public class DataMessageHandlerTest {
         AppDocument document = response.getDocument();
         Assertions.assertEquals("test.csv", document.fileName());
         Assertions.assertEquals("""
-                            \uFEFFname;phone;age;gender;isBlocked
-                            Дарья;+78943230685;13;Женский;Заблокирован
+                            \uFEFFname,phone,age,gender,isBlocked
+                            Дарья,+78943230685,13,Женский,Заблокирован
                             """, document.content());
     }
 

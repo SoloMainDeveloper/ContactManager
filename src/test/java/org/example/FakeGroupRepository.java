@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.entity.Group;
 import org.example.repository.IGroupRepository;
+import org.example.utils.GroupOrder;
 
 import java.util.*;
 
@@ -12,57 +13,44 @@ public class FakeGroupRepository implements IGroupRepository {
     /**
      * Хранилище групп
      */
-    private final Map<Long, Map<String, Group>> groups;
-
-    /**
-     * Конструктор
-     */
-    public FakeGroupRepository() {
-        groups = new LinkedHashMap<>();
-    }
+    private final Map<Long, Map<String, Group>> groups = new LinkedHashMap<>();
 
     @Override
     public void add(Group group) {
         Long chatId = group.getChatId();
-        if (!groups.containsKey(chatId)) {
-            groups.put(chatId, new LinkedHashMap<>());
-        }
-        if (groups.get(chatId).containsKey(group.getName())) {
-            throw new RuntimeException();
-        }
-        groups.get(chatId).put(group.getName(), group);
+        getOrCreateGroupsByChatId(chatId).put(group.getName(), group);
     }
 
     @Override
     public Optional<Group> findGroupByName(String name, Long chatId) {
-        Map<String, Group> currentGroups = groups.get(chatId);
-        return currentGroups == null || currentGroups.isEmpty() || currentGroups.get(name) == null
-                ? Optional.empty()
-                : Optional.of(currentGroups.get(name));
+        return Optional.ofNullable(getOrCreateGroupsByChatId(chatId).get(name));
     }
 
     @Override
-    public List<Group> findGroupsByChatId(Long chatId, String sorter) {
-        Map<String, Group> userGroups = groups.getOrDefault(chatId, new HashMap<>());
-        List<Group> groupList = new ArrayList<>(userGroups.values());
-
-        return applySorter(groupList, sorter);
+    public List<Group> findGroupsByChatId(Long chatId, GroupOrder order) {
+        Map<String, Group> userGroups = getOrCreateGroupsByChatId(chatId);
+        return getContactsAfterSorting(userGroups.values().stream().toList(), order);
     }
 
     /**
-     * Применить сортировку к списку групп
+     * Получить группы после примененной сортировки
      */
-    private List<Group> applySorter(List<Group> groups, String sorter) {
-        if (sorter == null || sorter.isEmpty()) {
-            return groups;
-        }
-
+    private List<Group> getContactsAfterSorting(List<Group> groups, GroupOrder order) {
         List<Group> sortedGroups = new ArrayList<>(groups);
-        if (sorter.contains("ORDER BY name ASC")) {
-            sortedGroups.sort(Comparator.comparing(Group::getName));
-        }
-        else if (sorter.contains("ORDER BY name DESC")) {
-            sortedGroups.sort(Comparator.comparing(Group::getName).reversed());
+        if(order.getProperty() == GroupOrder.OrderProperty.COUNT) {
+            switch (order.getDirection()) {
+                case ASC -> sortedGroups
+                    .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()));
+                case DESC -> sortedGroups
+                    .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()).reversed());
+            }
+        } else if(order.getProperty() == GroupOrder.OrderProperty.NAME) {
+            switch (order.getDirection()) {
+                case ASC -> sortedGroups
+                    .sort(Comparator.comparing(Group::getName));
+                case DESC -> sortedGroups
+                    .sort(Comparator.comparing(Group::getName).reversed());
+            }
         }
         return sortedGroups;
     }
@@ -70,19 +58,23 @@ public class FakeGroupRepository implements IGroupRepository {
     @Override
     public void update(String currentName, Group group) {
         Map<String, Group> userGroups = groups.get(group.getChatId());
-        if (userGroups != null) {
-            if (!currentName.equals(group.getName())) {
-                userGroups.remove(currentName);
-            }
-            userGroups.put(group.getName(), group);
-        }
+        userGroups.remove(currentName);
+        userGroups.put(group.getName(), group);
     }
 
     @Override
     public void deleteByName(String name, Long chatId) {
-        Map<String, Group> userGroups = groups.get(chatId);
-        if (userGroups != null) {
-            userGroups.remove(name);
+        groups.get(chatId).remove(name);
+    }
+
+    /**
+     * Получить группу по chatId пользователя. Если ещё не существует, предварительно
+     * её создаёт.
+     */
+    private Map<String, Group> getOrCreateGroupsByChatId(Long chatId) {
+        if(!groups.containsKey(chatId)) {
+            groups.put(chatId, new LinkedHashMap<>());
         }
+        return groups.get(chatId);
     }
 }

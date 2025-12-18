@@ -1,6 +1,9 @@
 package org.example.operations.contact;
 
+import org.example.entity.Contact;
+import org.example.entity.Gender;
 import org.example.exceptions.ContactDoesNotExistException;
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
@@ -10,17 +13,13 @@ import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Обработчик события: Редактирование контакта
  */
 @Component
 public class EditContactHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис контактов
      */
@@ -47,12 +46,13 @@ public class EditContactHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = stateService.getParamByKey(chatId, "currentContactName");
+        String contactName = (String) stateService.getParamByKey(
+                chatId, "currentContactName");
 
-        switch(messageText) {
+        switch (messageText) {
             case "Имя" -> {
                 response.setText("Введите имя контакта");
-                stateService.setLastRequestedParamKey(chatId, "contactName");
+                stateService.setLastRequestedParamKey(chatId, "newContactName");
             }
             case "Номер" -> {
                 response.setText("Введите номер телефона");
@@ -69,20 +69,33 @@ public class EditContactHandler implements OperationHandler {
             }
             case "Изменить контакт" -> {
                 try {
-                    contactService.tryUpdateContact(
-                            chatId, contactName, stateService.getParams(chatId));
+                    Contact contact = contactService.findContactByName(
+                            chatId, contactName).orElseThrow(() ->
+                            new ContactDoesNotExistException(
+                                    "Контакт %s не был найден".formatted(contactName)));
+                    Map<String, Object> params = stateService.getParams(chatId);
+
+                    contact.setName((String) params.getOrDefault(
+                            "newContactName", contact.getName()));
+                    contact.setPhoneNumber((String) params.getOrDefault(
+                            "contactNumber", contact.getPhoneNumber()));
+                    contact.setAge(Integer.parseInt((String) params.getOrDefault(
+                            "contactAge", contact.getAge())));
+                    contact.setGender(Gender.fromDisplayName((String) params.getOrDefault(
+                            "contactGender", contact.getGender())));
+                    contactService.tryUpdateContact(chatId, contactName, contact);
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } catch (ContactDoesNotExistException e) {
                     e.printStackTrace();
                     response.setText("Произошла ошибка при изменении: " + e.getMessage());
                 }
-                response.setKeyboardText(keyboardCreator.contactsMenu());
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU, true);
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+                response.setText(ReplyConstants.COME_BACK);
+                stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             default -> {
                 return handleMessageWithContext(chatId, messageText);
@@ -99,12 +112,12 @@ public class EditContactHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
-            response.setText("Я не понимаю эту команду.");
+            response.setText(ReplyConstants.UNKNOWN_COMMAND);
             return response;
         }
         stateService.addParameter(chatId, lastRequestedParamKey, messageText);
         response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
-        response.setKeyboardText(keyboardCreator.editContactMenu());
+        response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
         return response;
     }
 }

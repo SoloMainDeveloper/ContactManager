@@ -1,5 +1,6 @@
 package org.example.operations.group;
 
+import org.example.keyboardcreator.ReplyConstants;
 import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
@@ -12,11 +13,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class GroupsMenuHandler implements OperationHandler {
-    /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис состояний
      */
@@ -39,28 +35,27 @@ public class GroupsMenuHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         switch (messageText) {
             case "Добавить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.ADD_GROUP, true);
+                stateService.changeCurrentOperation(chatId, Operation.ADD_GROUP);
                 response.setText("Напишите имя добавляемой группы");
                 stateService.setLastRequestedParamKey(chatId, "groupName");
             }
             case "Получить все" -> {
-                stateService.changeCurrentOperation(
-                        chatId, Operation.GET_ALL_GROUPS, true);
+                stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS);
                 response.setText("Желаете получить все группы сразу или"
                         + " добавить сортировку?");
-                response.setKeyboardText(keyboardCreator.getAllGroupsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
             }
             case "Найти" -> {
-                stateService.changeCurrentOperation(chatId, Operation.FIND_GROUP, true);
+                stateService.changeCurrentOperation(chatId, Operation.FIND_GROUP);
                 response.setText("Введите имя группы, которую нужно найти");
                 stateService.setLastRequestedParamKey(chatId, "groupName");
             }
             case "Назад" -> {
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU, true);
-                response.setKeyboardText(keyboardCreator.mainMenu());
+                response.setText(ReplyConstants.COME_BACK);
+                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

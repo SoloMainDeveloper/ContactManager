@@ -3,132 +3,121 @@ package org.example.keyboardcreator;
 import java.util.List;
 
 /**
- * Класс, содержащий часто используемые наборы клавиатур
+ * Класс, содержащий часто используемые наборы клавиатур.
+ * Вячеслав Юрьевич, константы Вы нам тут разрешили
  */
 public class ReplyKeyboardConstants {
     /**
-     * Возвращает кнопки главного меню
+     * Приватный конструктор, чтобы не создавали экземпляр класса
      */
-    public final List<String> mainMenu() {
-        return List.of("Контакты", "Группы", "Данные");
+    private ReplyKeyboardConstants() {
     }
 
     /**
-     * Возвращает кнопки меню контактов
+     * Кнопки главного меню
      */
-    public List<String> contactsMenu() {
-        return List.of("Добавить", "Получить все", "Найти", "Назад");
-    }
+    public static final List<String> MAIN_MENU = List.of("Контакты", "Группы", "Данные");
 
     /**
-     * Возвращает кнопки меню текущего контакта
+     * Кнопки меню контактов
      */
-    public List<String> currentContactMenu() {
-        return List.of("Информация", "Изменить", "Блокировать", "Удалить", "Назад");
-    }
+    public static final List<String> CONTACTS_MENU = List.of(
+            "Добавить", "Получить все", "Найти", "Назад");
 
     /**
-     * Возвращает кнопки меню добавления контакта
+     * Кнопки меню текущего контакта
      */
-    public List<String> addContactMenu() {
-        return List.of("Номер", "Возраст", "Пол", "Сохранить контакт", "Назад");
-    }
+    public static final List<String> CURRENT_CONTACT_MENU = List.of(
+            "Информация", "Изменить", "Блокировать", "Удалить", "Назад");
 
     /**
-     * Возвращает кнопки меню поиска
+     * Кнопки меню добавления контакта
      */
-    public List<String> findContactMenu() {
-        return List.of("Поиск по имени", "Поиск по номеру", "Назад");
-    }
+    public static final List<String> ADD_CONTACT_MENU = List.of(
+            "Номер", "Возраст", "Пол", "Сохранить контакт", "Назад");
 
     /**
-     * Возвращает кнопки меню редактирования контакта
+     * Кнопки меню поиска
      */
-    public List<String> editContactMenu() {
-        return List.of("Имя", "Номер", "Возраст", "Пол", "Изменить контакт", "Назад");
-    }
+    public static final List<String> FIND_CONTACT_MENU = List.of(
+            "Поиск по имени", "Поиск по номеру", "Назад");
 
     /**
-     * Возвращает кнопки меню получения всех контактов
+     * Кнопки меню редактирования контакта
      */
-    public List<String> getAllContactsMenu() {
-        return List.of("Получить", "Добавить фильтр", "Добавить сортировку", "Назад");
-    }
+    public static final List<String> EDIT_CONTACT_MENU = List.of(
+            "Имя", "Номер", "Возраст", "Пол", "Изменить контакт", "Назад");
 
     /**
-     * Возвращает кнопки меню фильтрации
+     * Кнопки меню получения всех контактов
      */
-    public List<String> addFilterMenu() {
-        return List.of("По полу", "По возрасту", "Назад к выбору");
-    }
+    public static final List<String> GET_ALL_CONTACTS_MENU = List.of(
+            "Получить", "Добавить фильтр", "Добавить сортировку", "Назад");
 
     /**
-     * Возвращает кнопки меню фильтрации по полу
+     * Кнопки меню фильтрации
      */
-    public List<String> addFilterByGenderMenu() {
-        return List.of("Мужской", "Женский", "Не выбрано", "Назад к выбору");
-    }
+    public static final List<String> ADD_FILTER_MENU = List.of(
+            "По полу", "По возрасту", "Назад к выбору");
 
     /**
-     * Возвращает кнопки меню сортировки у контакта
+     * Кнопки меню фильтрации по полу
      */
-    public List<String> addSorterContactMenu() {
-        return List.of("В порядке убывания возраста", "В порядке возрастания возраста",
-                "В алфавитном порядке имени", "В обратном алфавитному порядку имени",
-                "Назад к выбору");
-    }
+    public static final List<String> ADD_FILTER_BY_GENDER_MENU = List.of(
+            "Мужской", "Женский", "Не выбрано", "Назад к выбору");
 
     /**
-     * Возвращает кнопки меню групп
+     * Кнопки меню сортировки у контакта
      */
-    public List<String> groupsMenu() {
-        return List.of("Добавить", "Получить все", "Найти", "Назад");
-    }
+    public static final List<String> ADD_SORTER_CONTACT_MENU = List.of(
+            "В порядке убывания возраста", "В порядке возрастания возраста",
+            "В алфавитном порядке имени", "В обратном алфавитному порядку имени",
+            "Назад к выбору");
 
     /**
-     * Возвращает кнопки меню получения всех групп
+     * Кнопки меню групп
      */
-    public List<String> getAllGroupsMenu() {
-        return List.of("Получить", "Сортировать", "Назад");
-    }
+    public static final List<String> GROUPS_MENU = List.of(
+            "Добавить", "Получить все", "Найти", "Назад");
 
     /**
-     * Возвращает кнопки меню для создания группы
+     * Кнопки меню получения всех групп
      */
-    public List<String> addGroupMenu() {
-        return List.of("Добавить контакт", "Сохранить группу", "Назад");
-    }
+    public static final List<String> GET_ALL_GROUPS_MENU = List.of(
+            "Получить", "Сортировать", "Назад");
 
     /**
-     * Возвращает кнопки меню текущего группы
+     * Кнопки меню для создания группы
      */
-    public List<String> currentGroupMenu() {
-        return List.of("Вывести все контакты группы", "Изменить", "Удалить", "Назад");
-    }
+    public static final List<String> ADD_GROUP_MENU = List.of(
+            "Добавить контакт", "Сохранить группу", "Назад");
 
     /**
-     * Возвращает кнопки меню редактирования группы
+     * Кнопки меню текущего группы
      */
-    public List<String> editGroupMenu() {
-        return List.of("Изменить имя группы", "Удалить контакт из группы",
-                "Добавить контакт в группу", "Сохранить группу", "Назад");
-    }
+    public static final List<String> CURRENT_GROUP_MENU = List.of(
+            "Вывести все контакты группы", "Изменить", "Удалить", "Назад");
 
     /**
-     * Возвращает кнопки меню сортировки у группы
+     * Кнопки меню редактирования группы
      */
-    public List<String> addSorterGroupMenu() {
-        return List.of("В алфавитном порядке имени",
-                "В обратном алфавитному порядке имени",
-                "В порядке убывания кол-ва участников",
-                "В порядке возрастания кол-ва участников",
-                "Назад к выбору");
-    }
+    public static final List<String> EDIT_GROUP_MENU = List.of(
+            "Изменить имя группы", "Удалить контакт из группы",
+            "Добавить контакт в группу", "Сохранить группу", "Назад");
+
+    /**
+     * Кнопки меню сортировки у группы
+     */
+    public static final List<String> ADD_SORTER_GROUP_MENU = List.of(
+            "В алфавитном порядке имени",
+            "В обратном алфавитному порядке имени",
+            "В порядке убывания кол-ва участников",
+            "В порядке возрастания кол-ва участников",
+            "Назад к выбору");
 
     /**
      * Возвращает кнопки меню Данные
      */
-    public List<String> dataMenu() {
-        return List.of("Импорт контактов", "Экспорт контактов", "Назад");
-    }
+    public static final List<String> DATA_MENU = List.of(
+        "Импорт контактов", "Экспорт контактов", "Назад");
 }
