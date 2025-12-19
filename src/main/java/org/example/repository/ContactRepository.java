@@ -133,14 +133,14 @@ public class ContactRepository implements IContactRepository {
         if(filter.isEmpty()) {
             return "";
         }
-        String condition = switch (filter.getCondition()) {
+        String condition = switch (filter.condition()) {
             case LESS_THAN -> "<";
             case GREATER_THAN -> ">";
             case EQUALS -> "=";
-            default -> "";
+            case null -> "";
         };
         return " AND %s %s '%s'".formatted(
-            filter.getProperty().name().toLowerCase(), condition, filter.getValue());
+            filter.property().name().toLowerCase(), condition, filter.value());
     }
 
     /**
@@ -150,7 +150,7 @@ public class ContactRepository implements IContactRepository {
         return order.isEmpty()
             ? ""
             : " ORDER BY %s %s".formatted(
-                order.getProperty().name().toLowerCase(), order.getDirection().name());
+                order.property().name().toLowerCase(), order.direction().name());
     }
 
     @Override

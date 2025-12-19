@@ -19,6 +19,11 @@ public class GroupsMenuHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса имени группы
+     */
+    private static final String GROUP_NAME = "groupName";
+
+    /**
      * Конструктор
      */
     public GroupsMenuHandler(StateService stateService) {
@@ -37,7 +42,7 @@ public class GroupsMenuHandler implements OperationHandler {
             case "Добавить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.ADD_GROUP);
                 response.setText("Напишите имя добавляемой группы");
-                stateService.setLastRequestedParamKey(chatId, "groupName");
+                stateService.setLastRequestedParamKey(chatId, GROUP_NAME);
             }
             case "Получить все" -> {
                 stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS);
@@ -48,7 +53,7 @@ public class GroupsMenuHandler implements OperationHandler {
             case "Найти" -> {
                 stateService.changeCurrentOperation(chatId, Operation.FIND_GROUP);
                 response.setText("Введите имя группы, которую нужно найти");
-                stateService.setLastRequestedParamKey(chatId, "groupName");
+                stateService.setLastRequestedParamKey(chatId, GROUP_NAME);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);

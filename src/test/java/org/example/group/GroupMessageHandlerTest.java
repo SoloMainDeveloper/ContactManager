@@ -1,5 +1,7 @@
-package org.example;
+package org.example.group;
 
+import org.example.MessageHandler;
+import org.example.contact.FakeContactRepository;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.entity.Group;

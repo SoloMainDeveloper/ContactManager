@@ -82,7 +82,7 @@ public class CurrentGroupMenuHandler implements OperationHandler {
             case "Удалить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP);
                 response.setText("Вы точно хотите удалить текущую группу?");
-                response.setKeyboardText(List.of("Да", "Нет"));
+                response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);

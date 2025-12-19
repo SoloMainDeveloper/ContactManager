@@ -2,8 +2,11 @@ package org.example.utils;
 
 /**
  * Порядок сортировки контактов
+ *
+ * @param property  Свойство порядка сортировки
+ * @param direction Направление порядка сортировки
  */
-public class ContactOrder {
+public record ContactOrder(OrderProperty property, Direction direction) {
     /**
      * Свойства порядка сортировки
      */
@@ -20,32 +23,13 @@ public class ContactOrder {
         DESC,
     }
 
-    /**
-     * Свойство порядка сортировки
-     */
-    private final OrderProperty property;
-
-    /**
-     * Направление порядка сортировки
-     */
-    private final Direction direction;
-
-    public ContactOrder(OrderProperty property, Direction direction) {
-        this.property = property;
-        this.direction = direction;
-    }
-
-    /**
-     * Получить свойство порядка сортировки
-     */
-    public OrderProperty getProperty() {
+    @Override
+    public OrderProperty property() {
         return property;
     }
 
-    /**
-     * Получить направление порядка сортировки
-     */
-    public Direction getDirection() {
+    @Override
+    public Direction direction() {
         return direction;
     }
 

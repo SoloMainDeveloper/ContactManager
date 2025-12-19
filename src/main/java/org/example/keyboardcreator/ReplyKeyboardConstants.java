@@ -114,4 +114,14 @@ public class ReplyKeyboardConstants {
             "В порядке убывания кол-ва участников",
             "В порядке возрастания кол-ва участников",
             "Назад к выбору");
+
+    /**
+     * Кнопки выбора пола
+     */
+    public static final List<String> GENDERS = List.of("Мужской", "Женский");
+
+    /**
+     * Кнопки выбора Да/Нет
+     */
+    public static final List<String> YES_NO = List.of("Да", "Нет");
 }
