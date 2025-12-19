@@ -83,12 +83,12 @@ public class CurrentContactMenuHandler implements OperationHandler {
                         isBlockedInfo, blockActionInfo);
 
                 response.setText(responseText);
-                response.setKeyboardText(List.of("Да", "Нет"));
+                response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
             }
             case "Удалить" -> {
                 stateService.changeCurrentOperation(chatId, Operation.DELETE_CONTACT);
                 response.setText("Вы точно хотите удалить текущий контакт?");
-                response.setKeyboardText(List.of("Да", "Нет"));
+                response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
@@ -104,17 +104,18 @@ public class CurrentContactMenuHandler implements OperationHandler {
      * Возвращает информацию о контакте
      */
     private String getContactInfo(Contact contact) {
+        String notDetermined = "не указан";
         String phoneNumberInfo = contact.getPhoneNumber().isEmpty()
-                ? "не указан"
+                ? notDetermined
                 : contact.getPhoneNumber();
         String genderInfo = "";
         switch (contact.getGender()) {
             case Gender.MALE -> genderInfo = "мужской";
             case Gender.FEMALE -> genderInfo = "женский";
-            case Gender.NOT_SPECIFIED -> genderInfo = "не указан";
+            case Gender.NOT_SPECIFIED -> genderInfo = notDetermined;
         }
         String ageInfo = contact.getAge() == -1
-                ? "не указан"
+                ? notDetermined
                 : String.valueOf(contact.getAge());
         String isBlockedInfo = contact.isBlocked()
                 ? "Заблокирован"

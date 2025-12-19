@@ -1,4 +1,4 @@
-package org.example;
+package org.example.contact;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
@@ -7,7 +7,6 @@ import org.example.utils.ContactFilter;
 import org.example.utils.ContactOrder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Хранилище контактов. Необходимо для тестов
@@ -88,9 +87,9 @@ public class FakeContactRepository implements IContactRepository {
      * Получить контакты после примененной фильтрации
      */
     private List<Contact> getContactsAfterFiltering(List<Contact> contacts, ContactFilter filter) {
-        switch (filter.getProperty()) {
+        switch (filter.property()) {
             case GENDER -> {
-                Gender gender = Gender.valueOf(filter.getValue());
+                Gender gender = Gender.valueOf(filter.value());
                 return contacts.stream()
                     .filter(contact -> contact.getGender() == gender)
                     .toList();
@@ -111,8 +110,8 @@ public class FakeContactRepository implements IContactRepository {
      * Вычислить условие для возраста
      */
     private boolean evaluateAgeCondition(int contactAge, ContactFilter filter) {
-        int age = Integer.parseInt(filter.getValue());
-        return switch (filter.getCondition()) {
+        int age = Integer.parseInt(filter.value());
+        return switch (filter.condition()) {
             case LESS_THAN -> contactAge < age;
             case GREATER_THAN -> contactAge > age;
             case EQUALS -> contactAge == age;
@@ -124,15 +123,15 @@ public class FakeContactRepository implements IContactRepository {
      */
     private List<Contact> getContactsAfterSorting(List<Contact> contacts, ContactOrder order) {
         List<Contact> sortedContacts = new ArrayList<>(contacts);
-        if(order.getProperty() == ContactOrder.OrderProperty.AGE) {
-            switch (order.getDirection()) {
+        if(order.property() == ContactOrder.OrderProperty.AGE) {
+            switch (order.direction()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge));
                 case DESC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge).reversed());
             }
-        } else if(order.getProperty() == ContactOrder.OrderProperty.NAME) {
-            switch (order.getDirection()) {
+        } else if(order.property() == ContactOrder.OrderProperty.NAME) {
+            switch (order.direction()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparing(Contact::getName));
                 case DESC -> sortedContacts
@@ -144,7 +143,8 @@ public class FakeContactRepository implements IContactRepository {
 
     @Override
     public List<Contact> findContactsByGroupId(Long groupId) {
-        return List.of();
+        return List.of(); // этот метод используется только в GroupRepository и в
+        // фейковой реализации он не нужен
     }
 
     @Override

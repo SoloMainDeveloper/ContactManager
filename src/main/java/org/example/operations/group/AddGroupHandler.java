@@ -40,6 +40,16 @@ public class AddGroupHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса новой группы
+     */
+    private static final String NEW_GROUP = "newGroup";
+
+    /**
+     * Название параметра запроса добавляемого контакта
+     */
+    private static final String CONTACT_TO_ADD = "contactToAdd";
+
+    /**
      * Конструктор
      */
     public AddGroupHandler(GroupService groupService, ContactService contactService,
@@ -60,12 +70,12 @@ public class AddGroupHandler implements OperationHandler {
         switch (messageText) {
             case "Добавить контакт" -> {
                 response.setText("Введите имя контакта для добавления в группу");
-                stateService.setLastRequestedParamKey(chatId, "contactToAdd");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_TO_ADD);
             }
             case "Сохранить группу" -> {
                 try {
                     Group newGroup = (Group) stateService.getParamByKey(
-                            chatId, "newGroup");
+                            chatId, NEW_GROUP);
                     groupService.tryAddGroup(chatId, newGroup);
                     response.setText(
                             "Группа " + newGroup.getName() + " успешна сохранена");
@@ -98,7 +108,7 @@ public class AddGroupHandler implements OperationHandler {
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         return switch (lastRequestedParamKey) {
             case "groupName" -> handleGroupNameMessage(chatId, messageText);
-            case "contactToAdd" -> handleContactToAddMessage(chatId, messageText);
+            case CONTACT_TO_ADD -> handleContactToAddMessage(chatId, messageText);
             default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
@@ -109,7 +119,7 @@ public class AddGroupHandler implements OperationHandler {
     private BotResponse handleGroupNameMessage(Long chatId, String groupName) {
         BotResponse response = new BotResponse();
         Group group = new Group(chatId, groupName);
-        stateService.addParameter(chatId, "newGroup", group);
+        stateService.addParameter(chatId, NEW_GROUP, group);
         response.setText("Отлично. Выберите дальнейшие действия");
         response.setKeyboardText(ReplyKeyboardConstants.ADD_GROUP_MENU);
         return response;
@@ -129,7 +139,7 @@ public class AddGroupHandler implements OperationHandler {
 
         Contact contact = optionalContact.get();
         Long contactId = contact.getId();
-        Group group = (Group) stateService.getParamByKey(chatId, "newGroup");
+        Group group = (Group) stateService.getParamByKey(chatId, NEW_GROUP);
 
         List<Contact> contacts = group.getContacts();
         Map<Long, Contact> contactMap = contacts.stream()

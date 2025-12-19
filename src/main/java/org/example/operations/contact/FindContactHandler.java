@@ -36,6 +36,16 @@ public class FindContactHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса имени контакта
+     */
+    private static final String CONTACT_NAME = "contactName";
+
+    /**
+     * Название параметра запроса номера контакта
+     */
+    private static final String CONTACT_NUMBER = "contactNumber";
+
+    /**
      * Конструктор
      */
     public FindContactHandler(ContactService contactService, StateService stateService) {
@@ -54,11 +64,11 @@ public class FindContactHandler implements OperationHandler {
         switch (messageText) {
             case "Поиск по имени" -> {
                 response.setText("Введите имя");
-                stateService.setLastRequestedParamKey(chatId, "contactName");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_NAME);
             }
             case "Поиск по номеру" -> {
                 response.setText("Введите номер");
-                stateService.setLastRequestedParamKey(chatId, "contactNumber");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_NUMBER);
             }
             case "Назад" -> {
                 response.setText(ReplyConstants.COME_BACK);
@@ -84,8 +94,8 @@ public class FindContactHandler implements OperationHandler {
         stateService.addParameter(chatId, lastRequestedParamKey, messageText);
 
         return switch (lastRequestedParamKey) {
-            case "contactName" -> handleFindContactByName(chatId);
-            case "contactNumber" -> handleFindContactByPhoneNumber(chatId);
+            case CONTACT_NAME -> handleFindContactByName(chatId);
+            case CONTACT_NUMBER -> handleFindContactByPhoneNumber(chatId);
             default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
@@ -95,7 +105,7 @@ public class FindContactHandler implements OperationHandler {
      */
     private BotResponse handleFindContactByName(Long chatId) {
         BotResponse response = new BotResponse();
-        String name = (String) stateService.getParamByKey(chatId, "contactName");
+        String name = (String) stateService.getParamByKey(chatId, CONTACT_NAME);
         Optional<Contact> contact = contactService.findContactByName(chatId, name);
 
         if (contact.isPresent()) {
@@ -116,7 +126,7 @@ public class FindContactHandler implements OperationHandler {
      */
     private BotResponse handleFindContactByPhoneNumber(Long chatId) {
         BotResponse response = new BotResponse();
-        String number = (String) stateService.getParamByKey(chatId, "contactNumber");
+        String number = (String) stateService.getParamByKey(chatId, CONTACT_NUMBER);
         List<Contact> contacts = contactService.findContactsByNumber(chatId, number);
 
         if (contacts.isEmpty()) {

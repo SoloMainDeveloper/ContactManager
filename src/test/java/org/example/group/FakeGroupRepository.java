@@ -1,4 +1,4 @@
-package org.example;
+package org.example.group;
 
 import org.example.entity.Group;
 import org.example.repository.IGroupRepository;
@@ -37,15 +37,15 @@ public class FakeGroupRepository implements IGroupRepository {
      */
     private List<Group> getContactsAfterSorting(List<Group> groups, GroupOrder order) {
         List<Group> sortedGroups = new ArrayList<>(groups);
-        if(order.getProperty() == GroupOrder.OrderProperty.COUNT) {
-            switch (order.getDirection()) {
+        if(order.property() == GroupOrder.OrderProperty.COUNT) {
+            switch (order.direction()) {
                 case ASC -> sortedGroups
                     .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()));
                 case DESC -> sortedGroups
                     .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()).reversed());
             }
-        } else if(order.getProperty() == GroupOrder.OrderProperty.NAME) {
-            switch (order.getDirection()) {
+        } else if(order.property() == GroupOrder.OrderProperty.NAME) {
+            switch (order.direction()) {
                 case ASC -> sortedGroups
                     .sort(Comparator.comparing(Group::getName));
                 case DESC -> sortedGroups
