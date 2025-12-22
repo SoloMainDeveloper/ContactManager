@@ -1,4 +1,4 @@
-package org.example;
+package org.example.group;
 
 import org.example.entity.Group;
 import org.example.repository.IGroupRepository;

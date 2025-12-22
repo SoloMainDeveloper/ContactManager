@@ -30,6 +30,13 @@ public class ContactOrder {
      */
     private final Direction direction;
 
+    /**
+     * Конструктор порядка сортировки контактов, если не нужно применять сортировку
+     */
+    public ContactOrder() {
+        this(null, null);
+    }
+
     public ContactOrder(OrderProperty property, Direction direction) {
         this.property = property;
         this.direction = direction;
@@ -47,13 +54,6 @@ public class ContactOrder {
      */
     public Direction getDirection() {
         return direction;
-    }
-
-    /**
-     * Получить порядок сортировки контактов, если не нужно применять сортировку
-     */
-    public static ContactOrder none() {
-        return new ContactOrder(null, null);
     }
 
     /**

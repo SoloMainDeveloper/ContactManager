@@ -1,8 +1,9 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.entity.Group;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
@@ -47,9 +48,9 @@ public class GetAllGroupsHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Получить" -> {
+            case UserCommandConstants.GET -> {
                 List<Group> groups = groupService
-                    .findGroupsByChatId(chatId, GroupOrder.none());
+                    .findGroupsByChatId(chatId, new GroupOrder());
                 if (groups.isEmpty()) {
                     response.setText("У вас пока нет созданных групп");
                 } else {
@@ -61,11 +62,11 @@ public class GetAllGroupsHandler implements OperationHandler {
                             groupNames, Operation.CURRENT_GROUP_MENU.name()));
                 }
             }
-            case "Сортировать" -> {
+            case UserCommandConstants.SORT -> {
                 response.setText("Выберите вид сортировки");
                 response.setKeyboardText(ReplyKeyboardConstants.ADD_SORTER_GROUP_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
@@ -80,10 +81,10 @@ public class GetAllGroupsHandler implements OperationHandler {
      */
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        if (Objects.equals(messageText, "В алфавитном порядке имени") ||
-                Objects.equals(messageText, "В обратном алфавитному порядке имени") ||
-                Objects.equals(messageText, "В порядке убывания кол-ва участников") ||
-                Objects.equals(messageText, "В порядке возрастания кол-ва участников")) {
+        if (Objects.equals(messageText, UserCommandConstants.ORDER_BY_NAME_ASC) ||
+                Objects.equals(messageText, UserCommandConstants.ORDER_BY_NAME_DESC) ||
+                Objects.equals(messageText, UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_DESC) ||
+                Objects.equals(messageText, UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_ASC)) {
             response.setText("Отлично. Выбрана следующая сортировка: " + messageText);
             GroupOrder order = createOrderFromMessageText(messageText);
             List<Group> groups = groupService.findGroupsByChatId(chatId, order);
@@ -113,15 +114,15 @@ public class GetAllGroupsHandler implements OperationHandler {
      */
     private GroupOrder createOrderFromMessageText(String message) {
         return switch (message) {
-            case "В алфавитном порядке имени" ->
+            case UserCommandConstants.ORDER_BY_NAME_ASC ->
                 new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.ASC);
-            case "В обратном алфавитному порядке имени" ->
+            case UserCommandConstants.ORDER_BY_NAME_DESC ->
                 new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.DESC);
-            case "В порядке возрастания кол-ва участников" ->
+            case UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_ASC ->
                 new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.ASC);
-            case "В порядке убывания кол-ва участников" ->
+            case UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_DESC ->
                 new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.DESC);
-            default -> GroupOrder.none();
+            default -> new GroupOrder();
         };
     }
 }

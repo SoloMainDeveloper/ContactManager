@@ -1,9 +1,10 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.entity.Contact;
 import org.example.entity.Group;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
@@ -67,24 +68,24 @@ public class CurrentGroupMenuHandler implements OperationHandler {
         }
         stateService.addParameter(chatId, "currentGroup", group.get());
         switch (messageText) {
-            case "Меню группы вызвано" -> {
+            case UserCommandConstants.GROUP_MENU -> {
                 response.setText("Меню для группы " + groupName + " вызвано");
                 response.setKeyboardText(ReplyKeyboardConstants.CURRENT_GROUP_MENU);
             }
-            case "Вывести все контакты группы" -> {
+            case UserCommandConstants.GET_GROUP_CONTACTS -> {
                 response = handleGetAllContactsFromGroup(chatId, group.get());
             }
-            case "Изменить" -> {
+            case UserCommandConstants.EDIT -> {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP);
                 response.setText("Отлично. Выберите какие операции хотите выполнить");
                 response.setKeyboardText(ReplyKeyboardConstants.EDIT_GROUP_MENU);
             }
-            case "Удалить" -> {
+            case UserCommandConstants.DELETE -> {
                 stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP);
                 response.setText("Вы точно хотите удалить текущую группу?");
-                response.setKeyboardText(List.of("Да", "Нет"));
+                response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

@@ -3,16 +3,16 @@ package org.example.operations.contact;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.exceptions.ContactAlreadyExistsException;
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +31,21 @@ public class AddContactHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса возраста контакта
+     */
+    private static final String CONTACT_AGE = "contactAge";
+
+    /**
+     * Название параметра запроса номера контакта
+     */
+    private static final String CONTACT_NUMBER = "contactNumber";
+
+    /**
+     * Название параметра запроса пола контакта
+     */
+    private static final String CONTACT_GENDER = "contactGender";
+
+    /**
      * Конструктор
      */
     public AddContactHandler(ContactService contactService, StateService stateService) {
@@ -47,28 +62,28 @@ public class AddContactHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Номер" -> {
+            case UserCommandConstants.NUMBER -> {
                 response.setText("Введите номер телефона");
-                stateService.setLastRequestedParamKey(chatId, "contactNumber");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_NUMBER);
             }
-            case "Возраст" -> {
+            case UserCommandConstants.AGE -> {
                 response.setText("Введите возраст");
-                stateService.setLastRequestedParamKey(chatId, "contactAge");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_AGE);
             }
-            case "Пол" -> {
+            case UserCommandConstants.GENDER -> {
                 response.setText("Выберите пол");
-                response.setKeyboardText(List.of("Мужской", "Женский"));
-                stateService.setLastRequestedParamKey(chatId, "contactGender");
+                response.setKeyboardText(ReplyKeyboardConstants.GENDERS);
+                stateService.setLastRequestedParamKey(chatId, CONTACT_GENDER);
             }
-            case "Сохранить контакт" -> {
+            case UserCommandConstants.SAVE_CONTACT -> {
                 try {
                     Map<String, Object> params = stateService.getParams(chatId);
                     Contact contact = new Contact(chatId,
                             (String) params.get("contactName"),
-                            (String) params.getOrDefault("contactNumber", ""),
-                            Integer.parseInt((String) params.getOrDefault("contactAge",
+                            (String) params.getOrDefault(CONTACT_NUMBER, ""),
+                            Integer.parseInt((String) params.getOrDefault(CONTACT_AGE,
                                     String.valueOf(-1))),
-                            Gender.fromDisplayName((String) params.get("contactGender")),
+                            Gender.fromDisplayName((String) params.get(CONTACT_GENDER)),
                             false
                     );
                     contactService.tryAddContact(chatId, contact);
@@ -81,7 +96,7 @@ public class AddContactHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

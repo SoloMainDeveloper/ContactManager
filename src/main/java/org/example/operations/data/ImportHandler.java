@@ -1,10 +1,10 @@
 package org.example.operations.data;
 
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.exceptions.ImportException;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;

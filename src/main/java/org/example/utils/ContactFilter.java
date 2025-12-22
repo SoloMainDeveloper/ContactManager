@@ -36,6 +36,13 @@ public class ContactFilter {
      */
     private final String value;
 
+    /**
+     * Конструктор фильтра контактов, если не нужно применять фильтрацию
+     */
+    public ContactFilter() {
+        this(null, null, null);
+    }
+
     public ContactFilter(FilterProperty property, Condition condition, String value) {
         this.property = property;
         this.condition = condition;
@@ -61,13 +68,6 @@ public class ContactFilter {
      */
     public String getValue() {
         return value;
-    }
-
-    /**
-     * Получить фильтр контактов, если не нужно применять фильтрацию
-     */
-    public static ContactFilter none() {
-        return new ContactFilter(null, null, null);
     }
 
     /**

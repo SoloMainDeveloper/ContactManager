@@ -1,4 +1,4 @@
-package org.example;
+package org.example.contact;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
@@ -7,7 +7,6 @@ import org.example.utils.ContactFilter;
 import org.example.utils.ContactOrder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Хранилище контактов. Необходимо для тестов
@@ -144,7 +143,8 @@ public class FakeContactRepository implements IContactRepository {
 
     @Override
     public List<Contact> findContactsByGroupId(Long groupId) {
-        return List.of();
+        return List.of(); // этот метод используется только в GroupRepository и в
+        // фейковой реализации он не нужен
     }
 
     @Override

@@ -1,7 +1,8 @@
 package org.example.operations.group;
 
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
+import org.example.constants.UserCommandConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.StateService;
@@ -19,6 +20,11 @@ public class GroupsMenuHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса имени группы
+     */
+    private static final String GROUP_NAME = "groupName";
+
+    /**
      * Конструктор
      */
     public GroupsMenuHandler(StateService stateService) {
@@ -34,23 +40,23 @@ public class GroupsMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Добавить" -> {
+            case UserCommandConstants.ADD -> {
                 stateService.changeCurrentOperation(chatId, Operation.ADD_GROUP);
                 response.setText("Напишите имя добавляемой группы");
-                stateService.setLastRequestedParamKey(chatId, "groupName");
+                stateService.setLastRequestedParamKey(chatId, GROUP_NAME);
             }
-            case "Получить все" -> {
+            case UserCommandConstants.GET_ALL -> {
                 stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS);
                 response.setText("Желаете получить все группы сразу или"
                         + " добавить сортировку?");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
             }
-            case "Найти" -> {
+            case UserCommandConstants.FIND -> {
                 stateService.changeCurrentOperation(chatId, Operation.FIND_GROUP);
                 response.setText("Введите имя группы, которую нужно найти");
-                stateService.setLastRequestedParamKey(chatId, "groupName");
+                stateService.setLastRequestedParamKey(chatId, GROUP_NAME);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);

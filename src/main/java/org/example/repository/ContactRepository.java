@@ -137,7 +137,7 @@ public class ContactRepository implements IContactRepository {
             case LESS_THAN -> "<";
             case GREATER_THAN -> ">";
             case EQUALS -> "=";
-            default -> "";
+            case null -> "";
         };
         return " AND %s %s '%s'".formatted(
             filter.getProperty().name().toLowerCase(), condition, filter.getValue());

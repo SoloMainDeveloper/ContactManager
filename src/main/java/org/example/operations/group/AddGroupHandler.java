@@ -1,10 +1,11 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
@@ -40,6 +41,16 @@ public class AddGroupHandler implements OperationHandler {
     private final StateService stateService;
 
     /**
+     * Название параметра запроса новой группы
+     */
+    private static final String NEW_GROUP = "newGroup";
+
+    /**
+     * Название параметра запроса добавляемого контакта
+     */
+    private static final String CONTACT_TO_ADD = "contactToAdd";
+
+    /**
      * Конструктор
      */
     public AddGroupHandler(GroupService groupService, ContactService contactService,
@@ -58,14 +69,14 @@ public class AddGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Добавить контакт" -> {
+            case UserCommandConstants.ADD_CONTACT_TO_GROUP -> {
                 response.setText("Введите имя контакта для добавления в группу");
-                stateService.setLastRequestedParamKey(chatId, "contactToAdd");
+                stateService.setLastRequestedParamKey(chatId, CONTACT_TO_ADD);
             }
-            case "Сохранить группу" -> {
+            case UserCommandConstants.SAVE_GROUP -> {
                 try {
                     Group newGroup = (Group) stateService.getParamByKey(
-                            chatId, "newGroup");
+                            chatId, NEW_GROUP);
                     groupService.tryAddGroup(chatId, newGroup);
                     response.setText(
                             "Группа " + newGroup.getName() + " успешна сохранена");
@@ -78,7 +89,7 @@ public class AddGroupHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
@@ -98,7 +109,7 @@ public class AddGroupHandler implements OperationHandler {
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         return switch (lastRequestedParamKey) {
             case "groupName" -> handleGroupNameMessage(chatId, messageText);
-            case "contactToAdd" -> handleContactToAddMessage(chatId, messageText);
+            case CONTACT_TO_ADD -> handleContactToAddMessage(chatId, messageText);
             default -> new BotResponse(ReplyConstants.UNKNOWN_COMMAND);
         };
     }
@@ -109,7 +120,7 @@ public class AddGroupHandler implements OperationHandler {
     private BotResponse handleGroupNameMessage(Long chatId, String groupName) {
         BotResponse response = new BotResponse();
         Group group = new Group(chatId, groupName);
-        stateService.addParameter(chatId, "newGroup", group);
+        stateService.addParameter(chatId, NEW_GROUP, group);
         response.setText("Отлично. Выберите дальнейшие действия");
         response.setKeyboardText(ReplyKeyboardConstants.ADD_GROUP_MENU);
         return response;
@@ -129,7 +140,7 @@ public class AddGroupHandler implements OperationHandler {
 
         Contact contact = optionalContact.get();
         Long contactId = contact.getId();
-        Group group = (Group) stateService.getParamByKey(chatId, "newGroup");
+        Group group = (Group) stateService.getParamByKey(chatId, NEW_GROUP);
 
         List<Contact> contacts = group.getContacts();
         Map<Long, Contact> contactMap = contacts.stream()

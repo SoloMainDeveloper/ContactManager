@@ -1,5 +1,6 @@
-package org.example;
+package org.example.contact;
 
+import org.example.MessageHandler;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.*;

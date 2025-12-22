@@ -30,6 +30,13 @@ public class GroupOrder {
      */
     private final Direction direction;
 
+    /**
+     * Конструктор порядка сортировки групп, если не нужно применять сортировку
+     */
+    public GroupOrder() {
+        this(null, null);
+    }
+
     public GroupOrder(OrderProperty property, Direction direction) {
         this.property = property;
         this.direction = direction;
@@ -47,13 +54,6 @@ public class GroupOrder {
      */
     public Direction getDirection() {
         return direction;
-    }
-
-    /**
-     * Получить порядок сортировки групп, если не нужно применять сортировку
-     */
-    public static GroupOrder none() {
-        return new GroupOrder(null, null);
     }
 
     /**

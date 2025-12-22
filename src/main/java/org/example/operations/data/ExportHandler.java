@@ -1,9 +1,9 @@
 package org.example.operations.data;
 
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ExportException;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
@@ -69,7 +69,7 @@ public class ExportHandler implements OperationHandler {
             }
             case "exportFileName" -> {
                 List<Contact> contacts = contactService.findContactsByChatId(
-                    chatId, ContactFilter.none(), ContactOrder.none());
+                    chatId, new ContactFilter(), new ContactOrder());
                 if(contacts.isEmpty()) {
                     response.setText("Вы еще не создали ни одного контакта");
                     response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);

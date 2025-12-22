@@ -1,5 +1,7 @@
-package org.example;
+package org.example.group;
 
+import org.example.MessageHandler;
+import org.example.contact.FakeContactRepository;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.entity.Group;
@@ -83,9 +85,9 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Добавить");
 
         handler.handleMessage(chatId, "Друзья");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Юлия");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         Assertions.assertEquals(
                 "Контакт Константин не был найден.",
                 handler.handleMessage(chatId, "Константин").getText()
@@ -129,7 +131,7 @@ public class GroupMessageHandlerTest {
 
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Друзья");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Юлия");
         BotResponse response = handler.handleMessage(chatId, "Сохранить группу");
         Assertions.assertEquals(
@@ -176,7 +178,7 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Магазин");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Юлия");
         handler.handleMessage(chatId, "Сохранить группу");
         handler.handleInlineButtonActivated(chatId, "CURRENT_GROUP_MENU_Магазин");
@@ -241,27 +243,27 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Друзья");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Юлия");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Олег");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Михаил");
         handler.handleMessage(chatId, "Сохранить группу");
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Коллеги");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Юлия");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Михаил");
         handler.handleMessage(chatId, "Сохранить группу");
 
         handler.handleMessage(chatId, "Группы");
         handler.handleMessage(chatId, "Добавить");
         handler.handleMessage(chatId, "Баскетбол");
-        handler.handleMessage(chatId, "Добавить контакт");
+        handler.handleMessage(chatId, "Добавить контакт в группу");
         handler.handleMessage(chatId, "Михаил");
         handler.handleMessage(chatId, "Сохранить группу");
 
@@ -289,7 +291,7 @@ public class GroupMessageHandlerTest {
         handler.handleMessage(chatId, "Сортировать");
         Assertions.assertEquals(
                 List.of("Коллеги", "Друзья", "Баскетбол"),
-                handler.handleMessage(chatId, "В обратном алфавитному порядке имени")
+                handler.handleMessage(chatId, "В обратном алфавитному порядку имени")
                         .getInlineKeyboardText().inlineText()
         );
 
