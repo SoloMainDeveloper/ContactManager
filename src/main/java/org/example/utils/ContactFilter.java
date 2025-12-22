@@ -2,12 +2,8 @@ package org.example.utils;
 
 /**
  * Фильтр контактов
- *
- * @param property  Свойство фильтра
- * @param condition Условие сравнение фильтра
- * @param value     Значение фильтрации
  */
-public record ContactFilter(FilterProperty property, Condition condition, String value) {
+public class ContactFilter {
     /**
      * Свойство фильтра
      */
@@ -25,26 +21,53 @@ public record ContactFilter(FilterProperty property, Condition condition, String
         EQUALS,
     }
 
-    @Override
-    public FilterProperty property() {
-        return property;
+    /**
+     * Свойство фильтра
+     */
+    private final FilterProperty property;
+
+    /**
+     * Условие сравнение фильтра
+     */
+    private final Condition condition;
+
+    /**
+     * Значение фильтрации
+     */
+    private final String value;
+
+    /**
+     * Конструктор фильтра контактов, если не нужно применять фильтрацию
+     */
+    public ContactFilter() {
+        this(null, null, null);
     }
 
-    @Override
-    public Condition condition() {
-        return condition;
-    }
-
-    @Override
-    public String value() {
-        return value;
+    public ContactFilter(FilterProperty property, Condition condition, String value) {
+        this.property = property;
+        this.condition = condition;
+        this.value = value;
     }
 
     /**
-     * Получить фильтр контактов, если не нужно применять фильтрацию
+     * Получить свойство фильтра
      */
-    public static ContactFilter none() {
-        return new ContactFilter(null, null, null);
+    public FilterProperty getProperty() {
+        return property;
+    }
+
+    /**
+     * Получить условие сравнение фильтра
+     */
+    public Condition getCondition() {
+        return condition;
+    }
+
+    /**
+     * Получить значение фильтрации
+     */
+    public String getValue() {
+        return value;
     }
 
     /**

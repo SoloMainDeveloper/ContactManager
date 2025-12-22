@@ -1,4 +1,4 @@
-package org.example.keyboardcreator;
+package org.example.constants;
 
 /**
  * Класс, содержащий часто используемые текстовые ответы.

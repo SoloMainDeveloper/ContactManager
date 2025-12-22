@@ -2,11 +2,8 @@ package org.example.utils;
 
 /**
  * Порядок сортировки групп
- *
- * @param property  Свойство порядка групп
- * @param direction Направление порядка сортировки
  */
-public record GroupOrder(OrderProperty property, Direction direction) {
+public class GroupOrder {
     /**
      * Свойства порядка групп
      */
@@ -23,21 +20,40 @@ public record GroupOrder(OrderProperty property, Direction direction) {
         DESC,
     }
 
-    @Override
-    public OrderProperty property() {
-        return property;
+    /**
+     * Свойство порядка групп
+     */
+    private final OrderProperty property;
+
+    /**
+     * Направление порядка сортировки
+     */
+    private final Direction direction;
+
+    /**
+     * Конструктор порядка сортировки групп, если не нужно применять сортировку
+     */
+    public GroupOrder() {
+        this(null, null);
     }
 
-    @Override
-    public Direction direction() {
-        return direction;
+    public GroupOrder(OrderProperty property, Direction direction) {
+        this.property = property;
+        this.direction = direction;
     }
 
     /**
-     * Получить порядок сортировки групп, если не нужно применять сортировку
+     * Получить свойство порядка сортировки
      */
-    public static GroupOrder none() {
-        return new GroupOrder(null, null);
+    public OrderProperty getProperty() {
+        return property;
+    }
+
+    /**
+     * Получить направление порядка сортировки
+     */
+    public Direction getDirection() {
+        return direction;
     }
 
     /**

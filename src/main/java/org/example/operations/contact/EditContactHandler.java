@@ -3,16 +3,16 @@ package org.example.operations.contact;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.exceptions.ContactDoesNotExistException;
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,24 +65,24 @@ public class EditContactHandler implements OperationHandler {
                 chatId, "currentContactName");
 
         switch (messageText) {
-            case "Имя" -> {
+            case UserCommandConstants.NAME -> {
                 response.setText("Введите имя контакта");
                 stateService.setLastRequestedParamKey(chatId, "newContactName");
             }
-            case "Номер" -> {
+            case UserCommandConstants.NUMBER -> {
                 response.setText("Введите номер телефона");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_NUMBER);
             }
-            case "Возраст" -> {
+            case UserCommandConstants.AGE -> {
                 response.setText("Введите возраст");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_AGE);
             }
-            case "Пол" -> {
+            case UserCommandConstants.GENDER -> {
                 response.setText("Выберите пол");
                 response.setKeyboardText(ReplyKeyboardConstants.GENDERS);
                 stateService.setLastRequestedParamKey(chatId, CONTACT_GENDER);
             }
-            case "Изменить контакт" -> {
+            case UserCommandConstants.EDIT_CONTACT -> {
                 try {
                     Contact contact = contactService.findContactByName(
                             chatId, contactName).orElseThrow(() ->
@@ -95,9 +95,9 @@ public class EditContactHandler implements OperationHandler {
                     contact.setPhoneNumber((String) params.getOrDefault(
                             CONTACT_NUMBER, contact.getPhoneNumber()));
                     contact.setAge(Integer.parseInt((String) params.getOrDefault(
-                            CONTACT_AGE, contact.getAge())));
+                            CONTACT_AGE, String.valueOf(contact.getAge()))));
                     contact.setGender(Gender.fromDisplayName((String) params.getOrDefault(
-                            CONTACT_GENDER, contact.getGender())));
+                            CONTACT_GENDER, contact.getGender().getDisplayName())));
                     contactService.tryUpdateContact(chatId, contactName, contact);
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } catch (ContactDoesNotExistException e) {
@@ -107,7 +107,7 @@ public class EditContactHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

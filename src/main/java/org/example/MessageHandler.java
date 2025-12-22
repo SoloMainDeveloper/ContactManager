@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.constants.UserCommandConstants;
 import org.example.operations.*;
 import org.example.response.BotResponse;
 import org.example.service.StateService;
@@ -57,12 +58,12 @@ public class MessageHandler {
             stateService.changeCurrentOperation(chatId, Operation.CURRENT_CONTACT_MENU);
             String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
             stateService.addParameter(chatId, "currentContactName", contactName);
-            return handleMessage(chatId, "Меню пользователя вызвано");
+            return handleMessage(chatId, UserCommandConstants.CONTACT_MENU);
         } else if (callbackData.startsWith("CURRENT_GROUP_MENU_")) {
             stateService.changeCurrentOperation(chatId, Operation.CURRENT_GROUP_MENU);
             String groupName = callbackData.substring("CURRENT_GROUP_MENU_".length());
             stateService.addParameter(chatId, "currentGroupName", groupName);
-            return handleMessage(chatId, "Меню группы вызвано");
+            return handleMessage(chatId, UserCommandConstants.GROUP_MENU);
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }

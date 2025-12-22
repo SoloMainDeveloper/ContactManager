@@ -140,7 +140,7 @@ public class GroupRepository implements IGroupRepository {
         return order.isEmpty()
             ? ""
             : " ORDER BY %s %s".formatted(
-            order.property().name().toLowerCase(), order.direction().name());
+            order.getProperty().name().toLowerCase(), order.getDirection().name());
     }
 
     /**

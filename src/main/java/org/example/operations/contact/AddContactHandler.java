@@ -3,16 +3,16 @@ package org.example.operations.contact;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.exceptions.ContactAlreadyExistsException;
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,20 +62,20 @@ public class AddContactHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Номер" -> {
+            case UserCommandConstants.NUMBER -> {
                 response.setText("Введите номер телефона");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_NUMBER);
             }
-            case "Возраст" -> {
+            case UserCommandConstants.AGE -> {
                 response.setText("Введите возраст");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_AGE);
             }
-            case "Пол" -> {
+            case UserCommandConstants.GENDER -> {
                 response.setText("Выберите пол");
                 response.setKeyboardText(ReplyKeyboardConstants.GENDERS);
                 stateService.setLastRequestedParamKey(chatId, CONTACT_GENDER);
             }
-            case "Сохранить контакт" -> {
+            case UserCommandConstants.SAVE_CONTACT -> {
                 try {
                     Map<String, Object> params = stateService.getParams(chatId);
                     Contact contact = new Contact(chatId,
@@ -96,7 +96,7 @@ public class AddContactHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

@@ -87,9 +87,9 @@ public class FakeContactRepository implements IContactRepository {
      * Получить контакты после примененной фильтрации
      */
     private List<Contact> getContactsAfterFiltering(List<Contact> contacts, ContactFilter filter) {
-        switch (filter.property()) {
+        switch (filter.getProperty()) {
             case GENDER -> {
-                Gender gender = Gender.valueOf(filter.value());
+                Gender gender = Gender.valueOf(filter.getValue());
                 return contacts.stream()
                     .filter(contact -> contact.getGender() == gender)
                     .toList();
@@ -110,8 +110,8 @@ public class FakeContactRepository implements IContactRepository {
      * Вычислить условие для возраста
      */
     private boolean evaluateAgeCondition(int contactAge, ContactFilter filter) {
-        int age = Integer.parseInt(filter.value());
-        return switch (filter.condition()) {
+        int age = Integer.parseInt(filter.getValue());
+        return switch (filter.getCondition()) {
             case LESS_THAN -> contactAge < age;
             case GREATER_THAN -> contactAge > age;
             case EQUALS -> contactAge == age;
@@ -123,15 +123,15 @@ public class FakeContactRepository implements IContactRepository {
      */
     private List<Contact> getContactsAfterSorting(List<Contact> contacts, ContactOrder order) {
         List<Contact> sortedContacts = new ArrayList<>(contacts);
-        if(order.property() == ContactOrder.OrderProperty.AGE) {
-            switch (order.direction()) {
+        if(order.getProperty() == ContactOrder.OrderProperty.AGE) {
+            switch (order.getDirection()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge));
                 case DESC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge).reversed());
             }
-        } else if(order.property() == ContactOrder.OrderProperty.NAME) {
-            switch (order.direction()) {
+        } else if(order.getProperty() == ContactOrder.OrderProperty.NAME) {
+            switch (order.getDirection()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparing(Contact::getName));
                 case DESC -> sortedContacts
