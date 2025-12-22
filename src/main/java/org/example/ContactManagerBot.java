@@ -113,12 +113,12 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     private SendMessage adaptBotResponseToTelegram(BotResponse response) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(response.getText());
-        if(response.getKeyboardText() != null){
+        if (response.getKeyboardText() != null) {
             sendMessage.setReplyMarkup(new ReplyKeyboardCreator()
                     .createKeyboard(response.getKeyboardText()));
         }
         InlineKeyboardText inlineKeyboardText = response.getInlineKeyboardText();
-        if(inlineKeyboardText != null && inlineKeyboardText.isNeeded()) {
+        if (inlineKeyboardText != null && inlineKeyboardText.isNeeded()) {
             sendMessage.setReplyMarkup(new InlineKeyboardCreator()
                     .createKeyboard(inlineKeyboardText));
         }

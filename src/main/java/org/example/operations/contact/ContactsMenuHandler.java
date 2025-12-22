@@ -1,8 +1,10 @@
 package org.example.operations.contact;
 
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
@@ -13,11 +15,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContactsMenuHandler implements OperationHandler {
     /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
-    /**
      * Сервис состояний
      */
     private final StateService stateService;
@@ -25,7 +22,7 @@ public class ContactsMenuHandler implements OperationHandler {
     /**
      * Конструктор
      */
-    public ContactsMenuHandler(StateService stateService){
+    public ContactsMenuHandler(StateService stateService) {
         this.stateService = stateService;
     }
 
@@ -38,31 +35,28 @@ public class ContactsMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Добавить":
-                stateService.changeCurrentOperation(chatId, Operation.ADD_CONTACT, true);
+            case UserCommandConstants.ADD -> {
+                stateService.changeCurrentOperation(chatId, Operation.ADD_CONTACT);
                 response.setText("Напишите имя добавляемого контакта");
-                stateService.setLastRequestedParamKey(chatId,"contactName");
-                break;
-            case "Получить все":
-                stateService.changeCurrentOperation(chatId,
-                        Operation.GET_ALL_CONTACTS, true);
+                stateService.setLastRequestedParamKey(chatId, "contactName");
+            }
+            case UserCommandConstants.GET_ALL -> {
+                stateService.changeCurrentOperation(chatId, Operation.GET_ALL_CONTACTS);
                 response.setText("Желаете получить все контакты сразу или добавить" +
                         " фильтрацию/сортировку?");
-                response.setKeyboardText(keyboardCreator.getAllContactsMenu());
-                break;
-            case "Найти":
-                stateService.changeCurrentOperation(chatId,Operation.FIND_CONTACT, true);
+                response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
+            }
+            case UserCommandConstants.FIND -> {
+                stateService.changeCurrentOperation(chatId, Operation.FIND_CONTACT);
                 response.setText("Выберите по какому признаку будет произведен поиск");
-                response.setKeyboardText(keyboardCreator.findContactMenu());
-                break;
-            case "Назад":
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(chatId,Operation.MAIN_MENU, true);
-                response.setKeyboardText(keyboardCreator.mainMenu());
-                break;
-            default:
-                response.setText("Я не понимаю эту команду");
-                break;
+                response.setKeyboardText(ReplyKeyboardConstants.FIND_CONTACT_MENU);
+            }
+            case UserCommandConstants.BACK -> {
+                response.setText(ReplyConstants.COME_BACK);
+                stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
+            }
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

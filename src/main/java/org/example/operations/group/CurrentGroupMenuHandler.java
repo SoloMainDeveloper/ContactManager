@@ -1,7 +1,10 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
+import org.example.entity.Contact;
 import org.example.entity.Group;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
@@ -13,17 +16,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Обработчик события: действия пользователя в меню текущей группы
  */
 @Component
 public class CurrentGroupMenuHandler implements OperationHandler {
-    /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис групп
      */
@@ -32,7 +31,7 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     /**
      * Сервис контактов
      */
-    private  final ContactService contactService;
+    private final ContactService contactService;
 
     /**
      * Сервис состояний
@@ -58,38 +57,40 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String groupName = stateService.getParamByKey(chatId, "currentGroupName");
-        Group group = groupService.findGroupByName(chatId, groupName).orElse(null);
-        if(group == null) {
+        String groupName = (String) stateService.getParamByKey(
+                chatId, "currentGroupName");
+        Optional<Group> group = groupService.findGroupByName(chatId, groupName);
+        if (group.isEmpty()) {
             response.setText("Группа " + groupName + " не была найдена");
-            response.setKeyboardText(keyboardCreator.groupsMenu());
-            stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+            response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
+            stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             return response;
         }
+        stateService.addParameter(chatId, "currentGroup", group.get());
         switch (messageText) {
-            case "Меню группы вызвано" -> {
+            case UserCommandConstants.GROUP_MENU -> {
                 response.setText("Меню для группы " + groupName + " вызвано");
-                response.setKeyboardText(keyboardCreator.currentGroupMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.CURRENT_GROUP_MENU);
             }
-            case "Вывести все контакты группы" -> {
-                response = handleGetAllContactsFromGroup(chatId, group);
+            case UserCommandConstants.GET_GROUP_CONTACTS -> {
+                response = handleGetAllContactsFromGroup(chatId, group.get());
             }
-            case "Изменить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP, false);
+            case UserCommandConstants.EDIT -> {
+                stateService.changeCurrentOperation(chatId, Operation.EDIT_GROUP);
                 response.setText("Отлично. Выберите какие операции хотите выполнить");
-                response.setKeyboardText(keyboardCreator.editGroupMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.EDIT_GROUP_MENU);
             }
-            case "Удалить" -> {
-                stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP, false);
+            case UserCommandConstants.DELETE -> {
+                stateService.changeCurrentOperation(chatId, Operation.DELETE_GROUP);
                 response.setText("Вы точно хотите удалить текущую группу?");
-                response.setKeyboardText(List.of("Да", "Нет"));
+                response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
             }
-            case "Назад" -> {
-                response.setText("Вы вернулись назад");
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
-                response.setKeyboardText(keyboardCreator.contactsMenu());
+            case UserCommandConstants.BACK -> {
+                response.setText(ReplyConstants.COME_BACK);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
+                response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }
@@ -101,13 +102,13 @@ public class CurrentGroupMenuHandler implements OperationHandler {
         BotResponse response = new BotResponse();
 
         List<String> contactNames = new ArrayList<>();
-        for(Long contactId : group.getContactIds()) {
-            contactService.findContactById(chatId, contactId)
-                    .ifPresent(contact ->
-                            contactNames.add(contact.getName())
+        for (Contact contact : group.getContacts()) {
+            contactService.findContactById(chatId, contact.getId())
+                    .ifPresent(c ->
+                            contactNames.add(c.getName())
                     );
         }
-        if(contactNames.isEmpty()) {
+        if (contactNames.isEmpty()) {
             response.setText("В группе " + group.getName() + " пока нет контактов");
         } else {
             response.setText("Все контакты группы " + group.getName() + ":");

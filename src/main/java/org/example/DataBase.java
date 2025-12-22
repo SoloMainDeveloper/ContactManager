@@ -17,9 +17,10 @@ public class DataBase {
 
     /**
      * Конструктор
+     *
      * @param config содержит данные для подключения
      */
-    public DataBase(DataBaseConfig config){
+    public DataBase(DataBaseConfig config) {
         this.config = config;
     }
 

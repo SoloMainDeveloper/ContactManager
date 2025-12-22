@@ -31,7 +31,7 @@ public class BotResponse {
     /**
      * Конструктор по умолчанию
      */
-    public BotResponse(){
+    public BotResponse() {
     }
 
     /**
@@ -51,7 +51,7 @@ public class BotResponse {
     /**
      * Устанавливает текст сообщения
      */
-    public void setText(String text){
+    public void setText(String text) {
         this.text = text;
     }
 

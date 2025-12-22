@@ -1,6 +1,9 @@
 package org.example.operations.group;
 
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.UserCommandConstants;
+import org.example.exceptions.GroupDoesNotExistException;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.GroupService;
@@ -13,11 +16,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DeleteGroupHandler implements OperationHandler {
-    /**
-     * Создает текст для кнопок быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис групп
      */
@@ -44,21 +42,26 @@ public class DeleteGroupHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        switch(messageText) {
-            case "Да" -> {
-                String contactName = stateService.getParamByKey(chatId,
-                        "currentGroupName");
-                groupService.deleteGroupByName(chatId, contactName);
-                response.setText("Группа " + contactName + " успешно удалена");
-                response.setKeyboardText(keyboardCreator.groupsMenu());
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+        switch (messageText) {
+            case UserCommandConstants.YES -> {
+                try {
+                    String contactName = (String) stateService.getParamByKey(chatId,
+                            "currentGroupName");
+                    groupService.deleteGroupByName(chatId, contactName);
+                    response.setText("Группа " + contactName + " успешно удалена");
+                } catch (GroupDoesNotExistException e) {
+                    response.setText("Ошибка при удалении группы: " + e.getMessage());
+                }
+
+                response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             }
-            case "Нет" -> {
-                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU, true);
+            case UserCommandConstants.NO -> {
+                stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setText("Действие удаления текущей группы отменено");
-                response.setKeyboardText(keyboardCreator.groupsMenu());
+                response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду.");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

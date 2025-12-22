@@ -1,11 +1,12 @@
-package org.example;
+package org.example.contact;
 
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.repository.IContactRepository;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Хранилище контактов. Необходимо для тестов
@@ -21,9 +22,6 @@ public class FakeContactRepository implements IContactRepository {
      */
     private Long counter;
 
-    /**
-     * Конструктор
-     */
     public FakeContactRepository() {
         contacts = new LinkedHashMap<>();
         counter = 0L;
@@ -76,101 +74,77 @@ public class FakeContactRepository implements IContactRepository {
     }
 
     @Override
-    public List<Contact> findContactsByChatId(Long chatId, String filter, String sorter) {
+    public List<Contact> findContactsByChatId(Long chatId, ContactFilter filter, ContactOrder order) {
         Map<String, Contact> userContacts = contacts.getOrDefault(chatId, new HashMap<>());
         List<Contact> contactList = new ArrayList<>(userContacts.values());
 
-        List<Contact> filteredContacts = applyFilter(contactList, filter);
+        List<Contact> filteredContacts = getContactsAfterFiltering(contactList, filter);
 
-        return applySorter(filteredContacts, sorter);
+        return getContactsAfterSorting(filteredContacts, order);
     }
 
     /**
-     * Применить фильтрацию к списку контактов
+     * Получить контакты после примененной фильтрации
      */
-    private List<Contact> applyFilter(List<Contact> contacts, String filter) {
-        if (filter == null || filter.isEmpty()) {
-            return contacts;
-        }
-
-        List<Contact> filteredContacts = new ArrayList<>(contacts);
-        if (filter.contains("gender")) {
-            String genderValue = extractValueFromFilter(filter);
-            if (genderValue != null) {
-                Gender gender = Gender.valueOf(genderValue);
-                filteredContacts = filteredContacts.stream()
-                        .filter(contact -> contact.getGender() == gender)
-                        .collect(Collectors.toList());
+    private List<Contact> getContactsAfterFiltering(List<Contact> contacts, ContactFilter filter) {
+        switch (filter.getProperty()) {
+            case GENDER -> {
+                Gender gender = Gender.valueOf(filter.getValue());
+                return contacts.stream()
+                    .filter(contact -> contact.getGender() == gender)
+                    .toList();
+            }
+            case AGE -> {
+                return contacts.stream()
+                    .filter(contact ->
+                        evaluateAgeCondition(contact.getAge(), filter))
+                    .toList();
+            }
+            case null, default -> {
+                return contacts;
             }
         }
-
-        if (filter.contains("age")) {
-            String ageCondition = filter.substring(filter.indexOf("age ") + 4);
-            filteredContacts = contacts.stream()
-                    .filter(contact -> evaluateAgeCondition(contact.getAge(), ageCondition))
-                    .collect(Collectors.toList());
-        }
-
-        return filteredContacts;
-    }
-
-    /**
-     * Извлечь значение из строки фильтра
-     */
-    private String extractValueFromFilter(String filter) {
-        int startIndex = filter.indexOf("gender = '");
-        if (startIndex == -1) {
-            return null;
-        }
-
-        startIndex += "gender = '".length();
-        int endIndex = filter.indexOf("'", startIndex);
-        if (endIndex == -1) {
-            return null;
-        }
-
-        return filter.substring(startIndex, endIndex);
     }
 
     /**
      * Вычислить условие для возраста
      */
-    private Boolean evaluateAgeCondition(int age, String condition) {
-        if (condition.startsWith(">")) {
-            int value = Integer.parseInt(condition.substring(1).trim());
-            return age > value;
-        } else if (condition.startsWith("<")) {
-            int value = Integer.parseInt(condition.substring(1).trim());
-            return age < value;
-        } else if (condition.startsWith("=")) {
-            int value = Integer.parseInt(condition.substring(1).trim());
-            return age == value;
-        }
-        return false;
+    private boolean evaluateAgeCondition(int contactAge, ContactFilter filter) {
+        int age = Integer.parseInt(filter.getValue());
+        return switch (filter.getCondition()) {
+            case LESS_THAN -> contactAge < age;
+            case GREATER_THAN -> contactAge > age;
+            case EQUALS -> contactAge == age;
+        };
     }
 
     /**
-     * Применить сортировку к списку контактов
+     * Получить контакты после примененной сортировки
      */
-    private List<Contact> applySorter(List<Contact> contacts, String sorter) {
-        if (sorter == null || sorter.isEmpty()) {
-            return contacts;
-        }
-
+    private List<Contact> getContactsAfterSorting(List<Contact> contacts, ContactOrder order) {
         List<Contact> sortedContacts = new ArrayList<>(contacts);
-        if (sorter.contains("ORDER BY age ASC")) {
-            sortedContacts.sort(Comparator.comparingInt(Contact::getAge));
-        }
-        else if (sorter.contains("ORDER BY age DESC")) {
-            sortedContacts.sort(Comparator.comparingInt(Contact::getAge).reversed());
-        }
-        else if (sorter.contains("ORDER BY name ASC")) {
-            sortedContacts.sort(Comparator.comparing(Contact::getName));
-        }
-        else if (sorter.contains("ORDER BY name DESC")) {
-            sortedContacts.sort(Comparator.comparing(Contact::getName).reversed());
+        if(order.getProperty() == ContactOrder.OrderProperty.AGE) {
+            switch (order.getDirection()) {
+                case ASC -> sortedContacts
+                    .sort(Comparator.comparingInt(Contact::getAge));
+                case DESC -> sortedContacts
+                    .sort(Comparator.comparingInt(Contact::getAge).reversed());
+            }
+        } else if(order.getProperty() == ContactOrder.OrderProperty.NAME) {
+            switch (order.getDirection()) {
+                case ASC -> sortedContacts
+                    .sort(Comparator.comparing(Contact::getName));
+                case DESC -> sortedContacts
+                    .sort(Comparator.comparing(Contact::getName).reversed());
+            }
         }
         return sortedContacts;
+    }
+
+    @Override
+    public List<Contact> findContactsByGroupId(Long groupId) {
+        return List.of(); // этот метод используется только в GroupRepository и в
+        // фейковой реализации он не нужен
     }
 
     @Override

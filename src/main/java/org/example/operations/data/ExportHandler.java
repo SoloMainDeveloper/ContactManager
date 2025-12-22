@@ -1,15 +1,17 @@
 package org.example.operations.data;
 
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.entity.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ExportException;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +22,6 @@ import java.util.List;
  */
 @Component
 public class ExportHandler implements OperationHandler {
-    /**
-     * Создает меню из кнопок для быстрого ввода команд
-     */
-    private final ReplyKeyboardConstants keyboardCreator = new ReplyKeyboardConstants();
-
     /**
      * Сервис состояний
      */
@@ -71,9 +68,18 @@ public class ExportHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "exportFileName");
             }
             case "exportFileName" -> {
-                String format = stateService.getParamByKey(chatId, "exportFormat");
-                List<Contact> contacts = contactService.findContactsByChatId(chatId);
+                List<Contact> contacts = contactService.findContactsByChatId(
+                    chatId, new ContactFilter(), new ContactOrder());
+                if(contacts.isEmpty()) {
+                    response.setText("Вы еще не создали ни одного контакта");
+                    response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+                    stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
+                    return response;
+                }
+
                 try {
+                    String format = (String) stateService
+                        .getParamByKey(chatId, "exportFormat");
                     AppDocument document = exportService
                             .exportContacts(messageText, format, contacts);
                     response.setDocument(document);
@@ -83,8 +89,8 @@ public class ExportHandler implements OperationHandler {
                     response.setText("Произошла ошибка при экспорте: " + e.getMessage());
                 }
 
-                response.setKeyboardText(keyboardCreator.dataMenu());
-                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU, true);
+                response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
             }
             default -> response.setText("Я не понимаю эту команду.");
         }
