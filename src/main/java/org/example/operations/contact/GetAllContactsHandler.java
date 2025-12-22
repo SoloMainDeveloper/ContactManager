@@ -67,9 +67,13 @@ public class GetAllContactsHandler implements OperationHandler {
 
         switch (messageText) {
             case "Получить" -> {
-                response.setText("Все контакты");
                 List<Contact> contacts = contactService.findContactsByChatId(
                     chatId, ContactFilter.none(), ContactOrder.none());
+                if(contacts.isEmpty()) {
+                    response.setText("У вас еще нет контактов");
+                } else {
+                    response.setText("Все контакты");
+                }
                 List<String> names = contacts.stream()
                         .map(Contact::getName)
                         .toList();
@@ -219,7 +223,6 @@ public class GetAllContactsHandler implements OperationHandler {
             condition = ContactFilter.Condition.EQUALS;
             isCorrectFilter = true;
         }
-
 
         if (isCorrectFilter) {
             response.setText("Отлично. Выбран следующий фильтр по возрасту:"

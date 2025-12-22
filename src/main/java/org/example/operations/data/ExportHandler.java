@@ -68,10 +68,18 @@ public class ExportHandler implements OperationHandler {
                 stateService.setLastRequestedParamKey(chatId, "exportFileName");
             }
             case "exportFileName" -> {
-                String format = (String) stateService.getParamByKey(chatId, "exportFormat");
                 List<Contact> contacts = contactService.findContactsByChatId(
                     chatId, ContactFilter.none(), ContactOrder.none());
+                if(contacts.isEmpty()) {
+                    response.setText("Вы еще не создали ни одного контакта");
+                    response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
+                    stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
+                    return response;
+                }
+
                 try {
+                    String format = (String) stateService
+                        .getParamByKey(chatId, "exportFormat");
                     AppDocument document = exportService
                             .exportContacts(messageText, format, contacts);
                     response.setDocument(document);

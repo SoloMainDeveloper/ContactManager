@@ -36,6 +36,7 @@ public class ContactService {
      */
     public void tryAddContact(Long chatId, Contact contact)
             throws ContactAlreadyExistsException {
+        contact.setChatId(chatId);
         String contactName = contact.getName();
         if (findContactByName(chatId, contactName).isEmpty()) {
             repository.add(contact);
