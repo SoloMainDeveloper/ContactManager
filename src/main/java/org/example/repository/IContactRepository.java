@@ -1,6 +1,8 @@
 package org.example.repository;
 
 import org.example.entity.Contact;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +12,14 @@ import java.util.Optional;
  */
 public interface IContactRepository {
     /**
-     * Добавить контакт
+     * Добавить контакт, при этом присвоив ему id
      */
     void add(Contact contact);
+
+    /**
+     * Найти контакт по идентификатору, соответствующий конкретному пользователю по chatId
+     */
+    Optional<Contact> findContactById(Long contactId, Long chatId);
 
     /**
      * Найти контакт по имени, соответствующий конкретному пользователю по chatId
@@ -25,14 +32,21 @@ public interface IContactRepository {
     List<Contact> findContactsByNumber(String number, Long chatId);
 
     /**
-     * Найти контакты по id пользователя с фильтрацией и сортировкой при необходимости
+     * Найти все контакты по id пользователя
      */
-    List<Contact> findContactsByChatId(Long chatId, String filter, String sorter);
+    List<Contact> findContactsByChatId(Long chatId, ContactFilter filter, ContactOrder order);
+
+    /**
+     * Найти контакты, хранящиеся в группе по ее id
+     */
+    List<Contact> findContactsByGroupId(Long groupId);
 
     /**
      * Обновить контакт
+     *
+     * @param currentName имя контакта до обновления
      */
-    void update(Contact contact);
+    void update(String currentName, Contact contact);
 
     /**
      * Удалить контакт по имени, соответствующий конкретному пользователю по chatId

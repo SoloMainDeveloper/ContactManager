@@ -21,15 +21,15 @@ public class StateService {
     /**
      * Конструктор
      */
-    public StateService(){
+    public StateService() {
         this.inMemoryStateStorage = new InMemoryStateStorage();
     }
 
     /**
      * Возвращает существующее состояние, в ином случае сначала его создаёт
      */
-    private State getOrCreateState(Long chatId){
-        if(!inMemoryStateStorage.containsKey(chatId)){
+    private State getOrCreateState(Long chatId) {
+        if (!inMemoryStateStorage.containsKey(chatId)) {
             inMemoryStateStorage.add(chatId, new State());
         }
         return inMemoryStateStorage.getStateById(chatId);
@@ -38,18 +38,18 @@ public class StateService {
     /**
      * Возвращает тип текущей операции у state по Id
      */
-    public Operation getOperation(Long chatId){
+    public Operation getOperation(Long chatId) {
         State state = getOrCreateState(chatId);
         return state.getOperation();
     }
 
     /**
-     * Меняет значение текущей операции и очищает предыдущий контекст
+     * Меняет значение текущей операции и очищает предыдущий
+     * контекст, если необходимо для данной операции
      */
-    public void changeCurrentOperation(
-            Long chatId, Operation operation, boolean needClearContext) {
+    public void changeCurrentOperation(Long chatId, Operation operation) {
         State state = getOrCreateState(chatId);
-        state.setOperation(operation, needClearContext);
+        state.setOperation(operation);
     }
 
     /**
@@ -71,7 +71,7 @@ public class StateService {
     /**
      * Добавление параметра в контекст состояния
      */
-    public void addParameter(Long chatId, String key, String value){
+    public void addParameter(Long chatId, String key, Object value) {
         State state = getOrCreateState(chatId);
         state.addParameter(key, value);
     }
@@ -79,14 +79,14 @@ public class StateService {
     /**
      * Возвращает контекст операции у состояния
      */
-    public Map<String, String> getParams(Long chatId) {
+    public Map<String, Object> getParams(Long chatId) {
         return Collections.unmodifiableMap(getOrCreateState(chatId).getParams());
     }
 
     /**
      * Возвращает значение параметра контекста по его ключу
      */
-    public String getParamByKey(Long chatId, String contactName) {
-        return getOrCreateState(chatId).getParams().get(contactName);
+    public Object getParamByKey(Long chatId, String key) {
+        return getOrCreateState(chatId).getParams().get(key);
     }
 }

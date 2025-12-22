@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.constants.UserCommandConstants;
 import org.example.operations.*;
 import org.example.response.BotResponse;
 import org.example.service.StateService;
@@ -24,7 +25,7 @@ public class MessageHandler {
     private final StateService stateService;
 
     public MessageHandler(List<OperationHandler> operationHandlers,
-                          StateService stateService){
+                          StateService stateService) {
         this.handlers = operationHandlers.stream()
                 .collect(Collectors.toMap(
                         OperationHandler::getSupportedOperation,
@@ -48,17 +49,21 @@ public class MessageHandler {
      * Из callBackData достаёт, какую Operation нужно выставить как текущую, а также
      * контекст для этой операции. После этого вызывает обработку сообщения в
      * handleMessage()
+     *
      * @param callbackData текст, скрытно хранящийся в inline-кнопке, необходимый для
-     * обработки действий при нажатии на эту кнопку
+     *                     обработки действий при нажатии на эту кнопку
      */
     public BotResponse handleInlineButtonActivated(Long chatId, String callbackData) {
         if (callbackData.startsWith("CURRENT_CONTACT_MENU_")) {
-            stateService.changeCurrentOperation(chatId,
-                    Operation.CURRENT_CONTACT_MENU,
-                    true);
+            stateService.changeCurrentOperation(chatId, Operation.CURRENT_CONTACT_MENU);
             String contactName = callbackData.substring("CURRENT_CONTACT_MENU_".length());
             stateService.addParameter(chatId, "currentContactName", contactName);
-            return handleMessage(chatId, "Меню пользователя вызвано");
+            return handleMessage(chatId, UserCommandConstants.CONTACT_MENU);
+        } else if (callbackData.startsWith("CURRENT_GROUP_MENU_")) {
+            stateService.changeCurrentOperation(chatId, Operation.CURRENT_GROUP_MENU);
+            String groupName = callbackData.substring("CURRENT_GROUP_MENU_".length());
+            stateService.addParameter(chatId, "currentGroupName", groupName);
+            return handleMessage(chatId, UserCommandConstants.GROUP_MENU);
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }

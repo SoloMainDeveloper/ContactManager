@@ -1,8 +1,10 @@
-package org.example;
+package org.example.contact;
 
+import org.example.MessageHandler;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.*;
+import org.example.operations.contact.*;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
 import org.example.service.StateService;
@@ -14,9 +16,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Тестируем обработчик сообщений
+ * Тестируем обработчики сообщений, взаимодействующие с контактами
  */
-class MessageHandlerTest {
+class ContactMessageHandlerTest {
     /**
      * Фейковый контакт-репозиторий для тестов
      */
@@ -35,7 +37,7 @@ class MessageHandlerTest {
     /**
      * ChatId пользователя
      */
-    public final Long chatId = 123245663L;
+    private static final Long chatId = 123245663L;
 
     /**
      * Инициализируем фейковый репозиторий, чтобы не работать напрямую с БД.
@@ -201,7 +203,7 @@ class MessageHandlerTest {
         );
 
         List<Contact> contactsByNumber = contactService
-                .findContactByNumber(chatId, "1234567890");
+                .findContactsByNumber(chatId, "1234567890");
         Assertions.assertTrue(contactsByNumber.isEmpty());
 
         Contact updatedContact = contactService
@@ -252,14 +254,14 @@ class MessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "5236790");
 
         Assertions.assertEquals(
-                "По номеру 5236790 контакт успешно найден.",
+                "По номеру 5236790 контакты успешно найдены.",
                 response.getText()
         );
         Assertions.assertEquals(
                 List.of("Алексей"),
                 response.getInlineKeyboardText().inlineText()
         );
-        Contact contact = contactService.findContactByNumber(chatId, "5236790").getFirst();
+        Contact contact = contactService.findContactsByNumber(chatId, "5236790").getFirst();
         Assertions.assertNotNull(contact);
     }
 
