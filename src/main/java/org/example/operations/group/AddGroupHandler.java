@@ -1,10 +1,11 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.exceptions.GroupAlreadyExistsException;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
@@ -68,11 +69,11 @@ public class AddGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Добавить контакт" -> {
+            case UserCommandConstants.ADD_CONTACT_TO_GROUP -> {
                 response.setText("Введите имя контакта для добавления в группу");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_TO_ADD);
             }
-            case "Сохранить группу" -> {
+            case UserCommandConstants.SAVE_GROUP -> {
                 try {
                     Group newGroup = (Group) stateService.getParamByKey(
                             chatId, NEW_GROUP);
@@ -88,7 +89,7 @@ public class AddGroupHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);

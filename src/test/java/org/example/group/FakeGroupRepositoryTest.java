@@ -68,7 +68,7 @@ class FakeGroupRepositoryTest {
             fakeGroupRepository.add(group);
         }
         List<Group> groupsFound = fakeGroupRepository.findGroupsByChatId(chatId,
-                GroupOrder.none());
+                new GroupOrder());
         Assertions.assertEquals(3, groupsFound.size());
         Assertions.assertEquals("Боевые", groupsFound.get(0).getName());
         Assertions.assertEquals("Августы", groupsFound.get(1).getName());

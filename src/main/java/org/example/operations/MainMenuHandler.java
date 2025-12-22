@@ -1,8 +1,9 @@
 package org.example.operations;
 
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.stereotype.Component;
@@ -37,13 +38,13 @@ public class MainMenuHandler implements OperationHandler {
                 response.setText("Привет! Я бот для управления контактами.");
                 response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
-            case "Контакты" -> {
+            case UserCommandConstants.CONTACTS -> {
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Взаимодействие с контактами. Выберите какое"
                         + " действие хотите совершить");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
-            case "Группы" -> {
+            case UserCommandConstants.GROUPS -> {
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setText("Взаимодействие с группами. Выберите какое"
                         + " действие хотите совершить");

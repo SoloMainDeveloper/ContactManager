@@ -1,9 +1,10 @@
 package org.example.operations.contact;
 
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
 import org.example.state.Operation;
@@ -41,7 +42,7 @@ public class DeleteContactHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Да" -> {
+            case UserCommandConstants.YES -> {
                 String contactName = (String) stateService.getParamByKey(chatId,
                         "currentContactName");
                 contactService.deleteByName(chatId, contactName);
@@ -49,7 +50,7 @@ public class DeleteContactHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             }
-            case "Нет" -> {
+            case UserCommandConstants.NO -> {
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Действие удаления текущего контакта отменено");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

@@ -1,8 +1,9 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.exceptions.GroupDoesNotExistException;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.GroupService;
@@ -42,7 +43,7 @@ public class DeleteGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Да" -> {
+            case UserCommandConstants.YES -> {
                 try {
                     String contactName = (String) stateService.getParamByKey(chatId,
                             "currentGroupName");
@@ -55,7 +56,7 @@ public class DeleteGroupHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
             }
-            case "Нет" -> {
+            case UserCommandConstants.NO -> {
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setText("Действие удаления текущей группы отменено");
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);

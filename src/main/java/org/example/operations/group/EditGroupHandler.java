@@ -1,11 +1,12 @@
 package org.example.operations.group;
 
+import org.example.constants.UserCommandConstants;
 import org.example.entity.Contact;
 import org.example.entity.Group;
 import org.example.exceptions.GroupDoesNotExistException;
 import org.example.exceptions.GroupEditException;
-import org.example.keyboardcreator.ReplyConstants;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
@@ -78,21 +79,21 @@ public class EditGroupHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Изменить имя группы" -> {
+            case UserCommandConstants.CHANGE_GROUP_NAME -> {
                 response.setText("Введите новое имя группы");
                 stateService.setLastRequestedParamKey(chatId, NEW_NAME);
             }
-            case "Удалить контакт из группы" -> {
+            case UserCommandConstants.DELETE_CONTACT_FROM_GROUP -> {
                 response.setText("Введите имя контакта, " +
                         "который вы хотите удалить из группы");
                 stateService.setLastRequestedParamKey(chatId, DELETE_CONTACT);
             }
-            case "Добавить контакт в группу" -> {
+            case UserCommandConstants.ADD_CONTACT_TO_GROUP -> {
                 response.setText("Введите имя контакта, " +
                         "который вы хотите добавить в группу");
                 stateService.setLastRequestedParamKey(chatId, ADD_CONTACT);
             }
-            case "Сохранить группу" -> {
+            case UserCommandConstants.SAVE_GROUP -> {
                 try {
                     applyChangesForGroup(chatId);
                     response.setText("Группа успешно отредактирована и сохранена");
@@ -103,7 +104,7 @@ public class EditGroupHandler implements OperationHandler {
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CURRENT_GROUP_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CURRENT_GROUP_MENU);
@@ -135,7 +136,7 @@ public class EditGroupHandler implements OperationHandler {
      */
     private BotResponse handleRenameGroup(Long chatId, String newName) {
         BotResponse response = new BotResponse();
-        List<Group> groups = groupService.findGroupsByChatId(chatId, GroupOrder.none());
+        List<Group> groups = groupService.findGroupsByChatId(chatId, new GroupOrder());
         List<String> groupNames = groups.stream().map(Group::getName).toList();
         if (groupNames.contains(newName)) {
             response.setText("Группа с таким именем уже существует, попробуйте еще раз");

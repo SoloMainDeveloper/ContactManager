@@ -1,11 +1,12 @@
 package org.example.operations.contact;
 
-import org.example.keyboardcreator.ReplyConstants;
+import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
+import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
 import org.example.keyboardcreator.InlineKeyboardCreator;
-import org.example.keyboardcreator.ReplyKeyboardConstants;
+import org.example.constants.ReplyKeyboardConstants;
 import org.example.entity.Contact;
 import org.example.service.ContactService;
 import org.example.service.StateService;
@@ -62,15 +63,15 @@ public class FindContactHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Поиск по имени" -> {
+            case UserCommandConstants.FIND_BY_NAME -> {
                 response.setText("Введите имя");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_NAME);
             }
-            case "Поиск по номеру" -> {
+            case UserCommandConstants.FIND_BY_NUMBER -> {
                 response.setText("Введите номер");
                 stateService.setLastRequestedParamKey(chatId, CONTACT_NUMBER);
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 response.setText(ReplyConstants.COME_BACK);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
