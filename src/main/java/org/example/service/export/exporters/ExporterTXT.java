@@ -19,7 +19,7 @@ public class ExporterTXT implements Exporter {
             content.append(convertToTxtFormat(contact));
         }
         String fileNameWithFormat = String.format("%s.%s",
-                fileName, getSupportedFormat());
+            fileName, getSupportedFormat());
         return new AppDocument(fileNameWithFormat, content.toString());
     }
 
@@ -30,14 +30,14 @@ public class ExporterTXT implements Exporter {
         ContactDto dto = new ContactDto(contact);
 
         return String.format("""
-                    Имя контакта: %s
-                    Номер телефона: %s
-                    Возраст: %s
-                    Пол: %s
-                    Блокировка: %s
-                    
-                    """, dto.getName(), dto.getPhoneNumber(),
-                dto.getAge(), dto.getGender(), dto.getIsBlocked());
+                Имя контакта: %s
+                Номер телефона: %s
+                Возраст: %s
+                Пол: %s
+                Блокировка: %s
+                
+                """, dto.getName(), dto.getPhoneNumber(),
+            dto.getAge(), dto.getGender(), dto.getIsBlocked());
     }
 
     @Override

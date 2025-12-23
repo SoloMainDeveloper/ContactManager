@@ -26,9 +26,6 @@ public class DeleteGroupHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public DeleteGroupHandler(GroupService groupService, StateService stateService) {
         this.groupService = groupService;
         this.stateService = stateService;
@@ -46,7 +43,7 @@ public class DeleteGroupHandler implements OperationHandler {
             case UserCommandConstants.YES -> {
                 try {
                     String contactName = (String) stateService.getParamByKey(chatId,
-                            "currentGroupName");
+                        "currentGroupName");
                     groupService.deleteGroupByName(chatId, contactName);
                     response.setText("Группа " + contactName + " успешно удалена");
                 } catch (GroupDoesNotExistException e) {

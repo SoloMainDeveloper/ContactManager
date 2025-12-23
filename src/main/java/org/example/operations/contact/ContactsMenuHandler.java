@@ -19,9 +19,6 @@ public class ContactsMenuHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public ContactsMenuHandler(StateService stateService) {
         this.stateService = stateService;
     }
@@ -43,7 +40,7 @@ public class ContactsMenuHandler implements OperationHandler {
             case UserCommandConstants.GET_ALL -> {
                 stateService.changeCurrentOperation(chatId, Operation.GET_ALL_CONTACTS);
                 response.setText("Желаете получить все контакты сразу или добавить" +
-                        " фильтрацию/сортировку?");
+                    " фильтрацию/сортировку?");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_CONTACTS_MENU);
             }
             case UserCommandConstants.FIND -> {

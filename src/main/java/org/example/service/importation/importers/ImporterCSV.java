@@ -17,11 +17,11 @@ import java.util.Objects;
 public class ImporterCSV implements Importer {
     @Override
     public List<Contact> importContacts(String content)
-            throws IncorrectImportDataException {
+        throws IncorrectImportDataException {
         try {
             List<Contact> contacts = new ArrayList<>();
             List<String> contactLines = List.of(content.split("\n"));
-            for(int i = 1; i < contactLines.size(); i++) {
+            for (int i = 1; i < contactLines.size(); i++) {
                 contacts.add(convertFromCsvFormat(contactLines.get(i)));
             }
             return contacts;
@@ -37,20 +37,20 @@ public class ImporterCSV implements Importer {
         List<String> contactFields = List.of(csvContact.split(","));
 
         String phoneNumber = contactFields.get(1).equals(ReplyConstants.NOT_SPECIFIED)
-                ? ""
-                : contactFields.get(1);
+            ? ""
+            : contactFields.get(1);
         int age = contactFields.get(2).equals(ReplyConstants.NOT_SPECIFIED)
-                ? -1
-                : Integer.parseInt(contactFields.get(2));
+            ? -1
+            : Integer.parseInt(contactFields.get(2));
 
         Contact contact = new Contact();
         contact.setName(contactFields.get(0));
         contact.setPhoneNumber(phoneNumber);
         contact.setAge(age);
         contact.setGender(Gender.fromDisplayName(
-                contactFields.get(3)));
+            contactFields.get(3)));
         contact.setBlocked(Objects.equals(
-                contactFields.get(4), ReplyConstants.BLOCKED));
+            contactFields.get(4), ReplyConstants.BLOCKED));
         return contact;
     }
 

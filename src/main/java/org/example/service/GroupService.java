@@ -30,17 +30,17 @@ public class GroupService {
      * Попытаться добавить группу
      *
      * @param chatId идентификатор чата
-     * @param group добавляемая группы
+     * @param group  добавляемая группы
      * @throws GroupAlreadyExistsException если группа уже существует
      */
     public void tryAddGroup(Long chatId, Group group)
-            throws GroupAlreadyExistsException {
+        throws GroupAlreadyExistsException {
         String groupName = group.getName();
         if (findGroupByName(chatId, groupName).isEmpty()) {
             repository.add(group);
         } else {
             throw new GroupAlreadyExistsException(
-                    "Группа %s уже существует".formatted(groupName));
+                "Группа %s уже существует".formatted(groupName));
         }
     }
 
@@ -61,16 +61,16 @@ public class GroupService {
     /**
      * Попытаться обновить группу
      *
-     * @param chatId  идентификатор чата
+     * @param chatId      идентификатор чата
      * @param currentName имя группы до обновления
-     * @param group обновляемая группа
+     * @param group       обновляемая группа
      * @throws GroupDoesNotExistException если группа не существует
      */
     public void tryUpdateGroup(Long chatId, String currentName, Group group)
-            throws GroupDoesNotExistException {
+        throws GroupDoesNotExistException {
         findGroupByName(chatId, currentName).orElseThrow(() ->
-                new GroupDoesNotExistException(
-                        "Группа %s не существует".formatted(currentName)));
+            new GroupDoesNotExistException(
+                "Группа %s не существует".formatted(currentName)));
         repository.update(currentName, group);
     }
 
@@ -78,12 +78,12 @@ public class GroupService {
      * Удалить группу по имени
      */
     public void deleteGroupByName(Long chatId, String groupName)
-            throws GroupDoesNotExistException {
+        throws GroupDoesNotExistException {
         if (repository.findGroupByName(groupName, chatId).isPresent()) {
             repository.deleteByName(groupName, chatId);
         } else {
             throw new GroupDoesNotExistException(
-                    "Группа %s не существует".formatted(groupName));
+                "Группа %s не существует".formatted(groupName));
         }
     }
 }

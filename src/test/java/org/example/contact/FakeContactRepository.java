@@ -30,12 +30,12 @@ public class FakeContactRepository implements IContactRepository {
     @Override
     public void add(Contact contact) {
         Long chatId = contact.getChatId();
-        if(!contacts.containsKey(chatId)){
+        if (!contacts.containsKey(chatId)) {
             contacts.put(chatId, new LinkedHashMap<>());
         }
         Contact contactWithId = new Contact(counter, contact.getChatId(),
-                contact.getName(), contact.getPhoneNumber(), contact.getAge(),
-                contact.getGender(), contact.isBlocked());
+            contact.getName(), contact.getPhoneNumber(), contact.getAge(),
+            contact.getGender(), contact.isBlocked());
         contacts.get(chatId).put(contact.getName(), contactWithId);
         counter++;
     }
@@ -44,17 +44,17 @@ public class FakeContactRepository implements IContactRepository {
     public Optional<Contact> findContactById(Long contactId, Long chatId) {
         Map<String, Contact> currentContacts = contacts.get(chatId);
         return currentContacts.values().stream()
-                .filter(contact ->
-                        contact.getId() != null && contact.getId().equals(contactId))
-                .findFirst();
+            .filter(contact ->
+                contact.getId() != null && contact.getId().equals(contactId))
+            .findFirst();
     }
 
     @Override
     public Optional<Contact> findContactByName(String name, Long chatId) {
         Map<String, Contact> currentContacts = contacts.get(chatId);
         return currentContacts == null ||
-                currentContacts.isEmpty() ||
-                currentContacts.get(name) == null
+            currentContacts.isEmpty() ||
+            currentContacts.get(name) == null
             ? Optional.empty()
             : Optional.of(currentContacts.get(name));
     }
@@ -63,7 +63,7 @@ public class FakeContactRepository implements IContactRepository {
     public List<Contact> findContactsByNumber(String number, Long chatId) {
         Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
         List<Contact> contacts = new ArrayList<>();
-        if(currentChatIdContacts != null) {
+        if (currentChatIdContacts != null) {
             for (Contact current : currentChatIdContacts.values()) {
                 if (Objects.equals(current.getPhoneNumber(), number)) {
                     contacts.add(current);
@@ -123,14 +123,14 @@ public class FakeContactRepository implements IContactRepository {
      */
     private List<Contact> getContactsAfterSorting(List<Contact> contacts, ContactOrder order) {
         List<Contact> sortedContacts = new ArrayList<>(contacts);
-        if(order.getProperty() == ContactOrder.OrderProperty.AGE) {
+        if (order.getProperty() == ContactOrder.OrderProperty.AGE) {
             switch (order.getDirection()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge));
                 case DESC -> sortedContacts
                     .sort(Comparator.comparingInt(Contact::getAge).reversed());
             }
-        } else if(order.getProperty() == ContactOrder.OrderProperty.NAME) {
+        } else if (order.getProperty() == ContactOrder.OrderProperty.NAME) {
             switch (order.getDirection()) {
                 case ASC -> sortedContacts
                     .sort(Comparator.comparing(Contact::getName));
@@ -150,7 +150,7 @@ public class FakeContactRepository implements IContactRepository {
     @Override
     public void update(String currentName, Contact contact) {
         Map<String, Contact> currentChatIdContacts = contacts.get(contact.getChatId());
-        if(currentChatIdContacts != null) {
+        if (currentChatIdContacts != null) {
             currentChatIdContacts.put(contact.getName(), contact);
         }
     }
@@ -158,7 +158,7 @@ public class FakeContactRepository implements IContactRepository {
     @Override
     public void deleteByName(String name, Long chatId) {
         Map<String, Contact> currentChatIdContacts = contacts.get(chatId);
-        if(currentChatIdContacts == null) {
+        if (currentChatIdContacts == null) {
             return;
         }
         currentChatIdContacts.remove(name);

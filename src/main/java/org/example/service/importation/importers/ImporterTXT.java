@@ -18,14 +18,14 @@ import java.util.Objects;
 public class ImporterTXT implements Importer {
     @Override
     public List<Contact> importContacts(String content)
-            throws IncorrectImportDataException {
+        throws IncorrectImportDataException {
         try {
             List<Contact> contacts = new ArrayList<>();
             String[] blocks = content.split("\\n\\s*\\n+");
             List<String> txtContacts = Arrays.stream(blocks)
-                    .filter(block -> !block.trim().isEmpty())
-                    .toList();
-            for(String contact : txtContacts) {
+                .filter(block -> !block.trim().isEmpty())
+                .toList();
+            for (String contact : txtContacts) {
                 contacts.add(convertFromTxtFormat(contact));
             }
             return contacts;
@@ -47,21 +47,21 @@ public class ImporterTXT implements Importer {
         List<String> isBlockedLine = List.of(contactFields.get(4).split(":"));
 
         String phoneNumber = phoneNumberLine.getLast().trim()
-                .equals(ReplyConstants.NOT_SPECIFIED)
-                ? ""
-                : phoneNumberLine.getLast().trim();
+            .equals(ReplyConstants.NOT_SPECIFIED)
+            ? ""
+            : phoneNumberLine.getLast().trim();
         int age = ageLine.getLast().trim().equals(ReplyConstants.NOT_SPECIFIED)
-                ? -1
-                : Integer.parseInt(ageLine.getLast().trim());
+            ? -1
+            : Integer.parseInt(ageLine.getLast().trim());
 
         Contact contact = new Contact();
         contact.setName(nameLine.getLast().trim());
         contact.setPhoneNumber(phoneNumber);
         contact.setAge(age);
         contact.setGender(Gender.fromDisplayName(
-                genderLine.getLast().trim()));
+            genderLine.getLast().trim()));
         contact.setBlocked(Objects.equals(
-                isBlockedLine.getLast().trim(), ReplyConstants.BLOCKED));
+            isBlockedLine.getLast().trim(), ReplyConstants.BLOCKED));
         return contact;
     }
 

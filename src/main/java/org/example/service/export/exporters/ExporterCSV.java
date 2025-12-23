@@ -17,11 +17,11 @@ public class ExporterCSV implements Exporter {
         StringBuilder content = new StringBuilder();
         content.append("\uFEFF");
         content.append("name,phone,age,gender,isBlocked\n");
-        for(Contact contact : contacts) {
+        for (Contact contact : contacts) {
             content.append(convertToCsvFormat(contact));
         }
         String fileNameWithFormat = String.format("%s.%s",
-                fileName, getSupportedFormat());
+            fileName, getSupportedFormat());
         return new AppDocument(fileNameWithFormat, content.toString());
     }
 
@@ -32,7 +32,7 @@ public class ExporterCSV implements Exporter {
         ContactDto dto = new ContactDto(contact);
 
         return String.format("%s,%s,%s,%s,%s\n", dto.getName(), dto.getPhoneNumber(),
-                dto.getAge(), dto.getGender(), dto.getIsBlocked());
+            dto.getAge(), dto.getGender(), dto.getIsBlocked());
     }
 
     @Override

@@ -36,12 +36,9 @@ public class ImportHandler implements OperationHandler {
      */
     private final ContactService contactService;
 
-    /**
-     * Конструктор
-     */
     @Autowired
     public ImportHandler(StateService stateService, ImportService importService,
-                         ContactService contactService){
+                         ContactService contactService) {
         this.stateService = stateService;
         this.importService = importService;
         this.contactService = contactService;
@@ -59,7 +56,7 @@ public class ImportHandler implements OperationHandler {
         try {
             String fileName = (String) stateService.getParamByKey(chatId, "fileName");
             contacts = importService.importContacts(
-                    new AppDocument(fileName, messageText));
+                new AppDocument(fileName, messageText));
         } catch (ImportException e) {
             e.printStackTrace();
             response.setText("Произошла ошибка при импорте: " + e.getMessage());
@@ -70,7 +67,7 @@ public class ImportHandler implements OperationHandler {
 
         StringBuilder responseText = new StringBuilder();
         int counter = 0;
-        for(Contact contact : contacts) {
+        for (Contact contact : contacts) {
             try {
                 contactService.tryAddContact(chatId, contact);
                 counter++;
@@ -79,7 +76,7 @@ public class ImportHandler implements OperationHandler {
             }
         }
         responseText.append("Импорт контактов закончен, добавилось %d из %d"
-                .formatted(counter, contacts.size()));
+            .formatted(counter, contacts.size()));
 
         response.setText(responseText.toString());
         response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);

@@ -21,7 +21,7 @@ public class ExporterJSON implements Exporter {
             content.put(convertToJsonFormat(contact));
         }
         String fileNameWithFormat = String.format("%s.%s",
-                fileName, getSupportedFormat());
+            fileName, getSupportedFormat());
         return new AppDocument(fileNameWithFormat, content.toString());
     }
 

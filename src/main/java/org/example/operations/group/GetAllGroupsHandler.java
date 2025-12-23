@@ -31,9 +31,6 @@ public class GetAllGroupsHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public GetAllGroupsHandler(GroupService groupService, StateService stateService) {
         this.groupService = groupService;
         this.stateService = stateService;
@@ -55,11 +52,11 @@ public class GetAllGroupsHandler implements OperationHandler {
                     response.setText("У вас пока нет созданных групп");
                 } else {
                     List<String> groupNames = groups.stream()
-                            .map(Group::getName)
-                            .toList();
+                        .map(Group::getName)
+                        .toList();
                     response.setText("Все ваши группы:");
                     response.setInlineKeyboardText(new InlineKeyboardText(
-                            groupNames, Operation.CURRENT_GROUP_MENU.name()));
+                        groupNames, Operation.CURRENT_GROUP_MENU.name()));
                 }
             }
             case UserCommandConstants.SORT -> {
@@ -82,9 +79,11 @@ public class GetAllGroupsHandler implements OperationHandler {
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         if (Objects.equals(messageText, UserCommandConstants.ORDER_BY_NAME_ASC) ||
-                Objects.equals(messageText, UserCommandConstants.ORDER_BY_NAME_DESC) ||
-                Objects.equals(messageText, UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_DESC) ||
-                Objects.equals(messageText, UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_ASC)) {
+            Objects.equals(messageText, UserCommandConstants.ORDER_BY_NAME_DESC) ||
+            Objects.equals(messageText,
+                UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_DESC) ||
+            Objects.equals(messageText,
+                UserCommandConstants.ORDER_BY_PARTICIPANTS_COUNT_ASC)) {
             response.setText("Отлично. Выбрана следующая сортировка: " + messageText);
             GroupOrder order = createOrderFromMessageText(messageText);
             List<Group> groups = groupService.findGroupsByChatId(chatId, order);
@@ -94,10 +93,10 @@ public class GetAllGroupsHandler implements OperationHandler {
             } else {
                 response.setText("Все группы с выбранной сортировкой:");
                 List<String> names = groups.stream()
-                        .map(Group::getName)
-                        .toList();
+                    .map(Group::getName)
+                    .toList();
                 response.setInlineKeyboardText(new InlineKeyboardText(
-                        names, Operation.CURRENT_GROUP_MENU.toString()));
+                    names, Operation.CURRENT_GROUP_MENU.toString()));
             }
         } else if (Objects.equals(messageText, "Назад к выбору")) {
             response.setText(ReplyConstants.COME_BACK);

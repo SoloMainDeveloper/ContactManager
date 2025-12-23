@@ -50,9 +50,6 @@ public class AddGroupHandler implements OperationHandler {
      */
     private static final String CONTACT_TO_ADD = "contactToAdd";
 
-    /**
-     * Конструктор
-     */
     public AddGroupHandler(GroupService groupService, ContactService contactService,
                            StateService stateService) {
         this.groupService = groupService;
@@ -76,15 +73,15 @@ public class AddGroupHandler implements OperationHandler {
             case UserCommandConstants.SAVE_GROUP -> {
                 try {
                     Group newGroup = (Group) stateService.getParamByKey(
-                            chatId, NEW_GROUP);
+                        chatId, NEW_GROUP);
                     groupService.tryAddGroup(chatId, newGroup);
                     response.setText(
-                            "Группа " + newGroup.getName() + " успешна сохранена");
+                        "Группа " + newGroup.getName() + " успешна сохранена");
                     response.setKeyboardText(ReplyKeyboardConstants.ADD_GROUP_MENU);
-                } catch (GroupAlreadyExistsException  e) {
+                } catch (GroupAlreadyExistsException e) {
                     e.printStackTrace();
                     response.setText(
-                            "Произошла ошибка при добавлении группы: " + e.getMessage());
+                        "Произошла ошибка при добавлении группы: " + e.getMessage());
                 }
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
@@ -132,8 +129,8 @@ public class AddGroupHandler implements OperationHandler {
     private BotResponse handleContactToAddMessage(Long chatId, String contactName) {
         BotResponse response = new BotResponse();
         Optional<Contact> optionalContact = contactService
-                .findContactByName(chatId, contactName);
-        if(optionalContact.isEmpty()) {
+            .findContactByName(chatId, contactName);
+        if (optionalContact.isEmpty()) {
             response.setText("Контакт " + contactName + " не был найден.");
             return response;
         }
@@ -154,7 +151,7 @@ public class AddGroupHandler implements OperationHandler {
         } else {
             group.addContact(contact);
             response.setText("Контакт " + contactName + " успешно добавлен в " +
-                    "группу. Желаете добавить ещё контактов в группу?");
+                "группу. Желаете добавить ещё контактов в группу?");
         }
         return response;
     }

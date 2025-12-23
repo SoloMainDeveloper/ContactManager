@@ -36,16 +36,16 @@ public class GroupRepository implements IGroupRepository {
     @Override
     public void add(Group group) {
         String addGroupSql = "INSERT INTO public.groups " +
-                "(chat_id, name) VALUES (:chatId, :name) RETURNING id";
+            "(chat_id, name) VALUES (:chatId, :name) RETURNING id";
 
         MapSqlParameterSource groupParams = new MapSqlParameterSource()
-                .addValue("chatId", group.getChatId())
-                .addValue("name", group.getName());
+            .addValue("chatId", group.getChatId())
+            .addValue("name", group.getName());
 
         Long groupId = jdbcTemplate.queryForObject(
-                addGroupSql,
-                groupParams,
-                Long.class
+            addGroupSql,
+            groupParams,
+            Long.class
         );
         group.setId(groupId);
 
@@ -58,14 +58,14 @@ public class GroupRepository implements IGroupRepository {
      */
     private void addRelationsBetweenGroupAndContacts(Group group) {
         List<Contact> contacts = group.getContacts();
-        if(!contacts.isEmpty()) {
+        if (!contacts.isEmpty()) {
             String addRelationSql = "INSERT INTO public.contact_groups " +
-                    "(contact_id, group_id) VALUES (:contactId, :groupId)";
+                "(contact_id, group_id) VALUES (:contactId, :groupId)";
 
             for (Contact contact : contacts) {
                 MapSqlParameterSource relationParams = new MapSqlParameterSource()
-                        .addValue("contactId", contact.getId())
-                        .addValue("groupId", group.getId());
+                    .addValue("contactId", contact.getId())
+                    .addValue("groupId", group.getId());
 
                 jdbcTemplate.update(addRelationSql, relationParams);
             }
@@ -75,16 +75,16 @@ public class GroupRepository implements IGroupRepository {
     @Override
     public Optional<Group> findGroupByName(String name, Long chatId) {
         String sql = "SELECT * FROM public.groups " +
-                "WHERE chat_id = :chatId and name = :name";
+            "WHERE chat_id = :chatId and name = :name";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
-                .addValue("name", name);
+            .addValue("chatId", chatId)
+            .addValue("name", name);
 
         try {
             Group group = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
-            if(group != null) {
+                (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
+            if (group != null) {
                 loadContactsIntoGroup(group);
             }
             return Optional.ofNullable(group);
@@ -103,22 +103,22 @@ public class GroupRepository implements IGroupRepository {
     public List<Group> findGroupsByChatId(Long chatId, GroupOrder order) {
         String orderBy = getSqlForOrder(order);
         String sql = """
-        SELECT groups.id, groups.chat_id, groups.name,
-            COUNT(contact_groups.contact_id) as count
-        FROM public.groups AS groups
-        LEFT JOIN public.contact_groups AS contact_groups
-            ON groups.id = contact_groups.group_id
-        WHERE groups.chat_id = :chatId
-        GROUP BY groups.id, groups.chat_id, groups.name
-        """ + orderBy;
+            SELECT groups.id, groups.chat_id, groups.name,
+                COUNT(contact_groups.contact_id) as count
+            FROM public.groups AS groups
+            LEFT JOIN public.contact_groups AS contact_groups
+                ON groups.id = contact_groups.group_id
+            WHERE groups.chat_id = :chatId
+            GROUP BY groups.id, groups.chat_id, groups.name
+            """ + orderBy;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId);
+            .addValue("chatId", chatId);
 
         try {
             List<Group> groups = jdbcTemplate.query(sql, params,
-                    (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
-            for(Group group : groups) {
+                (resultSet, rowNum) -> resultSetToGroupEntity(resultSet));
+            for (Group group : groups) {
                 loadContactsIntoGroup(group);
             }
             return groups;
@@ -157,12 +157,12 @@ public class GroupRepository implements IGroupRepository {
     @Override
     public void update(String currentName, Group group) {
         String updateGroupSql = "UPDATE public.groups SET name = :newName " +
-                "WHERE chat_id = :chatId and name = :oldName RETURNING id";
+            "WHERE chat_id = :chatId and name = :oldName RETURNING id";
 
         MapSqlParameterSource groupParams = new MapSqlParameterSource()
-                .addValue("chatId", group.getChatId())
-                .addValue("oldName", currentName)
-                .addValue("newName", group.getName());
+            .addValue("chatId", group.getChatId())
+            .addValue("oldName", currentName)
+            .addValue("newName", group.getName());
 
         jdbcTemplate.update(updateGroupSql, groupParams);
 
@@ -175,10 +175,10 @@ public class GroupRepository implements IGroupRepository {
      */
     private void updateRelationsBetweenGroupAndContacts(Group group) {
         String deleteRelationsSql = "DELETE FROM public.contact_groups " +
-                "WHERE group_id = :groupId";
+            "WHERE group_id = :groupId";
 
         jdbcTemplate.update(deleteRelationsSql,
-                new MapSqlParameterSource("groupId", group.getId()));
+            new MapSqlParameterSource("groupId", group.getId()));
 
         addRelationsBetweenGroupAndContacts(group);
     }
@@ -186,11 +186,11 @@ public class GroupRepository implements IGroupRepository {
     @Override
     public void deleteByName(String name, Long chatId) {
         String sql = "DELETE FROM public.groups " +
-                "WHERE chat_id = :chatId and name = :name";
+            "WHERE chat_id = :chatId and name = :name";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
-                .addValue("name", name);
+            .addValue("chatId", chatId)
+            .addValue("name", name);
 
         jdbcTemplate.update(sql, params);
     }
@@ -200,9 +200,9 @@ public class GroupRepository implements IGroupRepository {
      */
     private Group resultSetToGroupEntity(ResultSet resultSet) throws SQLException {
         return new Group(
-                resultSet.getLong("id"),
-                resultSet.getLong("chat_id"),
-                resultSet.getString("name")
+            resultSet.getLong("id"),
+            resultSet.getLong("chat_id"),
+            resultSet.getString("name")
         );
     }
 }

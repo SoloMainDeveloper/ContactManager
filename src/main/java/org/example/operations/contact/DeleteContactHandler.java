@@ -25,10 +25,8 @@ public class DeleteContactHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
-    public DeleteContactHandler(ContactService contactService, StateService stateService) {
+    public DeleteContactHandler(ContactService contactService,
+                                StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
     }
@@ -44,7 +42,7 @@ public class DeleteContactHandler implements OperationHandler {
         switch (messageText) {
             case UserCommandConstants.YES -> {
                 String contactName = (String) stateService.getParamByKey(chatId,
-                        "currentContactName");
+                    "currentContactName");
                 contactService.deleteByName(chatId, contactName);
                 response.setText("Контакт " + contactName + " успешно удален");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);

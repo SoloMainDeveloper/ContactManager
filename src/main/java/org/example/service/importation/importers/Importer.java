@@ -11,9 +11,10 @@ import java.util.List;
 public interface Importer {
     /**
      * Импортирует контакты из файла
+     *
      * @param content содержимое файла
-     * @throws IncorrectImportDataException если
-     * содержимое не соответствует виду запрашиваемого dto
+     * @throws IncorrectImportDataException если содержимое
+     * не соответствует виду запрашиваемого dto
      */
     List<Contact> importContacts(String content) throws IncorrectImportDataException;
 

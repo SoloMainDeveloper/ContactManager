@@ -11,6 +11,7 @@ import java.util.List;
 public interface Exporter {
     /**
      * Экспортирует контакты в {@link AppDocument}
+     *
      * @return экспортируемый документ
      */
     AppDocument exportContacts(String fileName, List<Contact> contacts);

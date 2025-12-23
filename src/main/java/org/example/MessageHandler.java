@@ -27,10 +27,10 @@ public class MessageHandler {
     public MessageHandler(List<OperationHandler> operationHandlers,
                           StateService stateService) {
         this.handlers = operationHandlers.stream()
-                .collect(Collectors.toMap(
-                        OperationHandler::getSupportedOperation,
-                        Function.identity()
-                ));
+            .collect(Collectors.toMap(
+                OperationHandler::getSupportedOperation,
+                Function.identity()
+            ));
         this.stateService = stateService;
     }
 
@@ -72,7 +72,7 @@ public class MessageHandler {
      * Обработать сообщение, содержащее документ
      */
     public BotResponse handleMessageWithDocument(
-            Long chatId, String fileName, String content) {
+        Long chatId, String fileName, String content) {
         String lastRequestedParam = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParam == null) {
             return new BotResponse("Документ не был запрошен");

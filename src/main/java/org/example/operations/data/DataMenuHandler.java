@@ -29,11 +29,8 @@ public class DataMenuHandler implements OperationHandler {
      */
     private final ExportService exportService;
 
-    /**
-     * Конструктор
-     */
     @Autowired
-    public DataMenuHandler(StateService stateService, ExportService exportService){
+    public DataMenuHandler(StateService stateService, ExportService exportService) {
         this.stateService = stateService;
         this.exportService = exportService;
     }
@@ -56,9 +53,9 @@ public class DataMenuHandler implements OperationHandler {
                 stateService.changeCurrentOperation(chatId, Operation.EXPORT_CONTACTS);
                 response.setText("Выберите желаемый формат экспорта контактов");
                 List<String> keyboardText = new ArrayList<>(exportService
-                        .getSupportedFormats()
-                        .stream()
-                        .toList());
+                    .getSupportedFormats()
+                    .stream()
+                    .toList());
                 keyboardText.add(UserCommandConstants.BACK);
                 response.setKeyboardText(keyboardText);
                 stateService.setLastRequestedParamKey(chatId, "exportFormat");
