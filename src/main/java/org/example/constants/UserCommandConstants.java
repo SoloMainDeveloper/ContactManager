@@ -91,4 +91,8 @@ public class UserCommandConstants {
     public static final String CONTACT_MENU = "Меню контакта вызвано";
 
     public static final String GROUP_MENU = "Меню группы вызвано";
+
+    public static final String IMPORT_CONTACTS = "Импорт контактов";
+
+    public static final String EXPORT_CONTACTS = "Экспорт контактов";
 }

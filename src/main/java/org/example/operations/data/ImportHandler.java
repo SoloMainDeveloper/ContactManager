@@ -1,14 +1,14 @@
 package org.example.operations.data;
 
 import org.example.constants.ReplyKeyboardConstants;
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ContactAlreadyExistsException;
 import org.example.exceptions.ImportException;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
-import org.example.service.ImportService;
+import org.example.service.importation.ImportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class ImportHandler implements OperationHandler {
         }
 
         StringBuilder responseText = new StringBuilder();
-        Integer counter = 0;
+        int counter = 0;
         for(Contact contact : contacts) {
             try {
                 contactService.tryAddContact(chatId, contact);

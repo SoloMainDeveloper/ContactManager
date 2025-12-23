@@ -1,13 +1,14 @@
 package org.example.operations.data;
 
+import org.example.constants.ReplyConstants;
 import org.example.constants.ReplyKeyboardConstants;
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ExportException;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
-import org.example.service.ExportService;
+import org.example.service.export.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.example.utils.ContactFilter;
@@ -37,6 +38,10 @@ public class ExportHandler implements OperationHandler {
      */
     private final ContactService contactService;
 
+    private static final String EXPORT_FORMAT = "exportFormat";
+
+    private static final String EXPORT_FILE_NAME = "exportFileName";
+
     /**
      * Конструктор
      */
@@ -58,16 +63,16 @@ public class ExportHandler implements OperationHandler {
         BotResponse response = new BotResponse();
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
         if (lastRequestedParamKey == null) {
-            response.setText("Я не понимаю эту команду.");
+            response.setText(ReplyConstants.UNKNOWN_COMMAND);
             return response;
         }
         switch (lastRequestedParamKey) {
-            case "exportFormat" -> {
+            case EXPORT_FORMAT -> {
                 stateService.addParameter(chatId, lastRequestedParamKey, messageText);
                 response.setText("Введите имя экспортируемому файлу");
-                stateService.setLastRequestedParamKey(chatId, "exportFileName");
+                stateService.setLastRequestedParamKey(chatId, EXPORT_FILE_NAME);
             }
-            case "exportFileName" -> {
+            case EXPORT_FILE_NAME -> {
                 List<Contact> contacts = contactService.findContactsByChatId(
                     chatId, new ContactFilter(), new ContactOrder());
                 if(contacts.isEmpty()) {
@@ -79,7 +84,7 @@ public class ExportHandler implements OperationHandler {
 
                 try {
                     String format = (String) stateService
-                        .getParamByKey(chatId, "exportFormat");
+                        .getParamByKey(chatId, EXPORT_FORMAT);
                     AppDocument document = exportService
                             .exportContacts(messageText, format, contacts);
                     response.setDocument(document);
@@ -92,7 +97,7 @@ public class ExportHandler implements OperationHandler {
                 response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду.");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

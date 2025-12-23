@@ -1,10 +1,9 @@
-package org.example.service;
+package org.example.service.export;
 
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ExportException;
-import org.example.utils.exporters.Exporter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.service.export.exporters.Exporter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

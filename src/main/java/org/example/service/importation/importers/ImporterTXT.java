@@ -1,5 +1,6 @@
-package org.example.utils.importers;
+package org.example.service.importation.importers;
 
+import org.example.constants.ReplyConstants;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.exceptions.IncorrectImportDataException;
@@ -29,7 +30,7 @@ public class ImporterTXT implements Importer {
             }
             return contacts;
         } catch (Exception e) {
-            throw new IncorrectImportDataException("Некорректные данные");
+            throw new IncorrectImportDataException(ReplyConstants.INCORRECT_DATA);
         }
     }
 
@@ -45,10 +46,11 @@ public class ImporterTXT implements Importer {
         List<String> genderLine = List.of(contactFields.get(3).split(":"));
         List<String> isBlockedLine = List.of(contactFields.get(4).split(":"));
 
-        String phoneNumber = phoneNumberLine.getLast().trim().equals("Не указан")
+        String phoneNumber = phoneNumberLine.getLast().trim()
+                .equals(ReplyConstants.NOT_SPECIFIED)
                 ? ""
                 : phoneNumberLine.getLast().trim();
-        int age = ageLine.getLast().trim().equals("Не указан")
+        int age = ageLine.getLast().trim().equals(ReplyConstants.NOT_SPECIFIED)
                 ? -1
                 : Integer.parseInt(ageLine.getLast().trim());
 
@@ -59,7 +61,7 @@ public class ImporterTXT implements Importer {
         contact.setGender(Gender.fromDisplayName(
                 genderLine.getLast().trim()));
         contact.setBlocked(Objects.equals(
-                isBlockedLine.getLast().trim(), "Заблокирован"));
+                isBlockedLine.getLast().trim(), ReplyConstants.BLOCKED));
         return contact;
     }
 

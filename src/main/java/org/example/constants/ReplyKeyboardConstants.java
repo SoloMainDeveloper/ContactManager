@@ -141,5 +141,5 @@ public class ReplyKeyboardConstants {
      * Кнопки меню данных
      */
     public static final List<String> DATA_MENU = List.of(
-        "Импорт контактов", "Экспорт контактов", UserCommandConstants.BACK);
+        UserCommandConstants.IMPORT_CONTACTS, UserCommandConstants.EXPORT_CONTACTS, UserCommandConstants.BACK);
 }

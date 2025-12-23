@@ -68,6 +68,9 @@ public class MessageHandler {
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
     }
 
+    /**
+     * Обработать сообщение, содержащее документ
+     */
     public BotResponse handleMessageWithDocument(
             Long chatId, String fileName, String content) {
         String lastRequestedParam = stateService.getLastRequestedParamKey(chatId);

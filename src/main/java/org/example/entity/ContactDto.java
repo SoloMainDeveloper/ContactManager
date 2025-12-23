@@ -1,5 +1,7 @@
 package org.example.entity;
 
+import org.example.constants.ReplyConstants;
+
 /**
  * Dto класса {@link Contact}
  */
@@ -35,20 +37,15 @@ public class ContactDto {
     public ContactDto(Contact contact) {
         name = contact.getName();
         phoneNumber = contact.getPhoneNumber().isEmpty()
-                ? "Не указан"
+                ? ReplyConstants.NOT_SPECIFIED
                 : contact.getPhoneNumber();
-        gender = "";
-        switch (contact.getGender()){
-            case Gender.MALE -> gender = "Мужской";
-            case Gender.FEMALE -> gender = "Женский";
-            case Gender.NOT_SPECIFIED -> gender = "Не указан";
-        }
+        gender = contact.getGender().getDisplayName();
         age = contact.getAge() == -1
-                ? "Не указан"
+                ? ReplyConstants.NOT_SPECIFIED
                 : String.valueOf(contact.getAge());
         isBlocked = contact.isBlocked()
-                ? "Заблокирован"
-                : "Не заблокирован";
+                ? ReplyConstants.BLOCKED
+                : ReplyConstants.NOT_BLOCKED;
     }
 
     /**
