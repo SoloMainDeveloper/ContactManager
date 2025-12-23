@@ -30,19 +30,19 @@ public class ContactService {
     /**
      * Попытаться добавить контакт
      *
-     * @param chatId идентификатор чата пользователя
+     * @param chatId  идентификатор чата пользователя
      * @param contact добавляемый контакт
      * @throws ContactAlreadyExistsException если контакт уже существует
      */
     public void tryAddContact(Long chatId, Contact contact)
-            throws ContactAlreadyExistsException {
-
+        throws ContactAlreadyExistsException {
+        contact.setChatId(chatId);
         String contactName = contact.getName();
         if (findContactByName(chatId, contactName).isEmpty()) {
             repository.add(contact);
         } else {
             throw new ContactAlreadyExistsException(
-                    "Контакт %s уже существует".formatted(contactName));
+                "Контакт %s уже существует".formatted(contactName));
         }
     }
 
@@ -73,7 +73,7 @@ public class ContactService {
      * Возвращает все контакты, имеющееся у данного пользователя
      */
     public List<Contact> findContactsByChatId(
-            Long chatId, ContactFilter filter, ContactOrder order) {
+        Long chatId, ContactFilter filter, ContactOrder order) {
         return repository.findContactsByChatId(chatId, filter, order);
     }
 
@@ -89,16 +89,16 @@ public class ContactService {
     /**
      * Попытаться обновить все поля пользователя, кроме блокировки
      *
-     * @param chatId идентификатор чата пользователя
-     * @param name   имя контакта
+     * @param chatId  идентификатор чата пользователя
+     * @param name    имя контакта
      * @param contact обновляемый контакт
      * @throws ContactDoesNotExistException если контакт не существует
      */
     public void tryUpdateContact(Long chatId, String name, Contact contact)
-            throws ContactDoesNotExistException {
+        throws ContactDoesNotExistException {
         Optional<Contact> foundContact = findContactByName(chatId, name);
         foundContact.orElseThrow(() -> new ContactDoesNotExistException(
-                "Контакт %s не существует".formatted(name)));
+            "Контакт %s не существует".formatted(name)));
         repository.update(name, contact);
     }
 

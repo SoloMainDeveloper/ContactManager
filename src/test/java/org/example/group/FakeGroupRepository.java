@@ -37,14 +37,14 @@ public class FakeGroupRepository implements IGroupRepository {
      */
     private List<Group> getContactsAfterSorting(List<Group> groups, GroupOrder order) {
         List<Group> sortedGroups = new ArrayList<>(groups);
-        if(order.getProperty() == GroupOrder.OrderProperty.COUNT) {
+        if (order.getProperty() == GroupOrder.OrderProperty.COUNT) {
             switch (order.getDirection()) {
                 case ASC -> sortedGroups
                     .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()));
                 case DESC -> sortedGroups
                     .sort(Comparator.comparingInt((Group g) -> g.getContacts().size()).reversed());
             }
-        } else if(order.getProperty() == GroupOrder.OrderProperty.NAME) {
+        } else if (order.getProperty() == GroupOrder.OrderProperty.NAME) {
             switch (order.getDirection()) {
                 case ASC -> sortedGroups
                     .sort(Comparator.comparing(Group::getName));
@@ -72,7 +72,7 @@ public class FakeGroupRepository implements IGroupRepository {
      * её создаёт.
      */
     private Map<String, Group> getOrCreateGroupsByChatId(Long chatId) {
-        if(!groups.containsKey(chatId)) {
+        if (!groups.containsKey(chatId)) {
             groups.put(chatId, new LinkedHashMap<>());
         }
         return groups.get(chatId);

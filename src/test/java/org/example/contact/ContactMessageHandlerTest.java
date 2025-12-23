@@ -50,16 +50,16 @@ class ContactMessageHandlerTest {
         contactService = new ContactService(fakeRepository);
         StateService stateService = new StateService();
         handler = new MessageHandler(
-                List.of(new AddContactHandler(contactService, stateService),
-                        new BlockContactHandler(contactService, stateService),
-                        new ContactsMenuHandler(stateService),
-                        new CurrentContactMenuHandler(contactService, stateService),
-                        new DeleteContactHandler(contactService, stateService),
-                        new EditContactHandler(contactService, stateService),
-                        new FindContactHandler(contactService, stateService),
-                        new GetAllContactsHandler(contactService, stateService),
-                        new MainMenuHandler(stateService)),
-                stateService);
+            List.of(new AddContactHandler(contactService, stateService),
+                new BlockContactHandler(contactService, stateService),
+                new ContactsMenuHandler(stateService),
+                new CurrentContactMenuHandler(contactService, stateService),
+                new DeleteContactHandler(contactService, stateService),
+                new EditContactHandler(contactService, stateService),
+                new FindContactHandler(contactService, stateService),
+                new GetAllContactsHandler(contactService, stateService),
+                new MainMenuHandler(stateService)),
+            stateService);
     }
 
     /**
@@ -77,15 +77,15 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Пол");
         handler.handleMessage(chatId, "Мужской");
         BotResponse response = handler.handleMessage(
-                chatId, "Сохранить контакт");
+            chatId, "Сохранить контакт");
         Assertions.assertEquals(
-                "Контакт Олег успешно добавлен",
-                response.getText()
+            "Контакт Олег успешно добавлен",
+            response.getText()
         );
 
         Contact contact = contactService
-                .findContactByName(chatId, "Олег")
-                .orElse(null);
+            .findContactByName(chatId, "Олег")
+            .orElse(null);
         Assertions.assertNotNull(contact);
         Assertions.assertEquals("Олег", contact.getName());
         Assertions.assertEquals("1234567890", contact.getPhoneNumber());
@@ -109,14 +109,14 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Возраст");
         handler.handleMessage(chatId, "22");
         BotResponse response = handler.handleMessage(
-                chatId, "Сохранить контакт");
+            chatId, "Сохранить контакт");
         Assertions.assertEquals(
-                "Произошла ошибка при добавлении: Контакт Олег уже существует",
-                response.getText());
+            "Произошла ошибка при добавлении: Контакт Олег уже существует",
+            response.getText());
 
         Contact contact = contactService
-                .findContactByName(chatId, "Олег")
-                .orElse(null);
+            .findContactByName(chatId, "Олег")
+            .orElse(null);
         Assertions.assertNotNull(contact);
         Assertions.assertEquals("Олег", contact.getName());
         Assertions.assertEquals(20, contact.getAge());
@@ -128,7 +128,7 @@ class ContactMessageHandlerTest {
     @Test
     public void blockContactTest() {
         fakeRepository.add(
-                new Contact(chatId, "Юлия", "95436475", 34, Gender.FEMALE, false));
+            new Contact(chatId, "Юлия", "95436475", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -138,19 +138,19 @@ class ContactMessageHandlerTest {
         BotResponse response1 = handler.handleMessage(chatId, "Блокировать");
 
         Assertions.assertEquals(
-                "Текущий контакт не заблокирован. Вы хотите заблокировать?",
-                response1.getText()
+            "Текущий контакт не заблокирован. Вы хотите заблокировать?",
+            response1.getText()
         );
 
         BotResponse response2 = handler.handleMessage(chatId, "Да");
         Assertions.assertEquals(
-                "Контакт Юлия успешно заблокирован",
-                response2.getText()
+            "Контакт Юлия успешно заблокирован",
+            response2.getText()
         );
 
         Contact contact = contactService
-                .findContactByName(chatId, "Юлия")
-                .orElse(null);
+            .findContactByName(chatId, "Юлия")
+            .orElse(null);
         Assertions.assertNotNull(contact);
         Assertions.assertTrue(contact.isBlocked());
     }
@@ -161,7 +161,7 @@ class ContactMessageHandlerTest {
     @Test
     public void deleteContactTest() {
         fakeRepository.add(
-                new Contact(chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
+            new Contact(chatId, "Юлия", "95436575", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -181,7 +181,7 @@ class ContactMessageHandlerTest {
     @Test
     public void editContactTest() {
         fakeRepository.add(
-                new Contact(chatId, "Олег", "95436475", 34, Gender.FEMALE, false));
+            new Contact(chatId, "Олег", "95436475", 34, Gender.FEMALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -190,29 +190,29 @@ class ContactMessageHandlerTest {
 
         handler.handleInlineButtonActivated(chatId, "CURRENT_CONTACT_MENU_Олег");
         handler.handleMessage(chatId, "Изменить");
-        handler.handleMessage(chatId,"Номер");
-        handler.handleMessage(chatId,"+99923333");
-        handler.handleMessage(chatId,"Возраст");
-        handler.handleMessage(chatId,"43");
-        handler.handleMessage(chatId,"Пол");
-        handler.handleMessage(chatId,"Мужской");
+        handler.handleMessage(chatId, "Номер");
+        handler.handleMessage(chatId, "+99923333");
+        handler.handleMessage(chatId, "Возраст");
+        handler.handleMessage(chatId, "43");
+        handler.handleMessage(chatId, "Пол");
+        handler.handleMessage(chatId, "Мужской");
         BotResponse response = handler.handleMessage(chatId, "Изменить контакт");
         Assertions.assertEquals(
-                "Контакт Олег успешно изменен",
-                response.getText()
+            "Контакт Олег успешно изменен",
+            response.getText()
         );
 
         List<Contact> contactsByNumber = contactService
-                .findContactsByNumber(chatId, "1234567890");
+            .findContactsByNumber(chatId, "1234567890");
         Assertions.assertTrue(contactsByNumber.isEmpty());
 
         Contact updatedContact = contactService
-                .findContactByName(chatId, "Олег")
-                .orElse(null);
+            .findContactByName(chatId, "Олег")
+            .orElse(null);
         Assertions.assertNotNull(updatedContact);
         Assertions.assertEquals("+99923333", updatedContact.getPhoneNumber());
         Assertions.assertEquals(43, updatedContact.getAge());
-        Assertions.assertEquals("Мужской",updatedContact.getGender().getDisplayName());
+        Assertions.assertEquals("Мужской", updatedContact.getGender().getDisplayName());
     }
 
     /**
@@ -221,7 +221,7 @@ class ContactMessageHandlerTest {
     @Test
     public void findContactByNameTest() {
         fakeRepository.add(
-                new Contact(chatId, "Алексей", "9436475", 34, Gender.MALE, false));
+            new Contact(chatId, "Алексей", "9436475", 34, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -229,12 +229,12 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Алексей");
 
         Assertions.assertEquals(
-                "По имени Алексей контакт успешно найден.",
-                response.getText()
+            "По имени Алексей контакт успешно найден.",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Алексей"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Алексей"),
+            response.getInlineKeyboardText().inlineText()
         );
         Optional<Contact> contact = contactService.findContactByName(chatId, "Алексей");
         Assertions.assertTrue(contact.isPresent());
@@ -244,9 +244,9 @@ class ContactMessageHandlerTest {
      * Тестируем успешный поиск контакта по номеру
      */
     @Test
-    public void findContactByNumberTest(){
+    public void findContactByNumberTest() {
         fakeRepository.add(
-                new Contact(chatId, "Алексей", "5236790", 34, Gender.MALE, false));
+            new Contact(chatId, "Алексей", "5236790", 34, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -254,12 +254,12 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "5236790");
 
         Assertions.assertEquals(
-                "По номеру 5236790 контакты успешно найдены.",
-                response.getText()
+            "По номеру 5236790 контакты успешно найдены.",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Алексей"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Алексей"),
+            response.getInlineKeyboardText().inlineText()
         );
         Contact contact = contactService.findContactsByNumber(chatId, "5236790").getFirst();
         Assertions.assertNotNull(contact);
@@ -280,8 +280,8 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Получить");
         Assertions.assertEquals("Все контакты", response.getText());
         Assertions.assertEquals(
-                List.of("Олег", "Игорь", "Юлия"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Олег", "Игорь", "Юлия"),
+            response.getInlineKeyboardText().inlineText()
         );
     }
 
@@ -301,12 +301,12 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Мужской");
         BotResponse response = handler.handleMessage(chatId, "Нет");
         Assertions.assertEquals(
-                "Все контакты с выбранной фильтрацией",
-                response.getText()
+            "Все контакты с выбранной фильтрацией",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Олег", "Игорь"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Олег", "Игорь"),
+            response.getInlineKeyboardText().inlineText()
         );
     }
 
@@ -327,12 +327,12 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "> 23");
         BotResponse response = handler.handleMessage(chatId, "Нет");
         Assertions.assertEquals(
-                "Все контакты с выбранной фильтрацией",
-                response.getText()
+            "Все контакты с выбранной фильтрацией",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Олег", "Юлия"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Олег", "Юлия"),
+            response.getInlineKeyboardText().inlineText()
         );
     }
 
@@ -349,14 +349,14 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Получить все");
         handler.handleMessage(chatId, "Добавить сортировку");
         BotResponse response = handler
-                .handleMessage(chatId, "В порядке убывания возраста");
+            .handleMessage(chatId, "В порядке убывания возраста");
         Assertions.assertEquals(
-                "Все контакты с выбранной сортировкой",
-                response.getText()
+            "Все контакты с выбранной сортировкой",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Юлия", "Олег", "Игорь"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Юлия", "Олег", "Игорь"),
+            response.getInlineKeyboardText().inlineText()
         );
     }
 
@@ -373,14 +373,14 @@ class ContactMessageHandlerTest {
         handler.handleMessage(chatId, "Получить все");
         handler.handleMessage(chatId, "Добавить сортировку");
         BotResponse response = handler
-                .handleMessage(chatId, "В алфавитном порядке имени");
+            .handleMessage(chatId, "В алфавитном порядке имени");
         Assertions.assertEquals(
-                "Все контакты с выбранной сортировкой",
-                response.getText()
+            "Все контакты с выбранной сортировкой",
+            response.getText()
         );
         Assertions.assertEquals(
-                List.of("Игорь", "Олег", "Юлия"),
-                response.getInlineKeyboardText().inlineText()
+            List.of("Игорь", "Олег", "Юлия"),
+            response.getInlineKeyboardText().inlineText()
         );
     }
 
@@ -390,7 +390,7 @@ class ContactMessageHandlerTest {
     @Test
     public void getContactFullInfoTest() {
         fakeRepository.add(
-                new Contact(chatId, "Олег", "1234567890", 42, Gender.MALE, false));
+            new Contact(chatId, "Олег", "1234567890", 42, Gender.MALE, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -400,20 +400,21 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Информация");
 
         Assertions.assertEquals("""
-                Контакт: Олег
-                Номер: 1234567890
-                Пол: мужской
-                Возраст: 42
-                Не заблокирован""", response.getText());
+            Имя контакта: Олег
+            Номер телефона: 1234567890
+            Возраст: 42
+            Пол: Мужской
+            Не заблокирован
+            """, response.getText());
     }
 
     /**
      * Тестируем информацию о пользователе, у которого задано только имя
      */
     @Test
-    public void getContactInfoOnlyNameTest(){
+    public void getContactInfoOnlyNameTest() {
         fakeRepository.add(
-                new Contact(chatId, "Олег", "", -1, Gender.NOT_SPECIFIED, false));
+            new Contact(chatId, "Олег", "", -1, Gender.NOT_SPECIFIED, false));
 
         handler.handleMessage(chatId, "Контакты");
         handler.handleMessage(chatId, "Найти");
@@ -423,10 +424,11 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Информация");
 
         Assertions.assertEquals("""
-                Контакт: Олег
-                Номер: не указан
-                Пол: не указан
-                Возраст: не указан
-                Не заблокирован""", response.getText());
+            Имя контакта: Олег
+            Номер телефона: Не указан
+            Возраст: Не указан
+            Пол: Не выбрано
+            Не заблокирован
+            """, response.getText());
     }
 }

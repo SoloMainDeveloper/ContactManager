@@ -34,7 +34,8 @@ public interface IContactRepository {
     /**
      * Найти все контакты по id пользователя
      */
-    List<Contact> findContactsByChatId(Long chatId, ContactFilter filter, ContactOrder order);
+    List<Contact> findContactsByChatId(Long chatId,
+                                       ContactFilter filter, ContactOrder order);
 
     /**
      * Найти контакты, хранящиеся в группе по ее id

@@ -13,9 +13,6 @@ public enum Gender {
      */
     private final String displayName;
 
-    /**
-     * Конструктор
-     */
     Gender(String displayName) {
         this.displayName = displayName;
     }

@@ -23,7 +23,11 @@ public enum Operation {
 
     CURRENT_GROUP_MENU(true),
     EDIT_GROUP(false),
-    DELETE_GROUP(false);
+    DELETE_GROUP(false),
+
+    DATA_MENU(true),
+    IMPORT_CONTACTS(true),
+    EXPORT_CONTACTS(true);
 
     /**
      * Показывает необходимо ли очистить контекст перед установкой данной операции
@@ -32,6 +36,7 @@ public enum Operation {
 
     /**
      * Конструктор
+     *
      * @param shouldClearContext показывает необходимо ли очистить контекст перед
      *                           установкой данной операции
      */

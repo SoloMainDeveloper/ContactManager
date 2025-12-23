@@ -59,9 +59,6 @@ public class EditGroupHandler implements OperationHandler {
      */
     private static final String CURRENT_GROUP = "currentGroup";
 
-    /**
-     * Конструктор
-     */
     public EditGroupHandler(GroupService groupService,
                             ContactService contactService,
                             StateService stateService) {
@@ -85,12 +82,12 @@ public class EditGroupHandler implements OperationHandler {
             }
             case UserCommandConstants.DELETE_CONTACT_FROM_GROUP -> {
                 response.setText("Введите имя контакта, " +
-                        "который вы хотите удалить из группы");
+                    "который вы хотите удалить из группы");
                 stateService.setLastRequestedParamKey(chatId, DELETE_CONTACT);
             }
             case UserCommandConstants.ADD_CONTACT_TO_GROUP -> {
                 response.setText("Введите имя контакта, " +
-                        "который вы хотите добавить в группу");
+                    "который вы хотите добавить в группу");
                 stateService.setLastRequestedParamKey(chatId, ADD_CONTACT);
             }
             case UserCommandConstants.SAVE_GROUP -> {
@@ -144,7 +141,7 @@ public class EditGroupHandler implements OperationHandler {
             Group group = (Group) stateService.getParamByKey(chatId, CURRENT_GROUP);
             group.setName(newName);
             response.setText("Имя группы записано на обновление.\n" +
-                    "Желаете внести ещё изменения в группу?");
+                "Желаете внести ещё изменения в группу?");
         }
         return response;
     }
@@ -162,7 +159,7 @@ public class EditGroupHandler implements OperationHandler {
         Group group = (Group) stateService.getParamByKey(chatId, CURRENT_GROUP);
         group.removeContact(contact.get());
         response.setText("Контакт добавлен на удаление.\n" +
-                "Желаете внести ещё изменения в группу?");
+            "Желаете внести ещё изменения в группу?");
         return response;
     }
 
@@ -179,7 +176,7 @@ public class EditGroupHandler implements OperationHandler {
         Group group = (Group) stateService.getParamByKey(chatId, CURRENT_GROUP);
         group.addContact(contact.get());
         response.setText("Контакт внесен на добавление.\n" +
-                "Желаете внести ещё изменения в группу?");
+            "Желаете внести ещё изменения в группу?");
         return response;
     }
 
@@ -191,13 +188,13 @@ public class EditGroupHandler implements OperationHandler {
      */
     private void applyChangesForGroup(Long chatId) throws GroupEditException {
         String groupName = (String) stateService.getParamByKey(
-                chatId, "currentGroupName");
+            chatId, "currentGroupName");
         try {
             Group group = (Group) stateService.getParamByKey(chatId, CURRENT_GROUP);
             groupService.tryUpdateGroup(chatId, groupName, group);
         } catch (GroupDoesNotExistException e) {
             throw new GroupEditException(
-                    "Произошла ошибка при редактировании группы: " + e.getMessage());
+                "Произошла ошибка при редактировании группы: " + e.getMessage());
         }
     }
 }

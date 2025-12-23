@@ -38,9 +38,6 @@ public class CurrentGroupMenuHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public CurrentGroupMenuHandler(GroupService groupService,
                                    ContactService contactService,
                                    StateService stateService) {
@@ -58,7 +55,7 @@ public class CurrentGroupMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         String groupName = (String) stateService.getParamByKey(
-                chatId, "currentGroupName");
+            chatId, "currentGroupName");
         Optional<Group> group = groupService.findGroupByName(chatId, groupName);
         if (group.isEmpty()) {
             response.setText("Группа " + groupName + " не была найдена");
@@ -104,16 +101,16 @@ public class CurrentGroupMenuHandler implements OperationHandler {
         List<String> contactNames = new ArrayList<>();
         for (Contact contact : group.getContacts()) {
             contactService.findContactById(chatId, contact.getId())
-                    .ifPresent(c ->
-                            contactNames.add(c.getName())
-                    );
+                .ifPresent(c ->
+                    contactNames.add(c.getName())
+                );
         }
         if (contactNames.isEmpty()) {
             response.setText("В группе " + group.getName() + " пока нет контактов");
         } else {
             response.setText("Все контакты группы " + group.getName() + ":");
             response.setInlineKeyboardText(new InlineKeyboardText(contactNames,
-                    Operation.CURRENT_CONTACT_MENU.name()));
+                Operation.CURRENT_CONTACT_MENU.name()));
         }
         return response;
     }

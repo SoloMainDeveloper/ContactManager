@@ -27,10 +27,10 @@ public class MessageHandler {
     public MessageHandler(List<OperationHandler> operationHandlers,
                           StateService stateService) {
         this.handlers = operationHandlers.stream()
-                .collect(Collectors.toMap(
-                        OperationHandler::getSupportedOperation,
-                        Function.identity()
-                ));
+            .collect(Collectors.toMap(
+                OperationHandler::getSupportedOperation,
+                Function.identity()
+            ));
         this.stateService = stateService;
     }
 
@@ -66,5 +66,21 @@ public class MessageHandler {
             return handleMessage(chatId, UserCommandConstants.GROUP_MENU);
         }
         return new BotResponse("Нажатие на inline-кнопку не было обработано");
+    }
+
+    /**
+     * Обработать сообщение, содержащее документ
+     */
+    public BotResponse handleMessageWithDocument(
+        Long chatId, String fileName, String content) {
+        String lastRequestedParam = stateService.getLastRequestedParamKey(chatId);
+        if (lastRequestedParam == null) {
+            return new BotResponse("Документ не был запрошен");
+        }
+        if (lastRequestedParam.equals("importData")) {
+            stateService.addParameter(chatId, "fileName", fileName);
+            return handleMessage(chatId, content);
+        }
+        return new BotResponse("Документ не был обработан");
     }
 }

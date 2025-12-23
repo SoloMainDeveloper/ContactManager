@@ -45,9 +45,6 @@ public class AddContactHandler implements OperationHandler {
      */
     private static final String CONTACT_GENDER = "contactGender";
 
-    /**
-     * Конструктор
-     */
     public AddContactHandler(ContactService contactService, StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
@@ -79,16 +76,16 @@ public class AddContactHandler implements OperationHandler {
                 try {
                     Map<String, Object> params = stateService.getParams(chatId);
                     Contact contact = new Contact(chatId,
-                            (String) params.get("contactName"),
-                            (String) params.getOrDefault(CONTACT_NUMBER, ""),
-                            Integer.parseInt((String) params.getOrDefault(CONTACT_AGE,
-                                    String.valueOf(-1))),
-                            Gender.fromDisplayName((String) params.get(CONTACT_GENDER)),
-                            false
+                        (String) params.get("contactName"),
+                        (String) params.getOrDefault(CONTACT_NUMBER, ""),
+                        Integer.parseInt((String) params.getOrDefault(CONTACT_AGE,
+                            String.valueOf(-1))),
+                        Gender.fromDisplayName((String) params.get(CONTACT_GENDER)),
+                        false
                     );
                     contactService.tryAddContact(chatId, contact);
                     response.setText(
-                            "Контакт " + contact.getName() + " успешно добавлен");
+                        "Контакт " + contact.getName() + " успешно добавлен");
                 } catch (ContactAlreadyExistsException e) {
                     e.printStackTrace();
                     response.setText("Произошла ошибка при добавлении: " + e.getMessage());
@@ -109,7 +106,8 @@ public class AddContactHandler implements OperationHandler {
     }
 
     /**
-     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом
+     * Обрабатывает сообщение от пользователя. Заполняет
+     * контекст входными данными, которые были запрошены ботом
      */
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         BotResponse response = new BotResponse();

@@ -47,7 +47,7 @@ public class FindGroupHandler implements OperationHandler {
         if (group.isPresent()) {
             response.setText("Группа " + groupName + " успешно найдена");
             response.setInlineKeyboardText(new InlineKeyboardText(List.of(groupName),
-                    Operation.CURRENT_GROUP_MENU.toString()));
+                Operation.CURRENT_GROUP_MENU.toString()));
         } else {
             response.setText("По имени " + groupName + " группа не найдена");
         }

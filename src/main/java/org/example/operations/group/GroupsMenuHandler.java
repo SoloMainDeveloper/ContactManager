@@ -24,9 +24,6 @@ public class GroupsMenuHandler implements OperationHandler {
      */
     private static final String GROUP_NAME = "groupName";
 
-    /**
-     * Конструктор
-     */
     public GroupsMenuHandler(StateService stateService) {
         this.stateService = stateService;
     }
@@ -48,7 +45,7 @@ public class GroupsMenuHandler implements OperationHandler {
             case UserCommandConstants.GET_ALL -> {
                 stateService.changeCurrentOperation(chatId, Operation.GET_ALL_GROUPS);
                 response.setText("Желаете получить все группы сразу или"
-                        + " добавить сортировку?");
+                    + " добавить сортировку?");
                 response.setKeyboardText(ReplyKeyboardConstants.GET_ALL_GROUPS_MENU);
             }
             case UserCommandConstants.FIND -> {

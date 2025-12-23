@@ -18,9 +18,6 @@ public class MainMenuHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public MainMenuHandler(StateService stateService) {
         this.stateService = stateService;
     }
@@ -41,14 +38,20 @@ public class MainMenuHandler implements OperationHandler {
             case UserCommandConstants.CONTACTS -> {
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
                 response.setText("Взаимодействие с контактами. Выберите какое"
-                        + " действие хотите совершить");
+                    + " действие хотите совершить");
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
             }
             case UserCommandConstants.GROUPS -> {
                 stateService.changeCurrentOperation(chatId, Operation.GROUPS_MENU);
                 response.setText("Взаимодействие с группами. Выберите какое"
-                        + " действие хотите совершить");
+                    + " действие хотите совершить");
                 response.setKeyboardText(ReplyKeyboardConstants.GROUPS_MENU);
+            }
+            case "Данные" -> {
+                stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
+                response.setText("Взаимодействие с данными. Выберите какое"
+                    + " действие хотите совершить");
+                response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
             }
             default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }

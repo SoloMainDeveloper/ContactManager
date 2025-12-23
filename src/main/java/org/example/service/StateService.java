@@ -18,9 +18,6 @@ public class StateService {
      */
     private final InMemoryStateStorage inMemoryStateStorage;
 
-    /**
-     * Конструктор
-     */
     public StateService() {
         this.inMemoryStateStorage = new InMemoryStateStorage();
     }

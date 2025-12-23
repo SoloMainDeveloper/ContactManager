@@ -1,11 +1,11 @@
 package org.example.operations.contact;
 
+import org.example.entity.ContactDto;
 import org.example.constants.ReplyConstants;
 import org.example.operations.OperationHandler;
 import org.example.constants.UserCommandConstants;
 import org.example.response.BotResponse;
 import org.example.entity.Contact;
-import org.example.entity.Gender;
 import org.example.constants.ReplyKeyboardConstants;
 import org.example.service.ContactService;
 import org.example.service.StateService;
@@ -29,10 +29,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
-    public CurrentContactMenuHandler(ContactService contactService, StateService stateService) {
+    public CurrentContactMenuHandler(ContactService contactService,
+                                     StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
     }
@@ -45,9 +43,10 @@ public class CurrentContactMenuHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = (String) stateService.getParamByKey(chatId, "currentContactName");
+        String contactName = (String) stateService
+            .getParamByKey(chatId, "currentContactName");
         Optional<Contact> contactOptional = contactService.findContactByName(
-                chatId, contactName);
+            chatId, contactName);
         if (contactOptional.isEmpty()) {
             response.setText("Контакт " + contactName + " не был найден");
             response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
@@ -67,20 +66,21 @@ public class CurrentContactMenuHandler implements OperationHandler {
             }
             case UserCommandConstants.EDIT -> {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT);
-                response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
+                response.setText("Отлично. Выберите какие " +
+                    "данные хотите изменить у контакта");
                 response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
             }
             case UserCommandConstants.BLOCK -> {
                 stateService.changeCurrentOperation(chatId, Operation.BLOCK_CONTACT);
 
                 String isBlockedInfo = contact.isBlocked()
-                        ? "заблокирован"
-                        : "не заблокирован";
+                    ? "заблокирован"
+                    : "не заблокирован";
                 String blockActionInfo = !contact.isBlocked()
-                        ? "заблокировать"
-                        : "разблокировать";
+                    ? "заблокировать"
+                    : "разблокировать";
                 String responseText = String.format("Текущий контакт %s. Вы хотите %s?",
-                        isBlockedInfo, blockActionInfo);
+                    isBlockedInfo, blockActionInfo);
 
                 response.setText(responseText);
                 response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
@@ -101,27 +101,18 @@ public class CurrentContactMenuHandler implements OperationHandler {
     }
 
     /**
-     * Возвращает информацию о контакте
+     * Получить информацию о контакте
      */
     private String getContactInfo(Contact contact) {
-        String notDetermined = "не указан";
-        String phoneNumberInfo = contact.getPhoneNumber().isEmpty()
-                ? notDetermined
-                : contact.getPhoneNumber();
-        String genderInfo = "";
-        switch (contact.getGender()) {
-            case Gender.MALE -> genderInfo = "мужской";
-            case Gender.FEMALE -> genderInfo = "женский";
-            case Gender.NOT_SPECIFIED -> genderInfo = notDetermined;
-        }
-        String ageInfo = contact.getAge() == -1
-                ? notDetermined
-                : String.valueOf(contact.getAge());
-        String isBlockedInfo = contact.isBlocked()
-                ? "Заблокирован"
-                : "Не заблокирован";
+        ContactDto info = new ContactDto(contact);
 
-        return String.format("Контакт: %s\nНомер: %s\nПол: %s\nВозраст: %s\n%s",
-                contact.getName(), phoneNumberInfo, genderInfo, ageInfo, isBlockedInfo);
+        return String.format("""
+                Имя контакта: %s
+                Номер телефона: %s
+                Возраст: %s
+                Пол: %s
+                %s
+                """, info.getName(), info.getPhoneNumber(),
+            info.getAge(), info.getGender(), info.getIsBlocked());
     }
 }

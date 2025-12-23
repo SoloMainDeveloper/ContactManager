@@ -13,7 +13,8 @@ public interface OperationHandler {
     Operation getSupportedOperation();
 
     /**
-     * Обрабатывает сообщение от пользователя в рамках текущего состояния и возвращает ответ
+     * Обрабатывает сообщение от пользователя в рамках
+     * текущего состояния и возвращает ответ
      */
     BotResponse handleMessage(Long chatId, String messageText);
 }

@@ -46,9 +46,6 @@ public class FindContactHandler implements OperationHandler {
      */
     private static final String CONTACT_NUMBER = "contactNumber";
 
-    /**
-     * Конструктор
-     */
     public FindContactHandler(ContactService contactService, StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
@@ -84,8 +81,8 @@ public class FindContactHandler implements OperationHandler {
     }
 
     /**
-     * Обрабатывает сообщение от пользователя. Заполняет контекст входными данными, которые были запрошены ботом, и затем
-     * использует их при поиске.
+     * Обрабатывает сообщение от пользователя. Заполняет контекст
+     * входными данными, которые были запрошены ботом, и затем использует их при поиске.
      */
     private BotResponse handleMessageWithContext(Long chatId, String messageText) {
         String lastRequestedParamKey = stateService.getLastRequestedParamKey(chatId);
@@ -112,8 +109,8 @@ public class FindContactHandler implements OperationHandler {
         if (contact.isPresent()) {
             response.setText("По имени " + name + " контакт успешно найден.");
             response.setInlineKeyboardText(new InlineKeyboardText(
-                    List.of(contact.get().getName()),
-                    Operation.CURRENT_CONTACT_MENU.toString()));
+                List.of(contact.get().getName()),
+                Operation.CURRENT_CONTACT_MENU.toString()));
         } else {
             stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);
             response.setText("По имени " + name + " контакты не найдены.");
@@ -137,10 +134,10 @@ public class FindContactHandler implements OperationHandler {
         } else {
             response.setText("По номеру " + number + " контакты успешно найдены.");
             List<String> names = contacts.stream()
-                    .map(Contact::getName)
-                    .toList();
+                .map(Contact::getName)
+                .toList();
             response.setInlineKeyboardText(new InlineKeyboardText(
-                    names, Operation.CURRENT_CONTACT_MENU.toString()));
+                names, Operation.CURRENT_CONTACT_MENU.toString()));
         }
         return response;
     }

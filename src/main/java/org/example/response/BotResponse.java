@@ -12,6 +12,11 @@ public class BotResponse {
     private String text;
 
     /**
+     * Документ, приложенный к сообщению
+     */
+    private AppDocument document;
+
+    /**
      * Текст для кнопок клавиатуры
      */
     private List<String> keyboardText;
@@ -46,6 +51,27 @@ public class BotResponse {
      */
     public void setText(String text) {
         this.text = text;
+    }
+
+    /**
+     * Есть ли документ в ответе бота
+     */
+    public Boolean hasDocument() {
+        return document != null;
+    }
+
+    /**
+     * Возвращает документ, прилагаемый к ответу бота
+     */
+    public AppDocument getDocument() {
+        return document;
+    }
+
+    /**
+     * Устанавливает документ, прилагаемый к ответу бота
+     */
+    public void setDocument(AppDocument document) {
+        this.document = document;
     }
 
     /**
