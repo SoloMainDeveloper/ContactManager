@@ -400,11 +400,12 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Информация");
 
         Assertions.assertEquals("""
-                Контакт: Олег
-                Номер: 1234567890
-                Пол: мужской
+                Имя контакта: Олег
+                Номер телефона: 1234567890
                 Возраст: 42
-                Не заблокирован""", response.getText());
+                Пол: Мужской
+                Не заблокирован
+                """, response.getText());
     }
 
     /**
@@ -423,10 +424,11 @@ class ContactMessageHandlerTest {
         BotResponse response = handler.handleMessage(chatId, "Информация");
 
         Assertions.assertEquals("""
-                Контакт: Олег
-                Номер: не указан
-                Пол: не указан
-                Возраст: не указан
-                Не заблокирован""", response.getText());
+                Имя контакта: Олег
+                Номер телефона: Не указан
+                Возраст: Не указан
+                Пол: Не выбрано
+                Не заблокирован
+                """, response.getText());
     }
 }

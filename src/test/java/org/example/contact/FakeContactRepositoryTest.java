@@ -5,11 +5,9 @@ import org.example.entity.Gender;
 import org.example.utils.ContactFilter;
 import org.example.utils.ContactOrder;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,24 +27,11 @@ class FakeContactRepositoryTest {
     /**
      * Список контактов для тестов
      */
-    private static final List<Contact> contacts = new ArrayList<>();
-
-    /**
-     * Создаём контакты для дальнейшего использования
-     */
-    @BeforeAll
-    static void setupContacts(){
-        Contact contact1 = new Contact(
-                1L, chatId, "Юлия", "9543", 34, Gender.FEMALE, false);
-        Contact contact2 = new Contact(
-                2L, chatId, "Олег", "12345", 45, Gender.MALE, false);
-        Contact contact3 = new Contact(
-                3L, chatId, "Виктор", "1236", 28, Gender.MALE, false);
-
-        contacts.add(contact1);
-        contacts.add(contact2);
-        contacts.add(contact3);
-    }
+    private static final List<Contact> contacts = List.of(
+            new Contact(1L, chatId, "Юлия", "9543", 34, Gender.FEMALE, false),
+            new Contact(2L, chatId, "Олег", "12345", 45, Gender.MALE, false),
+            new Contact(3L, chatId, "Виктор", "1236", 28, Gender.MALE, false)
+    );
 
     /**
      * Инициализируем и заполняем фейк-контакт репозиторий
@@ -54,7 +39,7 @@ class FakeContactRepositoryTest {
     @BeforeEach
     void setupFakeContactRepository() {
         fakeContactRepository = new FakeContactRepository();
-        for(Contact contact : contacts){
+        for(Contact contact : contacts) {
             fakeContactRepository.add(contact);
         }
     }

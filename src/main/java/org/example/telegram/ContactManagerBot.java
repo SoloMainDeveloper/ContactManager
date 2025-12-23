@@ -1,12 +1,12 @@
-package org.example;
+package org.example.telegram;
 
+import org.example.MessageHandler;
 import org.example.config.BotConfig;
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.keyboardcreator.InlineKeyboardCreator;
 import org.example.keyboardcreator.ReplyKeyboardCreator;
 import org.example.response.BotResponse;
 import org.example.response.InlineKeyboardText;
-import org.example.utils.telegram.TelegramDocumentReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -72,10 +72,15 @@ public class ContactManagerBot extends TelegramLongPollingBot {
         Long chatId = message.getChatId();
         if(message.hasDocument()) {
             Document document = message.getDocument();
-            String content = telegramDocumentReader.read(document.getFileId());
-            BotResponse response = messageHandler.handleMessageWithDocument(
-                    chatId, document.getFileName(), content);
-            sendBotResponse(chatId, response);
+            try {
+                String content = telegramDocumentReader.read(document.getFileId());
+                BotResponse response = messageHandler.handleMessageWithDocument(
+                        chatId, document.getFileName(), content);
+                sendBotResponse(chatId, response);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+                System.out.println("Документ не был прочитан: " + e);
+            }
         } else if(message.hasText()) {
             BotResponse response = messageHandler
                     .handleMessage(chatId, message.getText());

@@ -1,6 +1,6 @@
-package org.example.utils.exporters;
+package org.example.service.export.exporters;
 
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.entity.ContactDto;
 import org.json.JSONArray;

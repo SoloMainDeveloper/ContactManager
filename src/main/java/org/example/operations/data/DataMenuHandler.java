@@ -1,9 +1,11 @@
 package org.example.operations.data;
 
+import org.example.constants.ReplyConstants;
 import org.example.constants.ReplyKeyboardConstants;
+import org.example.constants.UserCommandConstants;
 import org.example.operations.OperationHandler;
 import org.example.response.BotResponse;
-import org.example.service.ExportService;
+import org.example.service.export.ExportService;
 import org.example.service.StateService;
 import org.example.state.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,28 +47,28 @@ public class DataMenuHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         switch (messageText) {
-            case "Импорт контактов" -> {
+            case UserCommandConstants.IMPORT_CONTACTS -> {
                 stateService.changeCurrentOperation(chatId, Operation.IMPORT_CONTACTS);
                 response.setText("Отправьте файл с данными для импорта");
                 stateService.setLastRequestedParamKey(chatId, "importData");
             }
-            case "Экспорт контактов" -> {
+            case UserCommandConstants.EXPORT_CONTACTS -> {
                 stateService.changeCurrentOperation(chatId, Operation.EXPORT_CONTACTS);
                 response.setText("Выберите желаемый формат экспорта контактов");
                 List<String> keyboardText = new ArrayList<>(exportService
                         .getSupportedFormats()
                         .stream()
                         .toList());
-                keyboardText.add("Назад");
+                keyboardText.add(UserCommandConstants.BACK);
                 response.setKeyboardText(keyboardText);
                 stateService.setLastRequestedParamKey(chatId, "exportFormat");
             }
-            case "Назад" -> {
+            case UserCommandConstants.BACK -> {
                 stateService.changeCurrentOperation(chatId, Operation.MAIN_MENU);
-                response.setText("Вы вернулись назад");
+                response.setText(ReplyConstants.COME_BACK);
                 response.setKeyboardText(ReplyKeyboardConstants.MAIN_MENU);
             }
-            default -> response.setText("Я не понимаю эту команду");
+            default -> response.setText(ReplyConstants.UNKNOWN_COMMAND);
         }
         return response;
     }

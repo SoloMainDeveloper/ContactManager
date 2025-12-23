@@ -1,14 +1,15 @@
-package org.example.utils.telegram;
+package org.example.telegram;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -40,24 +41,27 @@ public class TelegramDocumentReader {
      * @param fileId идентификатор файла
      * @return содержимое файла
      */
-    public String read(String fileId) {
-        ResponseEntity<String> resp = getFilePath(fileId);
-        if(resp.getStatusCode() == HttpStatus.OK) {
-            String filePath = getFilePath(resp);
+    public String read(String fileId) throws TelegramApiException {
+        ResponseEntity<String> response = getResponse(fileId);
+        if(response.getStatusCode() == HttpStatus.OK) {
             try {
+                String filePath = getFilePathFromResponse(response);
                 byte[] bytes = downloadFile(filePath);
                 return new String(bytes, StandardCharsets.UTF_8);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new TelegramApiException("Ошибка при чтении файла: ", e);
             }
         }
-        return null; //TODO поменять на Exception наверное
+        throw new TelegramApiException(
+                "Ошибка при чтении файла. Статус-код = " + response.getStatusCode());
     }
 
-    private ResponseEntity<String> getFilePath(String fileId) {
-        var restTemplate = new RestTemplate();
-        var headers = new HttpHeaders();
-        var request = new HttpEntity<>(headers);
+    /**
+     * Возвращает {@link ResponseEntity} по полученному fileId
+     */
+    private ResponseEntity<String> getResponse(String fileId) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<Object> request = new HttpEntity<>(new HttpHeaders());
 
         return restTemplate.exchange(
                 fileInfoUri,
@@ -69,25 +73,33 @@ public class TelegramDocumentReader {
         );
     }
 
+    /**
+     * По заданному URL считывает содержимое
+     * @throws Exception если не удалось прочитать содержимое
+     */
     private byte[] downloadFile(String filePath) throws Exception {
-        var fullUri = fileStorageUri.replace("{token}", botToken)
+        String fullUri = fileStorageUri.replace("{token}", botToken)
                 .replace("{filePath}", filePath);
-        URL urlObject;
-        try {
-            urlObject = new URL(fullUri);
-        } catch (MalformedURLException e) {
-            throw new Exception(e);
-        }
+        URL urlObject = new URI(fullUri).toURL();
 
         try (InputStream is = urlObject.openStream()) {
             return is.readAllBytes();
         } catch (IOException e) {
-            throw new Exception(urlObject.toExternalForm(), e);
+            throw new IOException("Не удалось прочитать содержимое файла", e);
         }
     }
 
-    private String getFilePath(ResponseEntity<String> response) {
-        var jsonObject = new JSONObject(response.getBody());
+    /**
+     * Получить путь к файлу из ответа
+     * @throws IllegalArgumentException если тело ответа пустое
+     */
+    private String getFilePathFromResponse(ResponseEntity<String> response)
+            throws IllegalArgumentException {
+        String body = response.getBody();
+        if(body == null) {
+            throw new IllegalArgumentException("Пустое тело ответа");
+        }
+        JSONObject jsonObject = new JSONObject(body);
         return String.valueOf(jsonObject
                 .getJSONObject("result")
                 .getString("file_path"));

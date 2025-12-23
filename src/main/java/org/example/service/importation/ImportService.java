@@ -1,12 +1,11 @@
-package org.example.service;
+package org.example.service.importation;
 
 import org.apache.commons.io.FilenameUtils;
-import org.example.entity.AppDocument;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.exceptions.ImportException;
 import org.example.exceptions.IncorrectImportDataException;
-import org.example.utils.importers.Importer;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.service.importation.importers.Importer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

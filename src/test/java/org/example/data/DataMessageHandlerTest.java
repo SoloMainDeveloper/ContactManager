@@ -1,6 +1,8 @@
-package org.example;
+package org.example.data;
 
-import org.example.entity.AppDocument;
+import org.example.MessageHandler;
+import org.example.contact.FakeContactRepository;
+import org.example.response.AppDocument;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.operations.MainMenuHandler;
@@ -9,15 +11,17 @@ import org.example.operations.data.ExportHandler;
 import org.example.operations.data.ImportHandler;
 import org.example.response.BotResponse;
 import org.example.service.ContactService;
-import org.example.service.ExportService;
-import org.example.service.ImportService;
+import org.example.service.export.ExportService;
+import org.example.service.importation.ImportService;
 import org.example.service.StateService;
-import org.example.utils.exporters.ExporterCSV;
-import org.example.utils.exporters.ExporterJSON;
-import org.example.utils.exporters.ExporterTXT;
-import org.example.utils.importers.ImporterCSV;
-import org.example.utils.importers.ImporterJSON;
-import org.example.utils.importers.ImporterTXT;
+import org.example.service.export.exporters.ExporterCSV;
+import org.example.service.export.exporters.ExporterJSON;
+import org.example.service.export.exporters.ExporterTXT;
+import org.example.service.importation.importers.ImporterCSV;
+import org.example.service.importation.importers.ImporterJSON;
+import org.example.service.importation.importers.ImporterTXT;
+import org.example.utils.ContactFilter;
+import org.example.utils.ContactOrder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +72,6 @@ public class DataMessageHandlerTest {
                         new ExportHandler(stateService, exportService, contactService),
                         new ImportHandler(stateService, importService, contactService)),
                 stateService);
-
     }
 
     /**
@@ -91,21 +94,22 @@ public class DataMessageHandlerTest {
                 "Импорт контактов закончен, добавилось 1 из 1",
                 response.getText()
         );
-        List<Contact> contacts = contactService.findContactsByChatId(chatId);
+        List<Contact> contacts = contactService.findContactsByChatId(
+                chatId, new ContactFilter(), new ContactOrder());
         Contact contact = contacts.getFirst();
         Assertions.assertEquals(1, contacts.size());
         Assertions.assertEquals("Владимир", contact.getName());
         Assertions.assertEquals("89034252365", contact.getPhoneNumber());
         Assertions.assertEquals(32, contact.getAge());
         Assertions.assertEquals(Gender.MALE, contact.getGender());
-        Assertions.assertEquals(false, contact.isBlocked());
+        Assertions.assertFalse(contact.isBlocked());
     }
 
     /**
      * Протестировать импорт контактов из csv формата
      */
     @Test
-    public void importContactsFromCsvTest() {
+    public void importContactsFromCsvTest()  {
         handler.handleMessage(chatId, "Данные");
         handler.handleMessage(chatId, "Импорт контактов");
         BotResponse response = handler
@@ -119,8 +123,22 @@ public class DataMessageHandlerTest {
                 "Импорт контактов закончен, добавилось 2 из 2",
                 response.getText()
         );
-        List<Contact> contacts = contactService.findContactsByChatId(chatId);
+        List<Contact> contacts = contactService.findContactsByChatId(
+                chatId, new ContactFilter(), new ContactOrder());
         Assertions.assertEquals(2, contacts.size());
+        Contact contactVladimir =
+                contactService.findContactByName(chatId, "Владимир").orElseThrow();
+        Assertions.assertEquals("89034252365", contactVladimir.getPhoneNumber());
+        Assertions.assertEquals(32, contactVladimir.getAge());
+        Assertions.assertEquals(Gender.MALE, contactVladimir.getGender());
+        Assertions.assertFalse(contactVladimir.isBlocked());
+
+        Contact contactJulia =
+                contactService.findContactByName(chatId, "Юлия").orElseThrow();
+        Assertions.assertEquals("95436475", contactJulia.getPhoneNumber());
+        Assertions.assertEquals(34, contactJulia.getAge());
+        Assertions.assertEquals(Gender.FEMALE, contactJulia.getGender());
+        Assertions.assertTrue(contactJulia.isBlocked());
     }
 
     /**
@@ -130,17 +148,23 @@ public class DataMessageHandlerTest {
     public void importContactsFromJsonTest() {
         handler.handleMessage(chatId, "Данные");
         handler.handleMessage(chatId, "Импорт контактов");
-        BotResponse response = handler
-                .handleMessageWithDocument(chatId, "test.json",
-                        "[{\"phoneNumber\":\"+78943230685\",\"gender\":\"Женский\",\"name\":" +
-                                "\"Дарья\",\"isBlocked\":\"Заблокирован\",\"age\":\"13\"}]");
+        BotResponse response = handler.handleMessageWithDocument(chatId, "test.json",
+                "[{\"phoneNumber\":\"+78943230685\",\"gender\":\"Не выбрано\",\"name\":" +
+                        "\"Дарья\",\"isBlocked\":\"Заблокирован\",\"age\":\"13\"}]");
 
         Assertions.assertEquals(
                 "Импорт контактов закончен, добавилось 1 из 1",
                 response.getText()
         );
-        List<Contact> contacts = contactService.findContactsByChatId(chatId);
+        List<Contact> contacts = contactService.findContactsByChatId(
+                chatId, new ContactFilter(), new ContactOrder());
         Assertions.assertEquals(1, contacts.size());
+        Contact contact = contacts.getFirst();
+        Assertions.assertEquals("Дарья", contact.getName());
+        Assertions.assertEquals("+78943230685", contact.getPhoneNumber());
+        Assertions.assertEquals(13, contact.getAge());
+        Assertions.assertEquals(Gender.NOT_SPECIFIED, contact.getGender());
+        Assertions.assertTrue(contact.isBlocked());
     }
 
     /**
@@ -160,7 +184,8 @@ public class DataMessageHandlerTest {
         Assertions.assertEquals("Произошла ошибка при импорте: Данный формат файла " +
                         "не поддерживается. Используйте txt/csv/json",
                 response.getText());
-        List<Contact> contacts = contactService.findContactsByChatId(chatId);
+        List<Contact> contacts = contactService.findContactsByChatId(
+                chatId, new ContactFilter(), new ContactOrder());
         Assertions.assertEquals(0, contacts.size());
     }
 
@@ -180,7 +205,8 @@ public class DataMessageHandlerTest {
 
         Assertions.assertEquals("Произошла ошибка при импорте: Некорректные данные",
                 response.getText());
-        List<Contact> contacts = contactService.findContactsByChatId(chatId);
+        List<Contact> contacts = contactService.findContactsByChatId(
+                chatId, new ContactFilter(), new ContactOrder());
         Assertions.assertEquals(0, contacts.size());
     }
 

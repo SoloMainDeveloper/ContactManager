@@ -1,5 +1,6 @@
-package org.example.utils.importers;
+package org.example.service.importation.importers;
 
+import org.example.constants.ReplyConstants;
 import org.example.entity.Contact;
 import org.example.entity.Gender;
 import org.example.exceptions.IncorrectImportDataException;
@@ -29,7 +30,7 @@ public class ImporterJSON implements Importer {
             }
             return contacts;
         } catch (Exception e) {
-            throw new IncorrectImportDataException("Некорректные данные");
+            throw new IncorrectImportDataException(ReplyConstants.INCORRECT_DATA);
         }
     }
 
@@ -37,10 +38,11 @@ public class ImporterJSON implements Importer {
      * Преобразовать json-объект в контакт
      */
     public Contact convertFromJsonFormat(JSONObject jsonContact) {
-        String phoneNumber = jsonContact.getString("phoneNumber").equals("Не указан")
+        String phoneNumber =
+                jsonContact.getString("phoneNumber").equals(ReplyConstants.NOT_SPECIFIED)
                 ? ""
                 : jsonContact.getString("phoneNumber");
-        int age = jsonContact.getString("age").equals("Не указан")
+        int age = jsonContact.getString("age").equals(ReplyConstants.NOT_SPECIFIED)
                 ? -1
                 : Integer.parseInt(jsonContact.getString("age"));
 
@@ -51,7 +53,7 @@ public class ImporterJSON implements Importer {
         contact.setGender(Gender.fromDisplayName(
                 jsonContact.getString("gender")));
         contact.setBlocked(Objects.equals(
-                jsonContact.getString("isBlocked"), "Заблокирован"));
+                jsonContact.getString("isBlocked"), ReplyConstants.BLOCKED));
         return contact;
     }
 
