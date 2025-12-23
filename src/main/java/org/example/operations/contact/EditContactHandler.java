@@ -45,9 +45,6 @@ public class EditContactHandler implements OperationHandler {
      */
     private static final String CONTACT_GENDER = "contactGender";
 
-    /**
-     * Конструктор
-     */
     public EditContactHandler(ContactService contactService, StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
@@ -62,7 +59,7 @@ public class EditContactHandler implements OperationHandler {
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
         String contactName = (String) stateService.getParamByKey(
-                chatId, "currentContactName");
+            chatId, "currentContactName");
 
         switch (messageText) {
             case UserCommandConstants.NAME -> {
@@ -85,19 +82,19 @@ public class EditContactHandler implements OperationHandler {
             case UserCommandConstants.EDIT_CONTACT -> {
                 try {
                     Contact contact = contactService.findContactByName(
-                            chatId, contactName).orElseThrow(() ->
-                            new ContactDoesNotExistException(
-                                    "Контакт %s не был найден".formatted(contactName)));
+                        chatId, contactName).orElseThrow(() ->
+                        new ContactDoesNotExistException(
+                            "Контакт %s не был найден".formatted(contactName)));
                     Map<String, Object> params = stateService.getParams(chatId);
 
                     contact.setName((String) params.getOrDefault(
-                            "newContactName", contact.getName()));
+                        "newContactName", contact.getName()));
                     contact.setPhoneNumber((String) params.getOrDefault(
-                            CONTACT_NUMBER, contact.getPhoneNumber()));
+                        CONTACT_NUMBER, contact.getPhoneNumber()));
                     contact.setAge(Integer.parseInt((String) params.getOrDefault(
-                            CONTACT_AGE, String.valueOf(contact.getAge()))));
+                        CONTACT_AGE, String.valueOf(contact.getAge()))));
                     contact.setGender(Gender.fromDisplayName((String) params.getOrDefault(
-                            CONTACT_GENDER, contact.getGender().getDisplayName())));
+                        CONTACT_GENDER, contact.getGender().getDisplayName())));
                     contactService.tryUpdateContact(chatId, contactName, contact);
                     response.setText("Контакт " + contactName + " успешно изменен");
                 } catch (ContactDoesNotExistException e) {

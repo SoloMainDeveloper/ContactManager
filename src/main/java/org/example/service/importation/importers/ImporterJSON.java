@@ -19,7 +19,7 @@ import java.util.Objects;
 public class ImporterJSON implements Importer {
     @Override
     public List<Contact> importContacts(String content)
-            throws IncorrectImportDataException {
+        throws IncorrectImportDataException {
         try {
             JSONArray jsonArray = new JSONArray(content);
             List<Contact> contacts = new ArrayList<>();
@@ -39,21 +39,21 @@ public class ImporterJSON implements Importer {
      */
     public Contact convertFromJsonFormat(JSONObject jsonContact) {
         String phoneNumber =
-                jsonContact.getString("phoneNumber").equals(ReplyConstants.NOT_SPECIFIED)
+            jsonContact.getString("phoneNumber").equals(ReplyConstants.NOT_SPECIFIED)
                 ? ""
                 : jsonContact.getString("phoneNumber");
         int age = jsonContact.getString("age").equals(ReplyConstants.NOT_SPECIFIED)
-                ? -1
-                : Integer.parseInt(jsonContact.getString("age"));
+            ? -1
+            : Integer.parseInt(jsonContact.getString("age"));
 
         Contact contact = new Contact();
         contact.setName(jsonContact.getString("name"));
         contact.setPhoneNumber(phoneNumber);
         contact.setAge(age);
         contact.setGender(Gender.fromDisplayName(
-                jsonContact.getString("gender")));
+            jsonContact.getString("gender")));
         contact.setBlocked(Objects.equals(
-                jsonContact.getString("isBlocked"), ReplyConstants.BLOCKED));
+            jsonContact.getString("isBlocked"), ReplyConstants.BLOCKED));
         return contact;
     }
 

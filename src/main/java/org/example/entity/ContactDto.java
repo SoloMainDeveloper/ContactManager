@@ -37,15 +37,15 @@ public class ContactDto {
     public ContactDto(Contact contact) {
         name = contact.getName();
         phoneNumber = contact.getPhoneNumber().isEmpty()
-                ? ReplyConstants.NOT_SPECIFIED
-                : contact.getPhoneNumber();
+            ? ReplyConstants.NOT_SPECIFIED
+            : contact.getPhoneNumber();
         gender = contact.getGender().getDisplayName();
         age = contact.getAge() == -1
-                ? ReplyConstants.NOT_SPECIFIED
-                : String.valueOf(contact.getAge());
+            ? ReplyConstants.NOT_SPECIFIED
+            : String.valueOf(contact.getAge());
         isBlocked = contact.isBlocked()
-                ? ReplyConstants.BLOCKED
-                : ReplyConstants.NOT_BLOCKED;
+            ? ReplyConstants.BLOCKED
+            : ReplyConstants.NOT_BLOCKED;
     }
 
     /**

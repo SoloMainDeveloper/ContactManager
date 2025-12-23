@@ -29,10 +29,8 @@ public class CurrentContactMenuHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
-    public CurrentContactMenuHandler(ContactService contactService, StateService stateService) {
+    public CurrentContactMenuHandler(ContactService contactService,
+                                     StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
     }
@@ -45,9 +43,10 @@ public class CurrentContactMenuHandler implements OperationHandler {
     @Override
     public BotResponse handleMessage(Long chatId, String messageText) {
         BotResponse response = new BotResponse();
-        String contactName = (String) stateService.getParamByKey(chatId, "currentContactName");
+        String contactName = (String) stateService
+            .getParamByKey(chatId, "currentContactName");
         Optional<Contact> contactOptional = contactService.findContactByName(
-                chatId, contactName);
+            chatId, contactName);
         if (contactOptional.isEmpty()) {
             response.setText("Контакт " + contactName + " не был найден");
             response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
@@ -67,20 +66,21 @@ public class CurrentContactMenuHandler implements OperationHandler {
             }
             case UserCommandConstants.EDIT -> {
                 stateService.changeCurrentOperation(chatId, Operation.EDIT_CONTACT);
-                response.setText("Отлично. Выберите какие данные хотите изменить у контакта");
+                response.setText("Отлично. Выберите какие " +
+                    "данные хотите изменить у контакта");
                 response.setKeyboardText(ReplyKeyboardConstants.EDIT_CONTACT_MENU);
             }
             case UserCommandConstants.BLOCK -> {
                 stateService.changeCurrentOperation(chatId, Operation.BLOCK_CONTACT);
 
                 String isBlockedInfo = contact.isBlocked()
-                        ? "заблокирован"
-                        : "не заблокирован";
+                    ? "заблокирован"
+                    : "не заблокирован";
                 String blockActionInfo = !contact.isBlocked()
-                        ? "заблокировать"
-                        : "разблокировать";
+                    ? "заблокировать"
+                    : "разблокировать";
                 String responseText = String.format("Текущий контакт %s. Вы хотите %s?",
-                        isBlockedInfo, blockActionInfo);
+                    isBlockedInfo, blockActionInfo);
 
                 response.setText(responseText);
                 response.setKeyboardText(ReplyKeyboardConstants.YES_NO);
@@ -107,12 +107,12 @@ public class CurrentContactMenuHandler implements OperationHandler {
         ContactDto info = new ContactDto(contact);
 
         return String.format("""
-                    Имя контакта: %s
-                    Номер телефона: %s
-                    Возраст: %s
-                    Пол: %s
-                    %s
-                    """, info.getName(), info.getPhoneNumber(),
-                info.getAge(), info.getGender(), info.getIsBlocked());
+                Имя контакта: %s
+                Номер телефона: %s
+                Возраст: %s
+                Пол: %s
+                %s
+                """, info.getName(), info.getPhoneNumber(),
+            info.getAge(), info.getGender(), info.getIsBlocked());
     }
 }

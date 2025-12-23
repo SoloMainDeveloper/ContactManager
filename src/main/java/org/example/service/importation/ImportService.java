@@ -24,31 +24,29 @@ public class ImportService {
      */
     private final Map<String, Importer> importers;
 
-    /**
-     * Конструктор
-     */
     public ImportService(List<Importer> importers) {
         this.importers = importers.stream().collect(
-                Collectors.toMap(
-                        Importer::getSupportedFormat,
-                        Function.identity()
-                ));
+            Collectors.toMap(
+                Importer::getSupportedFormat,
+                Function.identity()
+            ));
     }
 
     /**
      * Импортирует контакты из файла
+     *
      * @param document импортируемый документ
      * @return список контактов из файла
      * @throws ImportException если формат не
-     * поддерживается или некорректное содержимое файла
+     *                         поддерживается или некорректное содержимое файла
      */
     public List<Contact> importContacts(AppDocument document)
-            throws ImportException {
+        throws ImportException {
         String format = FilenameUtils.getExtension(document.fileName());
-        if(!importers.containsKey(format)) {
-            String supportedFormats = String.join("/", getSupportedFormats()) ;
+        if (!importers.containsKey(format)) {
+            String supportedFormats = String.join("/", getSupportedFormats());
             throw new ImportException("Данный формат файла не " +
-                    "поддерживается. Используйте " + supportedFormats);
+                "поддерживается. Используйте " + supportedFormats);
         }
         Importer importer = importers.get(format);
         try {

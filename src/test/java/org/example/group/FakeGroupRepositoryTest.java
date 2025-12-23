@@ -41,12 +41,12 @@ class FakeGroupRepositoryTest {
         fakeGroupRepository.add(new Group(chatId, "Боевые"));
 
         List<Group> groupsFound = fakeGroupRepository.findGroupsByChatId(chatId,
-                new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.ASC));
+            new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.ASC));
         Assertions.assertEquals("Августы", groupsFound.get(0).getName());
         Assertions.assertEquals("Боевые", groupsFound.get(1).getName());
 
         List<Group> groupsFound2 = fakeGroupRepository.findGroupsByChatId(chatId,
-                new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.DESC));
+            new GroupOrder(GroupOrder.OrderProperty.NAME, GroupOrder.Direction.DESC));
         Assertions.assertEquals("Боевые", groupsFound2.get(0).getName());
         Assertions.assertEquals("Августы", groupsFound2.get(1).getName());
     }
@@ -72,13 +72,13 @@ class FakeGroupRepositoryTest {
         fakeGroupRepository.add(group3);
 
         List<Group> groupsFound = fakeGroupRepository.findGroupsByChatId(chatId,
-                new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.ASC));
+            new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.ASC));
         Assertions.assertEquals("Двор", groupsFound.get(0).getName());
         Assertions.assertEquals("Одноклассники", groupsFound.get(1).getName());
         Assertions.assertEquals("Английский", groupsFound.get(2).getName());
 
         List<Group> groupsFound2 = fakeGroupRepository.findGroupsByChatId(chatId,
-                new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.DESC));
+            new GroupOrder(GroupOrder.OrderProperty.COUNT, GroupOrder.Direction.DESC));
         Assertions.assertEquals("Английский", groupsFound2.get(0).getName());
         Assertions.assertEquals("Одноклассники", groupsFound2.get(1).getName());
         Assertions.assertEquals("Двор", groupsFound2.get(2).getName());

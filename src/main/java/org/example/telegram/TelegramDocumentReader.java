@@ -38,12 +38,13 @@ public class TelegramDocumentReader {
 
     /**
      * Прочитать документ
+     *
      * @param fileId идентификатор файла
      * @return содержимое файла
      */
     public String read(String fileId) throws TelegramApiException {
         ResponseEntity<String> response = getResponse(fileId);
-        if(response.getStatusCode() == HttpStatus.OK) {
+        if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 String filePath = getFilePathFromResponse(response);
                 byte[] bytes = downloadFile(filePath);
@@ -53,7 +54,7 @@ public class TelegramDocumentReader {
             }
         }
         throw new TelegramApiException(
-                "Ошибка при чтении файла. Статус-код = " + response.getStatusCode());
+            "Ошибка при чтении файла. Статус-код = " + response.getStatusCode());
     }
 
     /**
@@ -64,22 +65,23 @@ public class TelegramDocumentReader {
         HttpEntity<Object> request = new HttpEntity<>(new HttpHeaders());
 
         return restTemplate.exchange(
-                fileInfoUri,
-                HttpMethod.GET,
-                request,
-                String.class,
-                botToken,
-                fileId
+            fileInfoUri,
+            HttpMethod.GET,
+            request,
+            String.class,
+            botToken,
+            fileId
         );
     }
 
     /**
      * По заданному URL считывает содержимое
+     *
      * @throws Exception если не удалось прочитать содержимое
      */
     private byte[] downloadFile(String filePath) throws Exception {
         String fullUri = fileStorageUri.replace("{token}", botToken)
-                .replace("{filePath}", filePath);
+            .replace("{filePath}", filePath);
         URL urlObject = new URI(fullUri).toURL();
 
         try (InputStream is = urlObject.openStream()) {
@@ -91,17 +93,18 @@ public class TelegramDocumentReader {
 
     /**
      * Получить путь к файлу из ответа
+     *
      * @throws IllegalArgumentException если тело ответа пустое
      */
     private String getFilePathFromResponse(ResponseEntity<String> response)
-            throws IllegalArgumentException {
+        throws IllegalArgumentException {
         String body = response.getBody();
-        if(body == null) {
+        if (body == null) {
             throw new IllegalArgumentException("Пустое тело ответа");
         }
         JSONObject jsonObject = new JSONObject(body);
         return String.valueOf(jsonObject
-                .getJSONObject("result")
-                .getString("file_path"));
+            .getJSONObject("result")
+            .getString("file_path"));
     }
 }

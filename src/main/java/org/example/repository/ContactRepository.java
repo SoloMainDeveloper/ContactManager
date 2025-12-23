@@ -35,15 +35,15 @@ public class ContactRepository implements IContactRepository {
     @Override
     public void add(Contact contact) {
         String sql = "INSERT INTO public.contacts (chat_id, name, phone_number, age, gender, is_blocked) " +
-                "VALUES (:chatId, :name, :phoneNumber, :age, :gender, :isBlocked)";
+            "VALUES (:chatId, :name, :phoneNumber, :age, :gender, :isBlocked)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", contact.getChatId())
-                .addValue("name", contact.getName())
-                .addValue("phoneNumber", contact.getPhoneNumber())
-                .addValue("age", contact.getAge())
-                .addValue("gender", contact.getGender().name())
-                .addValue("isBlocked", contact.isBlocked());
+            .addValue("chatId", contact.getChatId())
+            .addValue("name", contact.getName())
+            .addValue("phoneNumber", contact.getPhoneNumber())
+            .addValue("age", contact.getAge())
+            .addValue("gender", contact.getGender().name())
+            .addValue("isBlocked", contact.isBlocked());
 
         jdbcTemplate.update(sql, params);
     }
@@ -53,12 +53,12 @@ public class ContactRepository implements IContactRepository {
         String sql = "SELECT * FROM public.contacts WHERE id = :id and chat_id = :chatId";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", contactId)
-                .addValue("chatId", chatId);
+            .addValue("id", contactId)
+            .addValue("chatId", chatId);
 
         try {
             Contact contact = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
@@ -72,12 +72,12 @@ public class ContactRepository implements IContactRepository {
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId and name = :name";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
-                .addValue("name", name);
+            .addValue("chatId", chatId)
+            .addValue("name", name);
 
         try {
             Contact contact = jdbcTemplate.queryForObject(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
             return Optional.ofNullable(contact);
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
@@ -89,14 +89,14 @@ public class ContactRepository implements IContactRepository {
     @Override
     public List<Contact> findContactsByNumber(String number, Long chatId) {
         String sql = "SELECT * FROM public.contacts WHERE " +
-                "chat_id = :chatId and phone_number = :phoneNumber";
+            "chat_id = :chatId and phone_number = :phoneNumber";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
-                .addValue("phoneNumber", number);
+            .addValue("chatId", chatId)
+            .addValue("phoneNumber", number);
         try {
             return jdbcTemplate.query(sql, params,
-                    (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
+                (resultSet, rowNum) -> resultSetToContactEntity(resultSet));
         } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
             System.out.println("Ошибка запроса к БД при поиске контактов по номеру:" + e);
@@ -106,13 +106,13 @@ public class ContactRepository implements IContactRepository {
 
     @Override
     public List<Contact> findContactsByChatId(
-            Long chatId, ContactFilter filter, ContactOrder order) {
+        Long chatId, ContactFilter filter, ContactOrder order) {
         String where = getSqlForFilter(filter);
         String orderBy = getSqlForOrder(order);
         String sql = "SELECT * FROM public.contacts WHERE chat_id = :chatId"
             + where
             + orderBy;
-        
+
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("chatId", chatId);
 
@@ -130,7 +130,7 @@ public class ContactRepository implements IContactRepository {
      * Получить sql-запрос для фильтрации
      */
     private String getSqlForFilter(ContactFilter filter) {
-        if(filter.isEmpty()) {
+        if (filter.isEmpty()) {
             return "";
         }
         String condition = switch (filter.getCondition()) {
@@ -150,7 +150,7 @@ public class ContactRepository implements IContactRepository {
         return order.isEmpty()
             ? ""
             : " ORDER BY %s %s".formatted(
-                order.getProperty().name().toLowerCase(), order.getDirection().name());
+            order.getProperty().name().toLowerCase(), order.getDirection().name());
     }
 
     @Override
@@ -177,17 +177,17 @@ public class ContactRepository implements IContactRepository {
     @Override
     public void update(String currentName, Contact contact) {
         String sql = "UPDATE public.contacts SET name = :name, phone_number = "
-                + ":phoneNumber, age = :age, gender = :gender, is_blocked = :isBlocked "
-                + "WHERE chat_id = :chatId and name = :currentName";
+            + ":phoneNumber, age = :age, gender = :gender, is_blocked = :isBlocked "
+            + "WHERE chat_id = :chatId and name = :currentName";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", contact.getChatId())
-                .addValue("currentName", currentName)
-                .addValue("name", contact.getName())
-                .addValue("phoneNumber", contact.getPhoneNumber())
-                .addValue("age", contact.getAge())
-                .addValue("gender", contact.getGender().name())
-                .addValue("isBlocked", contact.isBlocked());
+            .addValue("chatId", contact.getChatId())
+            .addValue("currentName", currentName)
+            .addValue("name", contact.getName())
+            .addValue("phoneNumber", contact.getPhoneNumber())
+            .addValue("age", contact.getAge())
+            .addValue("gender", contact.getGender().name())
+            .addValue("isBlocked", contact.isBlocked());
 
         jdbcTemplate.update(sql, params);
     }
@@ -197,8 +197,8 @@ public class ContactRepository implements IContactRepository {
         String sql = "DELETE FROM public.contacts WHERE chat_id = :chatId and name = :name";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("chatId", chatId)
-                .addValue("name", name);
+            .addValue("chatId", chatId)
+            .addValue("name", name);
 
         jdbcTemplate.update(sql, params);
     }

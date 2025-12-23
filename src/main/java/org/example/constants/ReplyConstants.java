@@ -8,7 +8,8 @@ public class ReplyConstants {
     /**
      * Приватный конструктор, чтобы не создавали экземпляр класса
      */
-    private ReplyConstants() {}
+    private ReplyConstants() {
+    }
 
     /**
      * Ответ, когда бот не понял команду пользователя

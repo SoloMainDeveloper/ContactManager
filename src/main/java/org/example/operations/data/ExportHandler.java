@@ -42,9 +42,6 @@ public class ExportHandler implements OperationHandler {
 
     private static final String EXPORT_FILE_NAME = "exportFileName";
 
-    /**
-     * Конструктор
-     */
     @Autowired
     public ExportHandler(StateService stateService, ExportService exportService,
                          ContactService contactService) {
@@ -75,7 +72,7 @@ public class ExportHandler implements OperationHandler {
             case EXPORT_FILE_NAME -> {
                 List<Contact> contacts = contactService.findContactsByChatId(
                     chatId, new ContactFilter(), new ContactOrder());
-                if(contacts.isEmpty()) {
+                if (contacts.isEmpty()) {
                     response.setText("Вы еще не создали ни одного контакта");
                     response.setKeyboardText(ReplyKeyboardConstants.DATA_MENU);
                     stateService.changeCurrentOperation(chatId, Operation.DATA_MENU);
@@ -86,7 +83,7 @@ public class ExportHandler implements OperationHandler {
                     String format = (String) stateService
                         .getParamByKey(chatId, EXPORT_FORMAT);
                     AppDocument document = exportService
-                            .exportContacts(messageText, format, contacts);
+                        .exportContacts(messageText, format, contacts);
                     response.setDocument(document);
                     response.setText("Контакты были успешно экспортированы в файл");
                 } catch (ExportException e) {

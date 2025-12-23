@@ -33,9 +33,6 @@ public class BlockContactHandler implements OperationHandler {
      */
     private final StateService stateService;
 
-    /**
-     * Конструктор
-     */
     public BlockContactHandler(ContactService contactService, StateService stateService) {
         this.contactService = contactService;
         this.stateService = stateService;
@@ -47,24 +44,24 @@ public class BlockContactHandler implements OperationHandler {
         switch (messageText) {
             case UserCommandConstants.YES -> {
                 String contactName = (String) stateService.getParamByKey(
-                        chatId,
-                        "currentContactName");
+                    chatId,
+                    "currentContactName");
                 Optional<Contact> contactOptional = contactService
-                        .findContactByName(chatId, contactName);
+                    .findContactByName(chatId, contactName);
                 if (contactOptional.isPresent()) {
                     Contact contact = contactOptional.get();
                     contactService.toggleContactBlocked(contact);
 
                     String blockActionInfo = contact.isBlocked()
-                            ? "заблокирован"
-                            : "разблокирован";
+                        ? "заблокирован"
+                        : "разблокирован";
                     String responseText = String.format("Контакт " + contactName
-                            + " успешно %s", blockActionInfo);
+                        + " успешно %s", blockActionInfo);
 
                     response.setText(responseText);
                 } else {
                     response.setText("Контакта с именем " + contactName
-                            + " не существует. Блокировка не применена");
+                        + " не существует. Блокировка не применена");
                 }
                 response.setKeyboardText(ReplyKeyboardConstants.CONTACTS_MENU);
                 stateService.changeCurrentOperation(chatId, Operation.CONTACTS_MENU);

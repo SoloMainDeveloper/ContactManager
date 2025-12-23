@@ -22,28 +22,26 @@ public class ExportService {
      */
     private final Map<String, Exporter> exporters;
 
-    /**
-     * Конструктор
-     */
     public ExportService(List<Exporter> exporters) {
         this.exporters = exporters.stream().collect(
-                Collectors.toMap(
-                        Exporter::getSupportedFormat,
-                        Function.identity()
-                ));
+            Collectors.toMap(
+                Exporter::getSupportedFormat,
+                Function.identity()
+            ));
     }
 
     /**
      * Экспортирует контакты в файл
+     *
      * @throws ExportException если формат не поддерживается
      */
     public AppDocument exportContacts(
-            String fileName, String format, List<Contact> contacts)
-            throws ExportException {
-        if(!exporters.containsKey(format)) {
+        String fileName, String format, List<Contact> contacts)
+        throws ExportException {
+        if (!exporters.containsKey(format)) {
             String supportedFormats = String.join("/", getSupportedFormats());
             throw new ExportException("Данный формат файла не " +
-                    "поддерживается. Используйте " + supportedFormats);
+                "поддерживается. Используйте " + supportedFormats);
         }
         Exporter exporter = exporters.get(format);
         return exporter.exportContacts(fileName, contacts);

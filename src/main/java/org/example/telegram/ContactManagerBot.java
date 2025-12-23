@@ -43,7 +43,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
      */
     @Autowired
     public ContactManagerBot(BotConfig config, MessageHandler messageHandler,
-                             TelegramDocumentReader telegramDocumentReader){
+                             TelegramDocumentReader telegramDocumentReader) {
         super(config.getBotToken());
         this.botUsername = config.getBotUsername();
         this.messageHandler = messageHandler;
@@ -70,20 +70,20 @@ public class ContactManagerBot extends TelegramLongPollingBot {
      */
     public void handleMessage(Message message) {
         Long chatId = message.getChatId();
-        if(message.hasDocument()) {
+        if (message.hasDocument()) {
             Document document = message.getDocument();
             try {
                 String content = telegramDocumentReader.read(document.getFileId());
                 BotResponse response = messageHandler.handleMessageWithDocument(
-                        chatId, document.getFileName(), content);
+                    chatId, document.getFileName(), content);
                 sendBotResponse(chatId, response);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
                 System.out.println("Документ не был прочитан: " + e);
             }
-        } else if(message.hasText()) {
+        } else if (message.hasText()) {
             BotResponse response = messageHandler
-                    .handleMessage(chatId, message.getText());
+                .handleMessage(chatId, message.getText());
             sendBotResponse(chatId, response);
         }
     }
@@ -96,7 +96,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
         Message message = (Message) callbackQuery.getMessage();
         Long chatId = message.getChatId();
         BotResponse response = messageHandler
-                .handleInlineButtonActivated(chatId, callbackData);
+            .handleInlineButtonActivated(chatId, callbackData);
         sendBotResponse(chatId, response);
     }
 
@@ -107,7 +107,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
         SendMessage sendMessage = adaptBotResponseToTelegram(response);
         sendMessage(chatId, sendMessage);
 
-        if(response.hasDocument()) {
+        if (response.hasDocument()) {
             sendDocument(chatId, response.getDocument());
         }
     }
@@ -120,12 +120,12 @@ public class ContactManagerBot extends TelegramLongPollingBot {
         sendMessage.setText(response.getText());
         if (response.getKeyboardText() != null) {
             sendMessage.setReplyMarkup(new ReplyKeyboardCreator()
-                    .createKeyboard(response.getKeyboardText()));
+                .createKeyboard(response.getKeyboardText()));
         }
         InlineKeyboardText inlineKeyboardText = response.getInlineKeyboardText();
         if (inlineKeyboardText != null && inlineKeyboardText.isNeeded()) {
             sendMessage.setReplyMarkup(new InlineKeyboardCreator()
-                    .createKeyboard(inlineKeyboardText));
+                .createKeyboard(inlineKeyboardText));
         }
         return sendMessage;
     }
@@ -149,7 +149,7 @@ public class ContactManagerBot extends TelegramLongPollingBot {
     private void sendDocument(Long chatId, AppDocument appDocument) {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(
-                    appDocument.content().getBytes(StandardCharsets.UTF_8)
+                appDocument.content().getBytes(StandardCharsets.UTF_8)
             );
             InputFile inputFile = new InputFile(inputStream, appDocument.fileName());
 
