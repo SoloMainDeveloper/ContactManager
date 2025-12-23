@@ -93,19 +93,18 @@ public class GetAllContactsHandler implements OperationHandler {
 
         switch (messageText) {
             case UserCommandConstants.GET -> {
-                response.setText("Все контакты");
                 List<Contact> contacts = contactService.findContactsByChatId(
                     chatId, new ContactFilter(), new ContactOrder());
-                if(contacts.isEmpty()) {
+                if (contacts.isEmpty()) {
                     response.setText("У вас еще нет контактов");
                 } else {
                     response.setText("Все контакты");
+                    List<String> names = contacts.stream()
+                            .map(Contact::getName)
+                            .toList();
+                    response.setInlineKeyboardText(new InlineKeyboardText(
+                            names, Operation.CURRENT_CONTACT_MENU.toString()));
                 }
-                List<String> names = contacts.stream()
-                        .map(Contact::getName)
-                        .toList();
-                response.setInlineKeyboardText(new InlineKeyboardText(
-                        names, Operation.CURRENT_CONTACT_MENU.toString()));
             }
             case UserCommandConstants.ADD_FILTER -> {
                 response.setText("Выберите фильтр");
