@@ -74,7 +74,7 @@ public class MessageHandler {
     public BotResponse handleMessageWithDocument(
             Long chatId, String fileName, String content) {
         String lastRequestedParam = stateService.getLastRequestedParamKey(chatId);
-        if(lastRequestedParam == null) {
+        if (lastRequestedParam == null) {
             return new BotResponse("Документ не был запрошен");
         }
         if (lastRequestedParam.equals("importData")) {
