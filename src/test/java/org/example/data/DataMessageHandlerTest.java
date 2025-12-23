@@ -190,7 +190,7 @@ public class DataMessageHandlerTest {
     }
 
     /**
-     * Протестировать импорт контактов с их корректным представлением в файле
+     * Протестировать импорт контактов с их некорректным представлением в файле
      */
     @Test
     public void importContactsWithIncorrectDataTest() {
